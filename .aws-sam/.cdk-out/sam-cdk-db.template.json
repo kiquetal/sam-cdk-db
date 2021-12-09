@@ -1,0 +1,580 @@
+{
+  "Resources": {
+    "helloworldlambdafunctionServiceRoleC06D888B": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-lambda-function/ServiceRole/Resource"
+      }
+    },
+    "helloworldlambdafunctionC39FFDF2": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386S3Bucket74F406DA"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386S3VersionKey7CE0B03B"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386S3VersionKey7CE0B03B"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "helloworldlambdafunctionServiceRoleC06D888B",
+            "Arn"
+          ]
+        },
+        "Handler": "app.lambdaHandler",
+        "Runtime": "nodejs14.x",
+        "Timeout": 60
+      },
+      "DependsOn": [
+        "helloworldlambdafunctionServiceRoleC06D888B"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-lambda-function/Resource",
+        "aws:asset:path": "/home/kiquetal/Documents/codes/2k21/sam-project-starter/sam-cdk-db/hello-world",
+        "aws:asset:property": "Code"
+      }
+    },
+    "helloworldapi61D4D3D5": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "Name": "hello-world-api"
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-api/Resource"
+      }
+    },
+    "helloworldapiCloudWatchRole720B1846": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-api/CloudWatchRole/Resource"
+      }
+    },
+    "helloworldapiAccount1363D8B0": {
+      "Type": "AWS::ApiGateway::Account",
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "helloworldapiCloudWatchRole720B1846",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "helloworldapi61D4D3D5"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-api/Account"
+      }
+    },
+    "helloworldapiDeployment10C17DEE3ed4927bcc71ba58da0c44011bf1c226": {
+      "Type": "AWS::ApiGateway::Deployment",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "helloworldapi61D4D3D5"
+        },
+        "Description": "Automatically created by the RestApi construct"
+      },
+      "DependsOn": [
+        "helloworldapihelloGETCF558747",
+        "helloworldapihello038F8FAF"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-api/Deployment/Resource"
+      }
+    },
+    "helloworldapiDeploymentStageprodA60249BE": {
+      "Type": "AWS::ApiGateway::Stage",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "helloworldapi61D4D3D5"
+        },
+        "DeploymentId": {
+          "Ref": "helloworldapiDeployment10C17DEE3ed4927bcc71ba58da0c44011bf1c226"
+        },
+        "StageName": "prod"
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-api/DeploymentStage.prod/Resource"
+      }
+    },
+    "helloworldapihello038F8FAF": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "helloworldapi61D4D3D5",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "hello",
+        "RestApiId": {
+          "Ref": "helloworldapi61D4D3D5"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-api/Default/hello/Resource"
+      }
+    },
+    "helloworldapihelloGETApiPermissionsamcdkdbhelloworldapiFF8AFC02GEThello9BBC2E75": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "helloworldlambdafunctionC39FFDF2",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "helloworldapi61D4D3D5"
+              },
+              "/",
+              {
+                "Ref": "helloworldapiDeploymentStageprodA60249BE"
+              },
+              "/GET/hello"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-api/Default/hello/GET/ApiPermission.samcdkdbhelloworldapiFF8AFC02.GET..hello"
+      }
+    },
+    "helloworldapihelloGETApiPermissionTestsamcdkdbhelloworldapiFF8AFC02GEThello968CA058": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "helloworldlambdafunctionC39FFDF2",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "helloworldapi61D4D3D5"
+              },
+              "/test-invoke-stage/GET/hello"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-api/Default/hello/GET/ApiPermission.Test.samcdkdbhelloworldapiFF8AFC02.GET..hello"
+      }
+    },
+    "helloworldapihelloGETCF558747": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "GET",
+        "ResourceId": {
+          "Ref": "helloworldapihello038F8FAF"
+        },
+        "RestApiId": {
+          "Ref": "helloworldapi61D4D3D5"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "helloworldlambdafunctionC39FFDF2",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-api/Default/hello/GET/Resource"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Analytics": "v2:deflate64:H4sIAAAAAAAAA01PQVLDMAx8S++OSgoXboR2OMHQCS8QjlrcxnbGkul0PPk7sUMhJ612VtrdGh4foF494YUr3Z3XSftAkD4E9Vk1zCQTPBp3VC2xj0GT2nrHEqIWtT24PQa0JBTy8h5liIX+Fx/cpO+MGO9GlV1Sj/azQ0gv0elMZ80S7ylYw1wODFpIre/LozxHxfcV5lwMJZ7CwRxR6IJXSK/l9WQuzWB+c9xgo7WPTtSOht5fLbkSdLHlosVnBrcKz8ikln3+8BvJl+8yNaNxHJXzHcGJ19/1BjY13K1ObEwVJmNjCdp5/gCmfcAUdQEAAA=="
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/CDKMetadata/Default"
+      },
+      "Condition": "CDKMetadataAvailable"
+    }
+  },
+  "Parameters": {
+    "AssetParameters459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386S3Bucket74F406DA": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386\""
+    },
+    "AssetParameters459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386S3VersionKey7CE0B03B": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386\""
+    },
+    "AssetParameters459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386ArtifactHash503BFC39": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386\""
+    }
+  },
+  "Outputs": {
+    "helloworldapiEndpoint9A31576C": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "helloworldapi61D4D3D5"
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region"
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix"
+            },
+            "/",
+            {
+              "Ref": "helloworldapiDeploymentStageprodA60249BE"
+            },
+            "/"
+          ]
+        ]
+      }
+    }
+  },
+  "Conditions": {
+    "CDKMetadataAvailable": {
+      "Fn::Or": [
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "af-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ca-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-northwest-1"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-3"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "me-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "sa-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-2"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-2"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
