@@ -21,6 +21,10 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
     });
 
     const hello = api.root.addResource('hello');
+    const greedy = api.root.addResource('greedy');
     hello.addMethod('GET');
+
+    greedy.addProxy(
+	    {  defaultIntegration: new apigateway.LambdaIntegration(backend)});
   }
 }

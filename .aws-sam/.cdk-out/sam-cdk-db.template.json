@@ -39,7 +39,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": {
-            "Ref": "AssetParameters459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386S3Bucket74F406DA"
+            "Ref": "AssetParameters855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1S3Bucket30EE2DEB"
           },
           "S3Key": {
             "Fn::Join": [
@@ -52,7 +52,7 @@
                       "Fn::Split": [
                         "||",
                         {
-                          "Ref": "AssetParameters459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386S3VersionKey7CE0B03B"
+                          "Ref": "AssetParameters855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1S3VersionKeyBC034221"
                         }
                       ]
                     }
@@ -65,7 +65,7 @@
                       "Fn::Split": [
                         "||",
                         {
-                          "Ref": "AssetParameters459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386S3VersionKey7CE0B03B"
+                          "Ref": "AssetParameters855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1S3VersionKeyBC034221"
                         }
                       ]
                     }
@@ -154,7 +154,7 @@
         "aws:cdk:path": "sam-cdk-db/hello-world-api/Account"
       }
     },
-    "helloworldapiDeployment10C17DEE3ed4927bcc71ba58da0c44011bf1c226": {
+    "helloworldapiDeployment10C17DEEd53220fb9c8ff96ea8036a71a015b2cd": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -163,6 +163,9 @@
         "Description": "Automatically created by the RestApi construct"
       },
       "DependsOn": [
+        "helloworldapigreedyproxyANY5035D049",
+        "helloworldapigreedyproxy02BBCEC1",
+        "helloworldapigreedyAA9A5FB7",
         "helloworldapihelloGETCF558747",
         "helloworldapihello038F8FAF"
       ],
@@ -177,7 +180,7 @@
           "Ref": "helloworldapi61D4D3D5"
         },
         "DeploymentId": {
-          "Ref": "helloworldapiDeployment10C17DEE3ed4927bcc71ba58da0c44011bf1c226"
+          "Ref": "helloworldapiDeployment10C17DEEd53220fb9c8ff96ea8036a71a015b2cd"
         },
         "StageName": "prod"
       },
@@ -330,10 +333,170 @@
         "aws:cdk:path": "sam-cdk-db/hello-world-api/Default/hello/GET/Resource"
       }
     },
+    "helloworldapigreedyAA9A5FB7": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "helloworldapi61D4D3D5",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "greedy",
+        "RestApiId": {
+          "Ref": "helloworldapi61D4D3D5"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-api/Default/greedy/Resource"
+      }
+    },
+    "helloworldapigreedyproxy02BBCEC1": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Ref": "helloworldapigreedyAA9A5FB7"
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "helloworldapi61D4D3D5"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-api/Default/greedy/{proxy+}/Resource"
+      }
+    },
+    "helloworldapigreedyproxyANYApiPermissionsamcdkdbhelloworldapiFF8AFC02ANYgreedyproxy94FDBF6F": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "helloworldlambdafunctionC39FFDF2",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "helloworldapi61D4D3D5"
+              },
+              "/",
+              {
+                "Ref": "helloworldapiDeploymentStageprodA60249BE"
+              },
+              "/*/greedy/*"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-api/Default/greedy/{proxy+}/ANY/ApiPermission.samcdkdbhelloworldapiFF8AFC02.ANY..greedy.{proxy+}"
+      }
+    },
+    "helloworldapigreedyproxyANYApiPermissionTestsamcdkdbhelloworldapiFF8AFC02ANYgreedyproxy8ABD7B55": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "helloworldlambdafunctionC39FFDF2",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "helloworldapi61D4D3D5"
+              },
+              "/test-invoke-stage/*/greedy/*"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-api/Default/greedy/{proxy+}/ANY/ApiPermission.Test.samcdkdbhelloworldapiFF8AFC02.ANY..greedy.{proxy+}"
+      }
+    },
+    "helloworldapigreedyproxyANY5035D049": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "ANY",
+        "ResourceId": {
+          "Ref": "helloworldapigreedyproxy02BBCEC1"
+        },
+        "RestApiId": {
+          "Ref": "helloworldapi61D4D3D5"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "helloworldlambdafunctionC39FFDF2",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/hello-world-api/Default/greedy/{proxy+}/ANY/Resource"
+      }
+    },
     "CDKMetadata": {
       "Type": "AWS::CDK::Metadata",
       "Properties": {
-        "Analytics": "v2:deflate64:H4sIAAAAAAAAA01PQVLDMAx8S++OSgoXboR2OMHQCS8QjlrcxnbGkul0PPk7sUMhJ612VtrdGh4foF494YUr3Z3XSftAkD4E9Vk1zCQTPBp3VC2xj0GT2nrHEqIWtT24PQa0JBTy8h5liIX+Fx/cpO+MGO9GlV1Sj/azQ0gv0elMZ80S7ylYw1wODFpIre/LozxHxfcV5lwMJZ7CwRxR6IJXSK/l9WQuzWB+c9xgo7WPTtSOht5fLbkSdLHlosVnBrcKz8ikln3+8BvJl+8yNaNxHJXzHcGJ19/1BjY13K1ObEwVJmNjCdp5/gCmfcAUdQEAAA=="
+        "Analytics": "v2:deflate64:H4sIAAAAAAAAA01Q0U7DMAz8Ft7TjIpJiDfKJp5Aq8oXmNQr2Zqkih1GFfXfabIV+uTz2fHdpZRPW1nePcOFCtWeN1E5jzJ+MKizqIiQZ9hp24kGyQWvUOycJfZBsdgdbQ0eDDL61BwCDyHT/8tHO++3mrWzk0gqsQfz2YKMr8GqRKedNa7RG02UH2gwMjauz4dSnQQ9FJB8kcz2BAy6A8YLjDK+5dOzOFeDvvlYYKWUC5bFHofejQZtNrrqUtCscwVLhBcgFOs8f/gd+cu1ibqh2rufcRlP0ySsa1GeaPNdPsr7+ZtPpHXhZxfaoGyu9RdWNBDiggEAAA=="
       },
       "Metadata": {
         "aws:cdk:path": "sam-cdk-db/CDKMetadata/Default"
@@ -342,17 +505,17 @@
     }
   },
   "Parameters": {
-    "AssetParameters459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386S3Bucket74F406DA": {
+    "AssetParameters855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1S3Bucket30EE2DEB": {
       "Type": "String",
-      "Description": "S3 bucket for asset \"459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386\""
+      "Description": "S3 bucket for asset \"855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1\""
     },
-    "AssetParameters459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386S3VersionKey7CE0B03B": {
+    "AssetParameters855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1S3VersionKeyBC034221": {
       "Type": "String",
-      "Description": "S3 key for asset version \"459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386\""
+      "Description": "S3 key for asset version \"855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1\""
     },
-    "AssetParameters459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386ArtifactHash503BFC39": {
+    "AssetParameters855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1ArtifactHashC5F4E85D": {
       "Type": "String",
-      "Description": "Artifact hash for asset \"459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386\""
+      "Description": "Artifact hash for asset \"855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1\""
     }
   },
   "Outputs": {

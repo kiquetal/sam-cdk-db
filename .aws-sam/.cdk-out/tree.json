@@ -103,7 +103,7 @@
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": {
-                        "Ref": "AssetParameters459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386S3Bucket74F406DA"
+                        "Ref": "AssetParameters855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1S3Bucket30EE2DEB"
                       },
                       "s3Key": {
                         "Fn::Join": [
@@ -116,7 +116,7 @@
                                   "Fn::Split": [
                                     "||",
                                     {
-                                      "Ref": "AssetParameters459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386S3VersionKey7CE0B03B"
+                                      "Ref": "AssetParameters855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1S3VersionKeyBC034221"
                                     }
                                   ]
                                 }
@@ -129,7 +129,7 @@
                                   "Fn::Split": [
                                     "||",
                                     {
-                                      "Ref": "AssetParameters459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386S3VersionKey7CE0B03B"
+                                      "Ref": "AssetParameters855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1S3VersionKeyBC034221"
                                     }
                                   ]
                                 }
@@ -165,13 +165,13 @@
             "id": "AssetParameters",
             "path": "sam-cdk-db/AssetParameters",
             "children": {
-              "459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386": {
-                "id": "459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386",
-                "path": "sam-cdk-db/AssetParameters/459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386",
+              "855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1": {
+                "id": "855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1",
+                "path": "sam-cdk-db/AssetParameters/855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1",
                 "children": {
                   "S3Bucket": {
                     "id": "S3Bucket",
-                    "path": "sam-cdk-db/AssetParameters/459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386/S3Bucket",
+                    "path": "sam-cdk-db/AssetParameters/855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1/S3Bucket",
                     "constructInfo": {
                       "fqn": "@aws-cdk/core.CfnParameter",
                       "version": "1.94.1"
@@ -179,7 +179,7 @@
                   },
                   "S3VersionKey": {
                     "id": "S3VersionKey",
-                    "path": "sam-cdk-db/AssetParameters/459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386/S3VersionKey",
+                    "path": "sam-cdk-db/AssetParameters/855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1/S3VersionKey",
                     "constructInfo": {
                       "fqn": "@aws-cdk/core.CfnParameter",
                       "version": "1.94.1"
@@ -187,7 +187,7 @@
                   },
                   "ArtifactHash": {
                     "id": "ArtifactHash",
-                    "path": "sam-cdk-db/AssetParameters/459a729a418cdfe9184c81741870b8b95fdee187a1da24862bedb28a88324386/ArtifactHash",
+                    "path": "sam-cdk-db/AssetParameters/855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1/ArtifactHash",
                     "constructInfo": {
                       "fqn": "@aws-cdk/core.CfnParameter",
                       "version": "1.94.1"
@@ -332,7 +332,7 @@
                           "Ref": "helloworldapi61D4D3D5"
                         },
                         "deploymentId": {
-                          "Ref": "helloworldapiDeployment10C17DEE3ed4927bcc71ba58da0c44011bf1c226"
+                          "Ref": "helloworldapiDeployment10C17DEEd53220fb9c8ff96ea8036a71a015b2cd"
                         },
                         "stageName": "prod"
                       }
@@ -536,6 +536,221 @@
                         },
                         "constructInfo": {
                           "fqn": "@aws-cdk/aws-apigateway.Method",
+                          "version": "1.94.1"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "@aws-cdk/aws-apigateway.Resource",
+                      "version": "1.94.1"
+                    }
+                  },
+                  "greedy": {
+                    "id": "greedy",
+                    "path": "sam-cdk-db/hello-world-api/Default/greedy",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "sam-cdk-db/hello-world-api/Default/greedy/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
+                          "aws:cdk:cloudformation:props": {
+                            "parentId": {
+                              "Fn::GetAtt": [
+                                "helloworldapi61D4D3D5",
+                                "RootResourceId"
+                              ]
+                            },
+                            "pathPart": "greedy",
+                            "restApiId": {
+                              "Ref": "helloworldapi61D4D3D5"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "@aws-cdk/aws-apigateway.CfnResource",
+                          "version": "1.94.1"
+                        }
+                      },
+                      "{proxy+}": {
+                        "id": "{proxy+}",
+                        "path": "sam-cdk-db/hello-world-api/Default/greedy/{proxy+}",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "sam-cdk-db/hello-world-api/Default/greedy/{proxy+}/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
+                              "aws:cdk:cloudformation:props": {
+                                "parentId": {
+                                  "Ref": "helloworldapigreedyAA9A5FB7"
+                                },
+                                "pathPart": "{proxy+}",
+                                "restApiId": {
+                                  "Ref": "helloworldapi61D4D3D5"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "@aws-cdk/aws-apigateway.CfnResource",
+                              "version": "1.94.1"
+                            }
+                          },
+                          "ANY": {
+                            "id": "ANY",
+                            "path": "sam-cdk-db/hello-world-api/Default/greedy/{proxy+}/ANY",
+                            "children": {
+                              "ApiPermission.samcdkdbhelloworldapiFF8AFC02.ANY..greedy.{proxy+}": {
+                                "id": "ApiPermission.samcdkdbhelloworldapiFF8AFC02.ANY..greedy.{proxy+}",
+                                "path": "sam-cdk-db/hello-world-api/Default/greedy/{proxy+}/ANY/ApiPermission.samcdkdbhelloworldapiFF8AFC02.ANY..greedy.{proxy+}",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "helloworldlambdafunctionC39FFDF2",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:",
+                                          {
+                                            "Ref": "AWS::Partition"
+                                          },
+                                          ":execute-api:",
+                                          {
+                                            "Ref": "AWS::Region"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "AWS::AccountId"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "helloworldapi61D4D3D5"
+                                          },
+                                          "/",
+                                          {
+                                            "Ref": "helloworldapiDeploymentStageprodA60249BE"
+                                          },
+                                          "/*/greedy/*"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "@aws-cdk/aws-lambda.CfnPermission",
+                                  "version": "1.94.1"
+                                }
+                              },
+                              "ApiPermission.Test.samcdkdbhelloworldapiFF8AFC02.ANY..greedy.{proxy+}": {
+                                "id": "ApiPermission.Test.samcdkdbhelloworldapiFF8AFC02.ANY..greedy.{proxy+}",
+                                "path": "sam-cdk-db/hello-world-api/Default/greedy/{proxy+}/ANY/ApiPermission.Test.samcdkdbhelloworldapiFF8AFC02.ANY..greedy.{proxy+}",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "helloworldlambdafunctionC39FFDF2",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:",
+                                          {
+                                            "Ref": "AWS::Partition"
+                                          },
+                                          ":execute-api:",
+                                          {
+                                            "Ref": "AWS::Region"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "AWS::AccountId"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "helloworldapi61D4D3D5"
+                                          },
+                                          "/test-invoke-stage/*/greedy/*"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "@aws-cdk/aws-lambda.CfnPermission",
+                                  "version": "1.94.1"
+                                }
+                              },
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "sam-cdk-db/hello-world-api/Default/greedy/{proxy+}/ANY/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "httpMethod": "ANY",
+                                    "resourceId": {
+                                      "Ref": "helloworldapigreedyproxy02BBCEC1"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "helloworldapi61D4D3D5"
+                                    },
+                                    "authorizationType": "NONE",
+                                    "integration": {
+                                      "type": "AWS_PROXY",
+                                      "uri": {
+                                        "Fn::Join": [
+                                          "",
+                                          [
+                                            "arn:",
+                                            {
+                                              "Ref": "AWS::Partition"
+                                            },
+                                            ":apigateway:",
+                                            {
+                                              "Ref": "AWS::Region"
+                                            },
+                                            ":lambda:path/2015-03-31/functions/",
+                                            {
+                                              "Fn::GetAtt": [
+                                                "helloworldlambdafunctionC39FFDF2",
+                                                "Arn"
+                                              ]
+                                            },
+                                            "/invocations"
+                                          ]
+                                        ]
+                                      },
+                                      "integrationHttpMethod": "POST"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "@aws-cdk/aws-apigateway.CfnMethod",
+                                  "version": "1.94.1"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "@aws-cdk/aws-apigateway.Method",
+                              "version": "1.94.1"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "@aws-cdk/aws-apigateway.ProxyResource",
                           "version": "1.94.1"
                         }
                       }

@@ -33,16 +33,17 @@ console.log("lets check");
 
 
  const params = {
-    TableName: 'customerTable' ,
-    Key: {
-      'customerId' : 'user_1'
+    TableName: 'MusicCollection' ,
+    KeyConditionExpression:'Artist = :artist',
+    ExpressionAttributeValues:{
+   ':artist' :'led_zepellin'
     }
   };
 
 
 
             console.log("before response3");
-  const response3 = await db.get(params).promise();
+  const response3 = await db.query(params).promise();
  console.log("response3");
 
 
@@ -50,9 +51,13 @@ console.log("lets check");
 
 
 	    response = {
+             'headers': {
+             'Content-Type':'application/json'
+	     },
             'statusCode': 200,
             'body': JSON.stringify({
                 message: 'hello world',
+		data:response3
                 // location: ret.data.trim()
             })
         }
