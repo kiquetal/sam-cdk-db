@@ -7,10 +7,11 @@
   "author": "SAM CLI",
   "license": "MIT",
   "dependencies": {
+    "@middy/core": "^2.5.3",
+    "@middy/http-json-body-parser": "^2.5.3",
     "axios": "^0.21.1"
   },
-  "scripts": {
-  },
+  "scripts": {},
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^8.2.1"

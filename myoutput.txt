@@ -1,0 +1,14 @@
+START RequestId: ec0ee007-612e-4179-845f-2fc0a45f9b12 Version: $LATEST
+2021-12-13T05:37:19.074Z	ec0ee007-612e-4179-845f-2fc0a45f9b12	INFO	bodyyyy
+2021-12-13T05:37:19.074Z	ec0ee007-612e-4179-845f-2fc0a45f9b12	INFO	mi body
+2021-12-13T05:37:19.074Z	ec0ee007-612e-4179-845f-2fc0a45f9b12	INFO	"{\n    \"resourceGroup\":\"MI_TIGO\",\n    \"backendName\":\"backofficeTigo\",\n    \"country\":\"PY\",\n    \"value\":\"user:pass\",\n    \"type\":\"BASIC_CREDENTIALS\"\n}"
+2021-12-13T05:37:19.074Z	ec0ee007-612e-4179-845f-2fc0a45f9b12	INFO	BASIC_CREDENTIALS
+END RequestId: ec0ee007-612e-4179-845f-2fc0a45f9b12
+REPORT RequestId: ec0ee007-612e-4179-845f-2fc0a45f9b12	Init Duration: 0.07 ms	Duration: 1229.23 ms	Billed Duration: 1300 ms	Memory Size: 128 MB	Max Memory Used: 128 MB	
+START RequestId: 35fa7071-7c88-46e1-9bd1-ed946fdecc82 Version: $LATEST
+2021-12-13T05:37:41.917Z	35fa7071-7c88-46e1-9bd1-ed946fdecc82	INFO	bodyyyy
+2021-12-13T05:37:41.918Z	35fa7071-7c88-46e1-9bd1-ed946fdecc82	INFO	mi body
+2021-12-13T05:37:41.918Z	35fa7071-7c88-46e1-9bd1-ed946fdecc82	INFO	"{\n    \"resourceGroup\":\"MI_TIGO\",\n    \"backendName\":\"backofficeTigo\",\n    \"country\":\"BO\",\n    \"value\":\"user:pass\",\n    \"type\":\"BASIC_CREDENTIALS\"\n}"
+2021-12-13T05:37:41.918Z	35fa7071-7c88-46e1-9bd1-ed946fdecc82	INFO	BASIC_CREDENTIALS
+END RequestId: 35fa7071-7c88-46e1-9bd1-ed946fdecc82
+REPORT RequestId: 35fa7071-7c88-46e1-9bd1-ed946fdecc82	Init Duration: 0.11 ms	Duration: 365.14 ms	Billed Duration: 400 ms	Memory Size: 128 MB	Max Memory Used: 128 MB	

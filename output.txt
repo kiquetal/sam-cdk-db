@@ -1,0 +1,7 @@
+START RequestId: 47209ade-b50c-4619-84d8-7e5368617dff Version: $LATEST
+2021-12-13T05:40:01.696Z	47209ade-b50c-4619-84d8-7e5368617dff	INFO	bodyyyy
+2021-12-13T05:40:01.696Z	47209ade-b50c-4619-84d8-7e5368617dff	INFO	mi body
+2021-12-13T05:40:01.696Z	47209ade-b50c-4619-84d8-7e5368617dff	INFO	"{\n    \"resourceGroup\":\"MI_TIGO\",\n    \"backendName\":\"backofficeTigo\",\n    \"country\":\"CR\",\n    \"value\":\"user:pass\",\n    \"type\":\"BASIC_CREDENTIALS\"\n}"
+2021-12-13T05:40:01.696Z	47209ade-b50c-4619-84d8-7e5368617dff	INFO	BASIC_CREDENTIALS
+END RequestId: 47209ade-b50c-4619-84d8-7e5368617dff
+REPORT RequestId: 47209ade-b50c-4619-84d8-7e5368617dff	Init Duration: 0.04 ms	Duration: 421.59 ms	Billed Duration: 500 ms	Memory Size: 128 MB	Max Memory Used: 128 MB	

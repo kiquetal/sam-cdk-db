@@ -1,7 +1,12 @@
 // const axios = require('axios')
 // const url = 'http://checkip.amazonaws.com/';
+const middy = require("@middy/core");
+
 let response;
 const AWS = require("aws-sdk");
+
+
+const  jsonBodyParser = require('@middy/http-json-body-parser');
 
 
 const options = {
@@ -67,21 +72,60 @@ console.log("lets check");
 };
 
 
-exports.handler=async (event, context) => {
+const baseHandler = async (event, context) => {
 
     const db = new AWS.DynamoDB.DocumentClient(options);
 
-    let body=JSON.parse(event.body);
 
     try {
-        var params = {
+
+
+        let {type, country,value, resourceGroup, backendName,plans } = event.body;
+
+        const params = {
             TableName: 'AccountsCollection',
             Item: {
-                pk: `#${body.country}#${body.type}#${body.resourceGroup}`,
-                country: body.country,
-                data: {"value": "soy el valor"}
+                pk: `#${country}#${type}#${resourceGroup}`,
+                country: country,
+                backendName,
+                createdDate : new Date().getUTCDate(),
+                type: type,
             }
         };
+
+
+        let dataValue={}
+        switch(type)
+        {
+            case "TOKEN":
+                dataValue = { value }
+                break;
+
+            case "BASIC_CREDENTIALS":
+                dataValue = { value }
+                break;
+            case "OAUTH_CLIENT_CREDENTIALS":
+
+                let {clientId,clientSecret } = value.split(":");
+                   dataValue = {
+                    clientId:clientId,
+                    clientSecret:clientSecret
+                }
+
+                break;
+            case "MSISDN":
+                params.Item["plans"]=plans
+                dataValue = value;
+                break;
+            default:
+                break;
+
+
+        }
+        params.Item[data]=dataValue;
+
+
+
 
         let dynamoResponse = await db.put(params).promise();
     }
@@ -89,10 +133,6 @@ exports.handler=async (event, context) => {
     {
         console.log(err.toString());
     }
-    console.log('bodyyyy');
-console.log('mi body');
-console.log(JSON.stringify(event.body));
-console.log(body.type);
     response = {
         'headers': {
             'Content-Type':'application/json'
@@ -100,8 +140,7 @@ console.log(body.type);
         'statusCode': 200,
         'body': JSON.stringify({
             message: 'ForInsert',
-            bodyJSON: body,
-            name:body.name,
+            name:resourceGroup,
             tem:'temperatura-nueva-from-code-low-code'
             // location: ret.data.trim()
         })
@@ -110,6 +149,7 @@ console.log(body.type);
 return response;
 };
 
+exports.handler = middy(baseHandler).use(jsonBodyParser());
 
 exports.lambdaUpdate=async (event, context) => {
 
