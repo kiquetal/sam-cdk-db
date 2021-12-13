@@ -4,9 +4,12 @@ const middy = require("@middy/core");
 
 let response;
 const AWS = require("aws-sdk");
-
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 
 const  jsonBodyParser = require('@middy/http-json-body-parser');
+const httpError = require('@middy/http-error-handler');
 
 
 const options = {
@@ -80,15 +83,16 @@ const baseHandler = async (event, context) => {
     try {
 
 
-        let {type, country,value, resourceGroup, backendName,plans } = event.body;
+        let {type, country,value, resourceGroup, backendName,plans,enc } = event.body;
 
+        console.log(enc);
         const params = {
             TableName: 'AccountsCollection',
             Item: {
-                pk: `#${country}#${type}#${resourceGroup}`,
+                pk: `${country}-${type}-${resourceGroup}`,
                 country: country,
                 backendName,
-                createdDate : new Date().getUTCDate(),
+                createdDate : dayjs.utc().unix(),
                 type: type,
             }
         };
@@ -98,20 +102,16 @@ const baseHandler = async (event, context) => {
         switch(type)
         {
             case "TOKEN":
-                dataValue = { value }
+                dataValue =  value
                 break;
 
             case "BASIC_CREDENTIALS":
-                dataValue = { value }
+
+                dataValue = value
                 break;
             case "OAUTH_CLIENT_CREDENTIALS":
 
-                let {clientId,clientSecret } = value.split(":");
-                   dataValue = {
-                    clientId:clientId,
-                    clientSecret:clientSecret
-                }
-
+                dataValue = value
                 break;
             case "MSISDN":
                 params.Item["plans"]=plans
@@ -122,34 +122,36 @@ const baseHandler = async (event, context) => {
 
 
         }
-        params.Item[data]=dataValue;
+        params.Item["data"]=dataValue;
 
 
 
 
         let dynamoResponse = await db.put(params).promise();
+
+        response = {
+            'headers': {
+                'Content-Type':'application/json'
+            },
+            'statusCode': 200,
+            'body': JSON.stringify({
+                message: 'ForInsert',
+                tem:'temperatura-nueva-from-code-low-code'
+                // location: ret.data.trim()
+            })
+        }
+
     }
     catch(err)
     {
         console.log(err.toString());
     }
-    response = {
-        'headers': {
-            'Content-Type':'application/json'
-        },
-        'statusCode': 200,
-        'body': JSON.stringify({
-            message: 'ForInsert',
-            name:resourceGroup,
-            tem:'temperatura-nueva-from-code-low-code'
-            // location: ret.data.trim()
-        })
-    }
+
 
 return response;
 };
 
-exports.handler = middy(baseHandler).use(jsonBodyParser());
+exports.handler = middy(baseHandler).use(jsonBodyParser()).use(httpError());
 
 exports.lambdaUpdate=async (event, context) => {
 
