@@ -29,6 +29,13 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
       code: lambda.Code.fromAsset(path.join(__dirname, '..', 'dynamo-items')),
     });
 
+    const dynamoGetItem = new lambda.Function(this, 'dynamo-lambda-get-function', {
+      runtime: lambda.Runtime.NODEJS_14_X,
+      handler: 'get.handler',
+      timeout: cdk.Duration.minutes(1),
+      code: lambda.Code.fromAsset(path.join(__dirname, '..', 'dynamo-items')),
+    });
+
     const api = new apigateway.LambdaRestApi(this, 'hello-world-api', {
       handler: backend,
       proxy: false
@@ -38,7 +45,10 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
     const itemsRoot = api.root.addResource('items')
     //   const greedy = api.root.addResource('greedy');
     itemsRoot.addMethod('POST', new apigateway.LambdaIntegration(dynamoInsertItem))
-    itemsRoot.addResource('{itemId}').addMethod('PUT',new apigateway.LambdaIntegration(dynamoUpdateItem))
+   const itemsRresource= itemsRoot.addResource('{itemId}');
+    itemsRresource.addMethod('PUT',new apigateway.LambdaIntegration(dynamoUpdateItem))
+    itemsRresource.addMethod('GET',new apigateway.LambdaIntegration(dynamoGetItem))
+
     hello.addMethod('GET');
 
     /*  greedy.addProxy(
