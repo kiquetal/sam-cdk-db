@@ -5,8 +5,8 @@
     "aws-sam-cli-cdk-hello-world": "bin/aws-sam-cli-cdk-hello-world-stack.ts"
   },
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
+    "build": "tsc & sam-beta-cdk build",
+    "watch": "tsc -w & sam-beta-cdk build",
     "test": "jest",
     "cdk": "cdk"
   },

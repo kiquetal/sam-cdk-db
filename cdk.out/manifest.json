@@ -18,7 +18,7 @@
           {
             "type": "aws:cdk:asset",
             "data": {
-              "path": "/home/kiquetal/Documents/codes/2k21/sam-project-starter/sam-cdk-db/hello-world",
+              "path": "asset.855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1",
               "id": "855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1",
               "packaging": "zip",
               "sourceHash": "855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1",
@@ -57,13 +57,13 @@
           {
             "type": "aws:cdk:asset",
             "data": {
-              "path": "/home/kiquetal/Documents/codes/2k21/sam-project-starter/sam-cdk-db/dynamo-items",
-              "id": "f12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580",
+              "path": "asset.3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293bad",
+              "id": "3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293bad",
               "packaging": "zip",
-              "sourceHash": "f12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580",
-              "s3BucketParameter": "AssetParametersf12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580S3Bucket0690F5F9",
-              "s3KeyParameter": "AssetParametersf12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580S3VersionKey766744F2",
-              "artifactHashParameter": "AssetParametersf12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580ArtifactHash10F10F1D"
+              "sourceHash": "3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293bad",
+              "s3BucketParameter": "AssetParameters3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293badS3BucketDF17775C",
+              "s3KeyParameter": "AssetParameters3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293badS3VersionKeyEB7E5DF1",
+              "artifactHashParameter": "AssetParameters3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293badArtifactHashFE6FD075"
             },
             "trace": [
               "ConstructNode.addMetadata (/home/kiquetal/Documents/codes/2k21/sam-project-starter/sam-cdk-db/node_modules/@aws-cdk/core/lib/construct-compat.ts:431:92)",
@@ -246,10 +246,10 @@
             ]
           }
         ],
-        "/sam-cdk-db/AssetParameters/f12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580/S3Bucket": [
+        "/sam-cdk-db/AssetParameters/3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293bad/S3Bucket": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "AssetParametersf12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580S3Bucket0690F5F9",
+            "data": "AssetParameters3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293badS3BucketDF17775C",
             "trace": [
               "new FileAssetParameters (/home/kiquetal/Documents/codes/2k21/sam-project-starter/sam-cdk-db/node_modules/@aws-cdk/core/lib/private/asset-parameters.ts:16:32)",
               "LegacyStackSynthesizer.doAddFileAsset (/home/kiquetal/Documents/codes/2k21/sam-project-starter/sam-cdk-db/node_modules/@aws-cdk/core/lib/stack-synthesizers/legacy.ts:154:16)",
@@ -279,10 +279,10 @@
             ]
           }
         ],
-        "/sam-cdk-db/AssetParameters/f12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580/S3VersionKey": [
+        "/sam-cdk-db/AssetParameters/3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293bad/S3VersionKey": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "AssetParametersf12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580S3VersionKey766744F2",
+            "data": "AssetParameters3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293badS3VersionKeyEB7E5DF1",
             "trace": [
               "new FileAssetParameters (/home/kiquetal/Documents/codes/2k21/sam-project-starter/sam-cdk-db/node_modules/@aws-cdk/core/lib/private/asset-parameters.ts:21:31)",
               "LegacyStackSynthesizer.doAddFileAsset (/home/kiquetal/Documents/codes/2k21/sam-project-starter/sam-cdk-db/node_modules/@aws-cdk/core/lib/stack-synthesizers/legacy.ts:154:16)",
@@ -312,10 +312,10 @@
             ]
           }
         ],
-        "/sam-cdk-db/AssetParameters/f12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580/ArtifactHash": [
+        "/sam-cdk-db/AssetParameters/3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293bad/ArtifactHash": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "AssetParametersf12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580ArtifactHash10F10F1D",
+            "data": "AssetParameters3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293badArtifactHashFE6FD075",
             "trace": [
               "new FileAssetParameters (/home/kiquetal/Documents/codes/2k21/sam-project-starter/sam-cdk-db/node_modules/@aws-cdk/core/lib/private/asset-parameters.ts:26:34)",
               "LegacyStackSynthesizer.doAddFileAsset (/home/kiquetal/Documents/codes/2k21/sam-project-starter/sam-cdk-db/node_modules/@aws-cdk/core/lib/stack-synthesizers/legacy.ts:154:16)",

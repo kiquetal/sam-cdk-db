@@ -90,7 +90,7 @@
       ],
       "Metadata": {
         "aws:cdk:path": "sam-cdk-db/hello-world-lambda-function/Resource",
-        "aws:asset:path": "/home/kiquetal/Documents/codes/2k21/sam-project-starter/sam-cdk-db/hello-world",
+        "aws:asset:path": "asset.855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1",
         "aws:asset:property": "Code"
       }
     },
@@ -133,7 +133,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": {
-            "Ref": "AssetParametersf12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580S3Bucket0690F5F9"
+            "Ref": "AssetParameters3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293badS3BucketDF17775C"
           },
           "S3Key": {
             "Fn::Join": [
@@ -146,7 +146,7 @@
                       "Fn::Split": [
                         "||",
                         {
-                          "Ref": "AssetParametersf12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580S3VersionKey766744F2"
+                          "Ref": "AssetParameters3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293badS3VersionKeyEB7E5DF1"
                         }
                       ]
                     }
@@ -159,7 +159,7 @@
                       "Fn::Split": [
                         "||",
                         {
-                          "Ref": "AssetParametersf12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580S3VersionKey766744F2"
+                          "Ref": "AssetParameters3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293badS3VersionKeyEB7E5DF1"
                         }
                       ]
                     }
@@ -184,7 +184,7 @@
       ],
       "Metadata": {
         "aws:cdk:path": "sam-cdk-db/dynamo-lambda-insert-function/Resource",
-        "aws:asset:path": "/home/kiquetal/Documents/codes/2k21/sam-project-starter/sam-cdk-db/dynamo-items",
+        "aws:asset:path": "asset.3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293bad",
         "aws:asset:property": "Code"
       }
     },
@@ -227,7 +227,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": {
-            "Ref": "AssetParametersf12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580S3Bucket0690F5F9"
+            "Ref": "AssetParameters3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293badS3BucketDF17775C"
           },
           "S3Key": {
             "Fn::Join": [
@@ -240,7 +240,7 @@
                       "Fn::Split": [
                         "||",
                         {
-                          "Ref": "AssetParametersf12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580S3VersionKey766744F2"
+                          "Ref": "AssetParameters3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293badS3VersionKeyEB7E5DF1"
                         }
                       ]
                     }
@@ -253,7 +253,7 @@
                       "Fn::Split": [
                         "||",
                         {
-                          "Ref": "AssetParametersf12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580S3VersionKey766744F2"
+                          "Ref": "AssetParameters3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293badS3VersionKeyEB7E5DF1"
                         }
                       ]
                     }
@@ -278,7 +278,7 @@
       ],
       "Metadata": {
         "aws:cdk:path": "sam-cdk-db/dynamo-lambda-update-function/Resource",
-        "aws:asset:path": "/home/kiquetal/Documents/codes/2k21/sam-project-starter/sam-cdk-db/dynamo-items",
+        "aws:asset:path": "asset.3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293bad",
         "aws:asset:property": "Code"
       }
     },
@@ -833,17 +833,17 @@
       "Type": "String",
       "Description": "Artifact hash for asset \"855422aab2275af60def10f6af439261b65349e7ad495352ce0c724c7d3a5de1\""
     },
-    "AssetParametersf12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580S3Bucket0690F5F9": {
+    "AssetParameters3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293badS3BucketDF17775C": {
       "Type": "String",
-      "Description": "S3 bucket for asset \"f12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580\""
+      "Description": "S3 bucket for asset \"3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293bad\""
     },
-    "AssetParametersf12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580S3VersionKey766744F2": {
+    "AssetParameters3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293badS3VersionKeyEB7E5DF1": {
       "Type": "String",
-      "Description": "S3 key for asset version \"f12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580\""
+      "Description": "S3 key for asset version \"3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293bad\""
     },
-    "AssetParametersf12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580ArtifactHash10F10F1D": {
+    "AssetParameters3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293badArtifactHashFE6FD075": {
       "Type": "String",
-      "Description": "Artifact hash for asset \"f12f026e01250d02b8367735e17cd497f1f4512736d175aaadc5536c44a16580\""
+      "Description": "Artifact hash for asset \"3ff7c08ec9c21f47ef60b36a6e7e07379dfb09c798703f9267527a791e293bad\""
     }
   },
   "Outputs": {
