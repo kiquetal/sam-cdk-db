@@ -1,0 +1,151 @@
+swagger: "2.0"
+info:
+  description: "Data Test Mgmt"
+  version: "1.0.0"
+  title: "Data test Mgmt"
+  contact:
+    email: "enrique.melgarejo@edge.com.py"
+host: "localhost"
+basePath: "/dev"
+schemes:
+- "https"
+- "http"
+paths:
+  /items:
+    post:
+      summary: "Add a new test record"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Item"
+        required: true
+        schema:
+          $ref: "#/definitions/ItemMsisdn"
+      responses:
+        "200":
+          description: "success"
+          schema:
+            $ref: '#/definitions/ItemResponse'
+        "405":
+          description: "Invalid input"
+  
+definitions:
+  ItemToken:
+    type: "object"
+    properties:
+      resourceGroup:
+        type: "string"
+      backendName:
+        type: "string"
+      country:
+        type: "string"
+      type:
+        type: "string"
+        default: "TOKEN"
+      data:
+        type: "object"
+        properties:
+          token:
+            type: "string"
+  ItemOauthClientCredentiaLs:
+    type: "object"
+    properties:
+      resourceGroup:
+        type: "string"
+      backendName:
+        type: "string"
+      country:
+        type: "string"
+      type:
+        type: "string"
+        example: "OAUTH_CLIENT_CREDENTIALS"
+      data:
+        type: "object"
+        properties:
+          clientId:
+            type: "string"
+          clientSecret:
+            type: "string"
+  ItemBasicCredentials:
+    type: "object"
+    properties:
+      resourceGroup:
+        type: "string"
+      backendName:
+        type: "string"
+      country:
+        type: "string"
+      type:
+        type: "string"
+        default: "BASIC_CREDENTIALS"
+      data:
+        type: "object"
+        properties:
+          user:
+            type: "string"
+          pass:
+            type: "string"
+  ItemMsisdn:
+    type: "object"
+    properties:
+      resourceGroup:
+        type: "string"
+        default: "MI_TIENDA"
+      backendName:
+        type: "string"
+        example: "BACKOFFICEPY"
+      country:
+        type: "string"
+        example: "CO"
+      type:
+        type: "string"
+        default: "MSISDN"
+      plans:
+        type: "array"
+        items:
+         type: "string"
+        example: ["PRE_PAGO","POST_PAGO"] 
+      conditions:
+        type: "array"
+        items:
+          type: "string"
+        example: ["SIN_SALDO","INTERNET"]  
+      data:
+        type: "object"
+        properties:
+          value:
+            type: string
+            example: "579123433123"
+  ItemResponse:
+   type: "object"
+   properties:
+     item:
+       type: "object"
+       properties:
+         pk:
+           type: "string"
+           example: "CO-MSISDN-MITIENDA-PREPAGO-BACKOFFICE-571234345446"
+         data:
+           type: "object"
+           properties:
+            value:
+              type: "string"
+              example: "571234345446"
+  ApiResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      type:
+        type: "string"
+      message:
+        type: "string"
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"

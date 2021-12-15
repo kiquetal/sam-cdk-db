@@ -36,18 +36,30 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
       code: lambda.Code.fromAsset(path.join(__dirname, '..', 'dynamo-items')),
     });
 
+    const  dynamoGetCountryType = new lambda.Function(this,'dynamo-lambda-get-by-country-type-function',{
+       runtime: lambda.Runtime.NODEJS_14_X,
+       handler:'get.handlerCountryType',
+       timeout: cdk.Duration.minutes(1),
+        code:lambda.Code.fromAsset(path.join(__dirname,'..','dynamo-items'))
+
+    });
+
     const api = new apigateway.LambdaRestApi(this, 'hello-world-api', {
       handler: backend,
       proxy: false
     });
 
     const hello = api.root.addResource('hello');
-    const itemsRoot = api.root.addResource('items')
+    const itemsRootResource = api.root.addResource('items')
     //   const greedy = api.root.addResource('greedy');
-    itemsRoot.addMethod('POST', new apigateway.LambdaIntegration(dynamoInsertItem))
-   const itemsRresource= itemsRoot.addResource('{itemId}');
-    itemsRresource.addMethod('PUT',new apigateway.LambdaIntegration(dynamoUpdateItem))
-    itemsRresource.addMethod('GET',new apigateway.LambdaIntegration(dynamoGetItem))
+    itemsRootResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoInsertItem))
+    itemsRootResource.addMethod('PUT',new apigateway.LambdaIntegration(dynamoUpdateItem));
+   const itemSubResources= itemsRootResource.addResource('{itemId}');
+   const queryResource = itemsRootResource.addResource('query');
+   const countryQueryResource = queryResource.addResource('{country}');
+   const countryAndTypeResource = countryQueryResource.addResource('{type}');
+      countryAndTypeResource.addMethod('GET',new apigateway.LambdaIntegration(dynamoGetCountryType))
+    itemSubResources.addMethod('GET',new apigateway.LambdaIntegration(dynamoGetItem))
 
     hello.addMethod('GET');
 

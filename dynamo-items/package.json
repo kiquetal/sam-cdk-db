@@ -10,9 +10,11 @@
     "@middy/core": "^2.5.3",
     "@middy/http-error-handler": "^2.5.3",
     "@middy/http-json-body-parser": "^2.5.3",
+    "@middy/validator": "^2.5.3",
     "axios": "^0.21.1",
     "dayjs": "^1.10.7",
     "install": "^0.13.0",
+    "nanoid": "^3.1.30",
     "npm": "^8.3.0"
   },
   "scripts": {},

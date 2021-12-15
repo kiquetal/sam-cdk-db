@@ -1,13 +1,12 @@
 // const axios = require('axios')
 // const url = 'http://checkip.amazonaws.com/';
 const middy = require("@middy/core");
-
 let response;
 const AWS = require("aws-sdk");
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
-
+const nano = require('nanoid');
 const  jsonBodyParser = require('@middy/http-json-body-parser');
 const httpError = require('@middy/http-error-handler');
 
@@ -32,49 +31,6 @@ const options = {
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  *
  */
-exports.lambdaHandler = async (event, context) => {
-    try {
-
-const db = new AWS.DynamoDB.DocumentClient(options);
-console.log("lets check");
- const params = {
-    TableName: 'ion' ,
-    KeyConditionExpression:'Artist = :artist',
-    ExpressionAttributeValues:{
-   ':artist' :'led_zepellin'
-    }
-  };
-
-
-
-            console.log("before response3");
-  const response3 = await db.query(params).promise();
- console.log("response3");
-
-
-
-
-
-	    response = {
-             'headers': {
-             'Content-Type':'application/json'
-	     },
-            'statusCode': 200,
-            'body': JSON.stringify({
-                message: 'hello world',
-		data:response3
-                // location: ret.data.trim()
-            })
-        }
-    } catch (err) {
-        console.log(err);
-        return err;
-    }
-
-    return response
-};
-
-
 const baseHandler = async (event, context) => {
 
     const db = new AWS.DynamoDB.DocumentClient(options);
@@ -83,39 +39,50 @@ const baseHandler = async (event, context) => {
     try {
 
 
-        let {type, country,value, resourceGroup, backendName,plans,enc } = event.body;
+        let {type, country,data, resourceGroup, backendName,plans,enc } = event.body;
 
-        console.log(enc);
+        //schema-de-input
+
+        if (enc)
+        {
+            //symmetric encrypt and base64
+
+        }
+
+        const id= nano.customAlphabet("1234567890abcdef",10)();
+        const pk=`#${country}#${type}#${resourceGroup}#${backendName}#${id}`;
         const params = {
             TableName: 'AccountsCollection',
             Item: {
-                pk: `${country}-${type}-${resourceGroup}`,
+                pk:pk,
                 country: country,
                 backendName,
+                resourceGroup,
                 createdDate : dayjs.utc().unix(),
-                type: type,
+                typeAccount: type,
             }
         };
 
 
         let dataValue={}
+        let dataToClient="";
         switch(type)
         {
             case "TOKEN":
-                dataValue =  value
+                dataValue =  data
                 break;
-
             case "BASIC_CREDENTIALS":
-
-                dataValue = value
+                dataValue = data
+                dataToClient="*"
                 break;
             case "OAUTH_CLIENT_CREDENTIALS":
+                dataValue = data
+                dataToClient="*"
 
-                dataValue = value
                 break;
             case "MSISDN":
                 params.Item["plans"]=plans
-                dataValue = value;
+                dataValue = data;
                 break;
             default:
                 break;
@@ -124,10 +91,9 @@ const baseHandler = async (event, context) => {
         }
         params.Item["data"]=dataValue;
 
-
-
-
         let dynamoResponse = await db.put(params).promise();
+        let insertIndex = insertIndexDb(id,pk,db);
+
 
         response = {
             'headers': {
@@ -135,9 +101,8 @@ const baseHandler = async (event, context) => {
             },
             'statusCode': 200,
             'body': JSON.stringify({
-                message: 'ForInsert',
-                tem:'temperatura-nueva-from-code-low-code'
-                // location: ret.data.trim()
+                pk,
+                data:dataToClient
             })
         }
 
@@ -150,6 +115,27 @@ const baseHandler = async (event, context) => {
 
 return response;
 };
+
+
+const insertIndexDb = async (id,pk,db) => {
+
+    const params= {
+        TableName: 'AccountsCollection',
+        Item: {
+            pk: id,
+            country: pk,
+        }
+        };
+
+    try {
+        let response = await db.put(params).promise();
+        console.log("insert index");
+    }
+    catch(err)
+    {
+        console.log("error+setting+index"+err.toString());
+    }
+}
 
 exports.handler = middy(baseHandler).use(jsonBodyParser()).use(httpError());
 

@@ -120,4 +120,62 @@ Each value must be unique within the set.
 Order of values is not preserved.
 Empty binary set is not supported.
 
+### Create Secondar global indexes
 
+aws dynamodb update-table \
+   --table-name AccountsCollection \
+   --attribute-definitions '[
+       {
+         "AttributeName":"country",
+         "AttributeType":"S"
+       },
+       {
+         "AttributeName":"typeAccount",
+         "AttributeType":"S" 
+       }]'\
+  --global-secondary-index-updates '[
+     {
+      "Create": {
+          "IndexName":"TypeAccountCountryIndex",
+          "KeySchema":[
+           {
+            "AttributeName":"country",
+            "KeyType":"HASH"
+          },
+          {
+           "AttributeName":"typeAccount",
+           "KeyType":"RANGE"
+          }
+       ],
+        "Projection":{
+            "ProjectionType":"ALL"
+          },
+        "ProvisionedThroughput":{
+               "ReadCapacityUnits":1,
+               "WriteCapacityUnits":1 
+             }
+         }
+     }
+     ]' \
+    --endpoint http://127.0.0.1:8000 --profile devKiquetal
+
+## Query Secondary index
+
+   aws dynamodb query \
+    --table-name AccountsCollection \
+    --index-name TypeCountryIndex \
+    --key-condition-expression "country = :country" \
+    --expression-attribute-values  '{":country":{"S":"BO"}}'
+    --endpoint http://127.0.0.1:8000 --profile devKiquetal
+
+
+## Remove Secondary index
+
+aws dynamodb update-table \
+    --table-name Reply \
+    --global-secondary-index-updates '[{
+        "Delete":{
+            "IndexName": "TypeCountryIndex"
+        }
+    }
+]' --endpoint http://127.0.0.1:8000 --profile devKiquetal
