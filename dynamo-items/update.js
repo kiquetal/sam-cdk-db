@@ -100,7 +100,7 @@ const handlerUpdate = async (event, context) => {
                 },
                 'statusCode': 200,
                 'body': JSON.stringify({
-                    updateItem
+                    ...updateItem.Attributes
                 })
             }
             return response;

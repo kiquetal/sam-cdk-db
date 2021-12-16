@@ -179,3 +179,8 @@ aws dynamodb update-table \
         }
     }
 ]' --endpoint http://127.0.0.1:8000 --profile devKiquetal
+
+
+## Eager container
+
+sam-beta-cdk local start-api --docker-network lambda-local --warm-containers EAGER

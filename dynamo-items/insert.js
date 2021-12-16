@@ -39,7 +39,7 @@ const baseHandler = async (event, context) => {
     try {
 
 
-        let {type, country,data, resourceGroup, backendName,plans,enc } = event.body;
+        let {type, country,data, resourceGroup, backendName,enc,...rest } = event.body;
 
         //schema-de-input
 
@@ -60,6 +60,7 @@ const baseHandler = async (event, context) => {
                 resourceGroup,
                 createdDate : dayjs.utc().unix(),
                 typeAccount: type,
+                ...rest
             }
         };
 
@@ -99,7 +100,7 @@ const baseHandler = async (event, context) => {
             'headers': {
                 'Content-Type':'application/json'
             },
-            'statusCode': 200,
+            'statusCode': 201,
             'body': JSON.stringify({
                 pk,
                 data:dataToClient

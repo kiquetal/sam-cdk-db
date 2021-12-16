@@ -66,7 +66,7 @@ exports.handlerCountryType= async (event,context)=> {
             },
             'statusCode': 200,
             'body': JSON.stringify({
-             dynamoResponse
+             ...dynamoResponse
             })
         };
 }
