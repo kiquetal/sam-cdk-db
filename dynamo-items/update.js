@@ -46,24 +46,19 @@ const inputSchema = {
     }
 }
 
-function obtainCountry(pk) {
-
-    const [_, country, ...rest] = pk.split("#");
-    return country;
-
-}
 
 const handlerUpdate = async (event, context) => {
 
 
     try {
-        const db = new AWS.DynamoDB.DocumentClient(options);
+        console.log("env" +process.env.ISLOCAL);
+        const db =process.env.ISLOCAL=="true"?new AWS.DynamoDB.DocumentClient(options):new AWS.DynamoDB.DocumentClient();
         const {pk, type, ...rest} = event.body;
         let resp = await lib.getItemByPk(db, {
             TableName: 'AccountsCollection',
             Key: {
                 'pk': pk,
-                'country': obtainCountry(pk)
+                'country': lib.obtainCountry(pk)
             }
         });
         if (resp.hasOwnProperty('Item')) {
@@ -88,7 +83,7 @@ const handlerUpdate = async (event, context) => {
                 TableName: 'AccountsCollection',
                 Key: {
                     pk: pk,
-                    country: obtainCountry(pk)
+                    country: lib.obtainCountry(pk)
                 },
                 ...expressionUpdate,
                 ReturnValues: "ALL_NEW"
@@ -114,15 +109,19 @@ const handlerUpdate = async (event, context) => {
                 },
                 'statusCode': 404,
                 'body': JSON.stringify({
-                    message: 'Item not found',
-                    // location: ret.data.trim()
+                    error: {
+                        'message': 'Item not found'
+                    }
                 })
             }
         }
 
     } catch (err) {
-        console.log(err.toString());
-        return lib.return500Response(err)
+        if (err.message)
+            return lib.return500Response({"message":err.message});
+        else
+            return lib.return500Response(err.message);
+
     }
 };
 exports.handler = middy(handlerUpdate).use(jsonBodyParser()).use(validator({inputSchema})).onError(async (req) => {

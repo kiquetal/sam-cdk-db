@@ -9,6 +9,7 @@ dayjs.extend(utc);
 const nano = require('nanoid');
 const  jsonBodyParser = require('@middy/http-json-body-parser');
 const httpError = require('@middy/http-error-handler');
+const lib = require('lib');
 
 
 const options = {
@@ -33,13 +34,13 @@ const options = {
  */
 const baseHandler = async (event, context) => {
 
-    const db = new AWS.DynamoDB.DocumentClient(options);
-
 
     try {
 
+        console.log("env" +process.env.ISLOCAL);
+        const db =process.env.ISLOCAL=="true"?new AWS.DynamoDB.DocumentClient(options):new AWS.DynamoDB.DocumentClient();
 
-        let {type, country,data, resourceGroup, backendName,enc,...rest } = event.body;
+        let {typeItem, country,data, resourceGroup, backendName,enc,...rest } = event.body;
 
         //schema-de-input
 
@@ -50,7 +51,7 @@ const baseHandler = async (event, context) => {
         }
 
         const id= nano.customAlphabet("1234567890abcdef",10)();
-        const pk=`#${country}#${type}#${resourceGroup}#${backendName}#${id}`;
+        const pk=`#${country}#${typeItem}#${resourceGroup}#${backendName}#${id}`;
         const params = {
             TableName: 'AccountsCollection',
             Item: {
@@ -59,7 +60,7 @@ const baseHandler = async (event, context) => {
                 backendName,
                 resourceGroup,
                 createdDate : dayjs.utc().unix(),
-                typeAccount: type,
+                typeItem,
                 ...rest
             }
         };
@@ -67,7 +68,7 @@ const baseHandler = async (event, context) => {
 
         let dataValue={}
         let dataToClient="";
-        switch(type)
+        switch(typeItem)
         {
             case "TOKEN":
                 dataValue =  data
@@ -82,8 +83,8 @@ const baseHandler = async (event, context) => {
 
                 break;
             case "MSISDN":
-                params.Item["plans"]=plans
                 dataValue = data;
+                dataToClient=dataValue;
                 break;
             default:
                 break;
@@ -93,7 +94,7 @@ const baseHandler = async (event, context) => {
         params.Item["data"]=dataValue;
 
         let dynamoResponse = await db.put(params).promise();
-        let insertIndex = insertIndexDb(id,pk,db);
+     //   let insertIndex = insertIndexDb(id,pk,db);
 
 
         response = {
@@ -102,15 +103,18 @@ const baseHandler = async (event, context) => {
             },
             'statusCode': 201,
             'body': JSON.stringify({
-                pk,
-                data:dataToClient
+                pk
             })
         }
 
     }
     catch(err)
     {
-        console.log(err.toString());
+        if (err.message)
+            return lib.return500Response({"message":err.message});
+        else
+            return lib.return500Response(err.message);
+
     }
 
 
@@ -137,4 +141,8 @@ const insertIndexDb = async (id,pk,db) => {
     }
 }
 
-exports.handler = middy(baseHandler).use(jsonBodyParser()).use(httpError());
+exports.handler = middy(baseHandler).use(jsonBodyParser()).use(httpError()).onError(async (req) => {
+    if (req.error) {
+        return lib.return500Response(req.error);
+    }
+});

@@ -1,7 +1,6 @@
 const AWS = require("aws-sdk");
-const  jsonBodyParser = require('@middy/http-json-body-parser');
-const httpError = require('@middy/http-error-handler');
 const middy = require("@middy/core");
+const lib = require('lib');
 
 const options = {
     region: "localhost",
@@ -30,43 +29,64 @@ exports.handler=async (event, context) => {
 
 };
 
-exports.handlerCountryType= async (event,context)=> {
+const baseHandlerCountryType=async (event,context)=> {
 
-    const db = new AWS.DynamoDB.DocumentClient(options);
-    let  { country, type } = event.pathParameters;
-    let resourceGroup=null;
-    if (event.queryStringParameters)
-         resourceGroup  = event.queryStringParameters.resourceGroup;
+    console.log("env" +process.env.ISLOCAL);
+    const db =process.env.ISLOCAL=="true"?new AWS.DynamoDB.DocumentClient(options):new AWS.DynamoDB.DocumentClient();
+    let {country, type} = event.pathParameters;
 
     let expressionAttributesValues = {
         ':country': country.toUpperCase(),
-        ':type': type.toUpperCase(),
+        ':typeItem': type.toUpperCase(),
 
     };
     const params = {
         TableName: 'AccountsCollection',
-        IndexName: 'TypeAccountCountryIndex',
-        KeyConditionExpression: 'country = :country and typeAccount = :type',
+        IndexName: 'TypeItemCountryIndex',
+        KeyConditionExpression: 'country = :country and typeItem = :typeItem',
         ExpressionAttributeValues: expressionAttributesValues
     };
 
-    if (resourceGroup) {
-        params.ExpressionAttributeValues={
-            ...expressionAttributesValues,
-            ':rg':resourceGroup
-        }
-        params["FilterExpression"] = ' resourceGroup = :rg'
+    if (event.queryStringParameters) {
+        params['FilterExpression'] = "";
+        Object.entries(event.queryStringParameters).forEach(([key, item]) => {
+            params.ExpressionAttributeValues[`:${key}`] = `${item}`
+            params['FilterExpression'] += `${key} = :${key} AND `
+        });
+
+        params['FilterExpression'] = params['FilterExpression'].slice(0, -4);
+
     }
 
-        console.log(JSON.stringify(params));
+    console.log(JSON.stringify(params));
+    try {
+
         let dynamoResponse = await db.query(params).promise();
-    return {
+        return {
             'headers': {
-                'Content-Type':'application/json'
+                'Content-Type': 'application/json'
             },
             'statusCode': 200,
             'body': JSON.stringify({
-             ...dynamoResponse
+                ...dynamoResponse
             })
         };
+    } catch (err) {
+
+        if (err.message)
+            return lib.return500Response({"message":err.message});
+        else
+            return lib.return500Response(err.message);
+
+    }
 }
+
+
+exports.handlerCountryType= middy(baseHandlerCountryType).onError(async (req) => {
+
+
+    if (req.error) {
+        return lib.return500Response(req.error);
+    }
+});
+

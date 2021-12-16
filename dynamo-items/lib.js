@@ -1,6 +1,6 @@
 const return500Response = (data) => {
 
-
+console.log(JSON.stringify(data));
     return {
         'headers': {
             'Content-Type': 'application/json'
@@ -49,11 +49,11 @@ const putItemByPk = async (db, params) => {
     }
 }
 
-const getIemByPk = async (db, params) => {
-
-
+const getItemByPk = async (db, params) =>
+{
+console.log("from getItem");
+console.log(JSON.stringify(params));
     try {
-        console.log(JSON.stringify(params));
         return await db.get(params).promise();
     } catch (err) {
         return return500Response(err);
@@ -61,7 +61,16 @@ const getIemByPk = async (db, params) => {
 
 
 }
-exports.getItemByPk = getIemByPk;
+
+const  obtainCountry = (pk) => {
+
+    const [_, country, ...rest] = pk.split("#");
+    return country;
+
+}
+
+exports.getItemByPk = getItemByPk;
 exports.putItem = putItemByPk;
 exports.updateItem = updateItemByPk;
 exports.return500Response = return500Response;
+exports.obtainCountry = obtainCountry;
