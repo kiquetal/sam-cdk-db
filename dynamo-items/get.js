@@ -40,19 +40,9 @@ exports.handlerCountryType= async (event,context)=> {
 
     let expressionAttributesValues = {
         ':country': country.toUpperCase(),
-        ':type': type.toUpperCase()
+        ':type': type.toUpperCase(),
 
     };
-
-    if (resourceGroup)
-    {
-        expressionAttributesValues={
-            ':country': country.toUpperCase(),
-            ':type': type.toUpperCase(),
-            ':rg':resourceGroup
-
-        }
-    }
     const params = {
         TableName: 'AccountsCollection',
         IndexName: 'TypeAccountCountryIndex',
@@ -60,6 +50,15 @@ exports.handlerCountryType= async (event,context)=> {
         ExpressionAttributeValues: expressionAttributesValues
     };
 
+    if (resourceGroup) {
+        params.ExpressionAttributeValues={
+            ...expressionAttributesValues,
+            ':rg':resourceGroup
+        }
+        params["FilterExpression"] = ' resourceGroup = :rg'
+    }
+
+        console.log(JSON.stringify(params));
         let dynamoResponse = await db.query(params).promise();
     return {
             'headers': {

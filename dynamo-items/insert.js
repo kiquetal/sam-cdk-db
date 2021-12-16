@@ -126,10 +126,9 @@ const insertIndexDb = async (id,pk,db) => {
             country: pk,
         }
         };
-
     try {
-        let response = await db.put(params).promise();
-        console.log("insert index");
+       await db.put(params).promise();
+
     }
     catch(err)
     {
@@ -138,20 +137,3 @@ const insertIndexDb = async (id,pk,db) => {
 }
 
 exports.handler = middy(baseHandler).use(jsonBodyParser()).use(httpError());
-
-exports.lambdaUpdate=async (event, context) => {
-
-    response = {
-        'headers': {
-            'Content-Type':'application/json'
-        },
-        'statusCode': 200,
-        'body': JSON.stringify({
-            message: 'ForUpdate',
-            // location: ret.data.trim()
-        })
-    }
-
-    return response;
-
-};
