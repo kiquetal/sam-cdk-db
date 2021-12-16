@@ -9,6 +9,7 @@
   "dependencies": {
     "@aws-cdk/aws-dynamodb": "^1.136.0",
     "@middy/core": "^2.5.3",
+    "@middy/http-cors": "^2.5.3",
     "@middy/http-error-handler": "^2.5.3",
     "@middy/http-json-body-parser": "^2.5.3",
     "@middy/validator": "^2.5.3",

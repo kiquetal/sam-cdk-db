@@ -94,6 +94,16 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         const api = new apigateway.LambdaRestApi(this, 'dynamo-items', {
             handler: dynamoGetItem,
+
+            defaultCorsPreflightOptions:{
+                allowOrigins: apigateway.Cors.ALL_ORIGINS,
+                allowMethods: apigateway.Cors.ALL_METHODS,
+                allowHeaders:apigateway.Cors.DEFAULT_HEADERS
+            },
+            deployOptions:{
+                stageName:'test'
+
+            },
             proxy: false
         });
 

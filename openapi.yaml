@@ -1,0 +1,119 @@
+openapi: "3.0.0"
+info:
+  description: "Data Test Mgmt"
+  version: "1.0.0"
+  title: "Data test Mgmt"
+  contact:
+    email: "enrique.melgarejo@edge.com.py"
+servers:
+  - url: https://dnxdcc3yzg.execute-api.us-east-1.amazonaws.com/prod
+    description: AWS API-GATEWAY
+
+
+paths:
+  /items:
+    post:
+      summary: "Add a new item for test"
+      description: ""
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: "#/components/schemas/Token"
+                - $ref: '#/components/schemas/BasicCredentials'
+                - $ref: '#/components/schemas/OauthClientCredentiaLs'
+              discriminator:
+                propertyName: typeItem
+      responses:
+        "201":
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+
+
+
+components:
+  schemas:
+    Item:
+      type: "object"
+      properties:
+        resourceGroup:
+          type: "string"
+          example: MI-TIGO
+        typeItem:
+          type: string
+        country:
+          type: "string"
+          example: CO
+        backendName:
+          type: "string"
+          example: FOX
+      required:
+        - typeItem
+        - resourceGroup
+        - country
+        - backendName
+      discriminator:
+        propertyName: typeItem
+
+    Token:
+      allOf:
+        - $ref: "#/components/schemas/Item"
+        - type: object
+          properties:
+            typeItem:
+              type: string
+              example: TOKEN
+            data:
+              type: object
+              properties:
+                token:
+                  type: string
+                  example: ffaaa3445-ffdggfgfd-34342342-xafdfdsfmN
+          required:
+            - data
+
+
+    BasicCredentials:
+      allOf:
+        - $ref: "#/components/schemas/Item"
+        - type: object
+          properties:
+            typeItem:
+              type: string
+              example: BASIC_CREDENTIALS
+            data:
+              type: object
+              properties:
+                user:
+                  type: string
+                pass:
+                  type: string
+
+    OauthClientCredentiaLs:
+      allOf:
+        - $ref: "#/components/schemas/Item"
+        - type: object
+          properties:
+            typeItem:
+              type: string
+              example: OAUTH_CLIENT_CREDENTIALS
+            data:
+              type: object
+              properties:
+                clientId:
+                  type: "string"
+                  example: "4311123-232331-3213213"
+                clientSecret:
+                  type: "string"
+                  example: "b4333-33444343-343424242"
+    ItemResponse:
+      type: object
+      properties:
+        pk:
+          type: string
+          example: "#BO#BASIC_CREDENTIALS#Mi-App#backofficeco#741f583a89"

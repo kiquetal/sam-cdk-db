@@ -11,7 +11,7 @@ const  jsonBodyParser = require('@middy/http-json-body-parser');
 const httpError = require('@middy/http-error-handler');
 const lib = require('lib');
 
-
+const cors = require('@middy/http-cors');
 const options = {
         region: "localhost",
         endpoint: "http://dynamodb:8000",
@@ -141,7 +141,7 @@ const insertIndexDb = async (id,pk,db) => {
     }
 }
 
-exports.handler = middy(baseHandler).use(jsonBodyParser()).use(httpError()).onError(async (req) => {
+exports.handler = middy(baseHandler).use(jsonBodyParser()).use(httpError()).use(cors()).onError(async (req) => {
     if (req.error) {
         return lib.return500Response(req.error);
     }
