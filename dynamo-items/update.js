@@ -9,6 +9,7 @@ const AWS = require("aws-sdk");
 
 const lib = require('lib');
 const dayjs = require("dayjs");
+const cors = require('@middy/http-cors');
 
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -124,7 +125,7 @@ const handlerUpdate = async (event, context) => {
 
     }
 };
-exports.handler = middy(handlerUpdate).use(jsonBodyParser()).use(validator({inputSchema})).onError(async (req) => {
+exports.handler = middy(handlerUpdate).use(jsonBodyParser()).use(validator({inputSchema})).use(cors()).onError(async (req) => {
 
 
     if (req.error) {

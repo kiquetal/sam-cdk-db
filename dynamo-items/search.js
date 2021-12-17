@@ -1,5 +1,6 @@
 const middy = require("@middy/core");
 const AWS = require("aws-sdk");
+const cors = require('@middy/http-cors');
 
 const  jsonBodyParser = require('@middy/http-json-body-parser');
 const lib = require("lib");
@@ -61,4 +62,4 @@ const baseSearchHandler = async(event,context) => {
     }
 
 };
-exports.searchHandler= middy(baseSearchHandler).use(jsonBodyParser());
+exports.searchHandler= middy(baseSearchHandler).use(cors()).use(jsonBodyParser());

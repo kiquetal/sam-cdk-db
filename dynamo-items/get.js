@@ -2,6 +2,8 @@ const AWS = require("aws-sdk");
 const middy = require("@middy/core");
 const lib = require('lib');
 
+const cors = require('@middy/http-cors');
+
 const options = {
     region: "localhost",
     endpoint: "http://dynamodb:8000",
@@ -82,7 +84,7 @@ const baseHandlerCountryType=async (event,context)=> {
 }
 
 
-exports.handlerCountryType= middy(baseHandlerCountryType).onError(async (req) => {
+exports.handlerCountryType= middy(baseHandlerCountryType).use(cors()).onError(async (req) => {
 
 
     if (req.error) {
