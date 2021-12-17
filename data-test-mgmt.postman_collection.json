@@ -1,0 +1,544 @@
+{
+	"info": {
+		"_postman_id": "f3c4c3f7-7cc1-49dc-a2d4-52595083f5d4",
+		"name": "data-test-mgmt",
+		"description": "#### Create item \n\nType of items\n\n- BASIC_CREDENTIASL\n\n- OAUTH_CLIENT_CREDENTIALS\n\n- MSISDN\n\n- TOKEN",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "apigateway",
+			"item": [
+				{
+					"name": "CreateItem",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"backofficeco\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"msisdn\":\"571345543122\"\n    },\n    \"planName\":\"PRE_PAGO\",\n    \"conditions\":[\"SIN_SALDO\"],\n    \"typeItem\":\"MSISDN\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://dnxdcc3yzg.execute-api.us-east-1.amazonaws.com/prod/items",
+							"protocol": "https",
+							"host": [
+								"dnxdcc3yzg",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"prod",
+								"items"
+							]
+						},
+						"description": "Required attributes \n \n - **resourceGroup**\n - **backendName**\n - **country**\n - **type**\n - **data**\n\n#### Create an item for a basic_credentials\n\n```json\n{\n    \"resourceGroup\":\"AMAZON_PRIME\",\n    \"backendName\":\"FOX\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"user\":\"user1\",\n        \"pass\":\"pass1\"\n    },\n    \"typeItem\":\"BASIC_CREDENTIALS\"\n}\n```\n\n#### Create an item for a oauth_client_credentials type\n\n```json\n{\n    \"resourceGroup\":\"AMAZON_PRIME\",\n    \"backendName\":\"CINEMAX\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"clientId\":\"xxx3434mnnndfd\",\n        \"clientSecret\":\"xxx344434234\"\n    },\n    \"typeItem\":\"OAUTH_CLIENT_CREDENTIALS\"\n}\n```\n\n#### Create an item for msisdn type\n\n```json\n{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"backofficeco\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"msisdn\":\"571345543122\"\n    },\n    \"planName\":\"PRE_PAGO\",\n    \"conditions\":[\"SIN_SALDO\"],\n    \"typeItem\":\"MSISDN\"\n}\n```\n\n#### Create an item for token type\n\n```json\n{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"ESPN\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"token\":\"bffgfgfdg-3433fdfdsfs-bvbfdgfgadsada\"\n    },\n\n    \"typeItem\":\"TOKEN\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "CreateItemForOauthClientCredentials",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"backofficeco\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"msisdn\":\"571345543122\"\n    },\n    \"planName\":\"PRE_PAGO\",\n    \"conditions\":[\"SIN_SALDO\"],\n    \"typeItem\":\"MSISDN\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://dnxdcc3yzg.execute-api.us-east-1.amazonaws.com/prod/items",
+							"protocol": "https",
+							"host": [
+								"dnxdcc3yzg",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"prod",
+								"items"
+							]
+						},
+						"description": "Required attributes \n \n - **resourceGroup**\n - **backendName**\n - **country**\n - **type**\n - **data**\n\n#### Create an item for a basic_credentials\n\n```json\n{\n    \"resourceGroup\":\"AMAZON_PRIME\",\n    \"backendName\":\"FOX\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"user\":\"user1\",\n        \"pass\":\"pass1\"\n    },\n    \"typeItem\":\"BASIC_CREDENTIALS\"\n}\n```\n\n#### Create an item for a oauth_client_credentials type\n\n```json\n{\n    \"resourceGroup\":\"AMAZON_PRIME\",\n    \"backendName\":\"CINEMAX\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"clientId\":\"xxx3434mnnndfd\",\n        \"clientSecret\":\"xxx344434234\"\n    },\n    \"typeItem\":\"OAUTH_CLIENT_CREDENTIALS\"\n}\n```\n\n#### Create an item for msisdn type\n\n```json\n{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"backofficeco\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"msisdn\":\"571345543122\"\n    },\n    \"planName\":\"PRE_PAGO\",\n    \"conditions\":[\"SIN_SALDO\"],\n    \"typeItem\":\"MSISDN\"\n}\n```\n\n#### Create an item for token type\n\n```json\n{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"ESPN\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"token\":\"bffgfgfdg-3433fdfdsfs-bvbfdgfgadsada\"\n    },\n\n    \"typeItem\":\"TOKEN\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "CreateItemForMsisdn",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"backofficeco\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"msisdn\":\"571345543122\"\n    },\n    \"planName\":\"PRE_PAGO\",\n    \"conditions\":[\"SIN_SALDO\"],\n    \"typeItem\":\"MSISDN\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://dnxdcc3yzg.execute-api.us-east-1.amazonaws.com/prod/items",
+							"protocol": "https",
+							"host": [
+								"dnxdcc3yzg",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"prod",
+								"items"
+							]
+						},
+						"description": "Required attributes \n \n - **resourceGroup**\n - **backendName**\n - **country**\n - **type**\n - **data**\n\n#### Create an item for a basic_credentials\n\n```json\n{\n    \"resourceGroup\":\"AMAZON_PRIME\",\n    \"backendName\":\"FOX\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"user\":\"user1\",\n        \"pass\":\"pass1\"\n    },\n    \"typeItem\":\"BASIC_CREDENTIALS\"\n}\n```\n\n#### Create an item for a oauth_client_credentials type\n\n```json\n{\n    \"resourceGroup\":\"AMAZON_PRIME\",\n    \"backendName\":\"CINEMAX\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"clientId\":\"xxx3434mnnndfd\",\n        \"clientSecret\":\"xxx344434234\"\n    },\n    \"typeItem\":\"OAUTH_CLIENT_CREDENTIALS\"\n}\n```\n\n#### Create an item for msisdn type\n\n```json\n{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"backofficeco\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"msisdn\":\"571345543122\"\n    },\n    \"planName\":\"PRE_PAGO\",\n    \"conditions\":[\"SIN_SALDO\"],\n    \"typeItem\":\"MSISDN\"\n}\n```\n\n#### Create an item for token type\n\n```json\n{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"ESPN\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"token\":\"bffgfgfdg-3433fdfdsfs-bvbfdgfgadsada\"\n    },\n\n    \"typeItem\":\"TOKEN\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "CreateItemForToken",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"backofficeco\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"msisdn\":\"571345543122\"\n    },\n    \"planName\":\"PRE_PAGO\",\n    \"conditions\":[\"SIN_SALDO\"],\n    \"typeItem\":\"MSISDN\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://dnxdcc3yzg.execute-api.us-east-1.amazonaws.com/prod/items",
+							"protocol": "https",
+							"host": [
+								"dnxdcc3yzg",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"prod",
+								"items"
+							]
+						},
+						"description": "Required attributes \n \n - **resourceGroup**\n - **backendName**\n - **country**\n - **type**\n - **data**\n\n#### Create an item for a basic_credentials\n\n```json\n{\n    \"resourceGroup\":\"AMAZON_PRIME\",\n    \"backendName\":\"FOX\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"user\":\"user1\",\n        \"pass\":\"pass1\"\n    },\n    \"typeItem\":\"BASIC_CREDENTIALS\"\n}\n```\n\n#### Create an item for a oauth_client_credentials type\n\n```json\n{\n    \"resourceGroup\":\"AMAZON_PRIME\",\n    \"backendName\":\"CINEMAX\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"clientId\":\"xxx3434mnnndfd\",\n        \"clientSecret\":\"xxx344434234\"\n    },\n    \"typeItem\":\"OAUTH_CLIENT_CREDENTIALS\"\n}\n```\n\n#### Create an item for msisdn type\n\n```json\n{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"backofficeco\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"msisdn\":\"571345543122\"\n    },\n    \"planName\":\"PRE_PAGO\",\n    \"conditions\":[\"SIN_SALDO\"],\n    \"typeItem\":\"MSISDN\"\n}\n```\n\n#### Create an item for token type\n\n```json\n{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"ESPN\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"token\":\"bffgfgfdg-3433fdfdsfs-bvbfdgfgadsada\"\n    },\n\n    \"typeItem\":\"TOKEN\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "CreateItemForBasicCredentials",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"resourceGroup\":\"MI-APP\",\n    \"backendName\":\"BEIN\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"user\":\"user1\",\n        \"pass\":\"pass2\"\n    },\n    \"typeItem\":\"BASIC_CREDENTIALS\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://dnxdcc3yzg.execute-api.us-east-1.amazonaws.com/prod/items",
+							"protocol": "https",
+							"host": [
+								"dnxdcc3yzg",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"prod",
+								"items"
+							]
+						},
+						"description": "Required attributes \n \n - **resourceGroup**\n - **backendName**\n - **country**\n - **type**\n - **data**\n\n#### Create an item for a basic_credentials\n\n```json\n{\n    \"resourceGroup\":\"AMAZON_PRIME\",\n    \"backendName\":\"FOX\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"user\":\"user1\",\n        \"pass\":\"pass1\"\n    },\n    \"typeItem\":\"BASIC_CREDENTIALS\"\n}\n```\n\n#### Create an item for a oauth_client_credentials type\n\n```json\n{\n    \"resourceGroup\":\"AMAZON_PRIME\",\n    \"backendName\":\"CINEMAX\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"clientId\":\"xxx3434mnnndfd\",\n        \"clientSecret\":\"xxx344434234\"\n    },\n    \"typeItem\":\"OAUTH_CLIENT_CREDENTIALS\"\n}\n```\n\n#### Create an item for msisdn type\n\n```json\n{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"backofficeco\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"msisdn\":\"571345543122\"\n    },\n    \"planName\":\"PRE_PAGO\",\n    \"conditions\":[\"SIN_SALDO\"],\n    \"typeItem\":\"MSISDN\"\n}\n```\n\n#### Create an item for token type\n\n```json\n{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"ESPN\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"token\":\"bffgfgfdg-3433fdfdsfs-bvbfdgfgadsada\"\n    },\n\n    \"typeItem\":\"TOKEN\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "SearchItemByPk",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"pk\":\"#CO#MSISDN#MI_tienda#backofficeco#cbb1efe963\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://dnxdcc3yzg.execute-api.us-east-1.amazonaws.com/prod/items/items/search",
+							"protocol": "https",
+							"host": [
+								"dnxdcc3yzg",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"prod",
+								"items",
+								"items",
+								"search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObtainItemByCountryAndTypeItem",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://dnxdcc3yzg.execute-api.us-east-1.amazonaws.com/prod/items/query/co/msisdn",
+							"protocol": "https",
+							"host": [
+								"dnxdcc3yzg",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"prod",
+								"items",
+								"query",
+								"co",
+								"msisdn"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateItem",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"pk\":\"#CO#TOKEN#Mi-App#backofficeco#8d860685ef\",\n    \"data\":{\n        \"token\":\"baaa-asff-dddadda-bbbaa\"\n    }\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://dnxdcc3yzg.execute-api.us-east-1.amazonaws.com/test/items",
+							"protocol": "https",
+							"host": [
+								"dnxdcc3yzg",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"test",
+								"items"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CreateItem",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"ESPN\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"token\":\"bffgfgfdg-3433fdfdsfs-bvbfdgfgadsada\"\n    },\n\n    \"typeItem\":\"TOKEN\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3000/items",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3000",
+					"path": [
+						"items"
+					]
+				},
+				"description": "Required attributes \n \n - **resourceGroup**\n - **backendName**\n - **country**\n - **type**\n - **data**\n\n#### Create an item for a basic_credentials\n\n```json\n{\n    \"resourceGroup\":\"AMAZON_PRIME\",\n    \"backendName\":\"FOX\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"user\":\"user1\",\n        \"pass\":\"pass1\"\n    },\n    \"typeItem\":\"BASIC_CREDENTIALS\"\n}\n```\n\n#### Create an item for a oauth_client_credentials type\n\n```json\n{\n    \"resourceGroup\":\"AMAZON_PRIME\",\n    \"backendName\":\"CINEMAX\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"clientId\":\"xxx3434mnnndfd\",\n        \"clientSecret\":\"xxx344434234\"\n    },\n    \"typeItem\":\"OAUTH_CLIENT_CREDENTIALS\"\n}\n```\n\n#### Create an item for msisdn type\n\n```json\n{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"backofficeco\",\n    \"country\":\"CO\",\n    \"data\":{\n        \"msisdn\":\"571345543122\"\n    },\n    \"planName\":\"PRE_PAGO\",\n    \"conditions\":[\"SIN_SALDO\"],\n    \"typeItem\":\"MSISDN\"\n}\n```\n\n#### Create an item for token type\n\n```json\n{\n    \"resourceGroup\":\"MI_tienda\",\n    \"backendName\":\"ESPN\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"token\":\"bffgfgfdg-3433fdfdsfs-bvbfdgfgadsada\"\n    },\n\n    \"typeItem\":\"TOKEN\"\n}\n```"
+			},
+			"response": [
+				{
+					"name": "Add Item of OAUTH_CLIENT_CREDENTIALS",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"resourceGroup\":\"AMAZON_PRIME\",\n    \"backendName\":\"FOX\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"user\":\"user1\",\n        \"pass\":\"pass1\"\n    },\n    \"type\":\"BASIC_CREDENTIALS\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:3000/items",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"items"
+							]
+						}
+					},
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": null
+				},
+				{
+					"name": "ADD ITEM OF BASIC_CREDENTIALS",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"resourceGroup\":\"AMAZON_PRIME\",\n    \"backendName\":\"FOX\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"user\":\"user1\",\n        \"pass\":\"pass1\"\n    },\n    \"type\":\"BASIC_CREDENTIALS\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:3000/items",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"items"
+							]
+						}
+					},
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "ObtainItemByCountryAndTypeItem",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"resourceGroup\":\"AMAZON_PRIME\",\n    \"backendName\":\"FOX\",\n    \"country\":\"BO\",\n    \"data\":{\n        \"user\":\"user1\",\n        \"pass\":\"pass1\"\n    },\n    \"type\":\"BASIC_CREDENTIALS\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3000/items/query/bo/token",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3000",
+					"path": [
+						"items",
+						"query",
+						"bo",
+						"token"
+					]
+				},
+				"description": "### Search by country and itemType\n\nUrl: \n/items/query/{country}/{itemType}"
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateItem",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"pk\":\"#PY#BASIC_CREDENTIALS#AMAZON_PRIME#FOX#939259bb09\",\n    \"data\":{\n        \"user\":\"new-user-user-new1-21222\",\n        \"pass\":\"new-pass-user-new2-21222\"\n    }\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3000/items",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3000",
+					"path": [
+						"items"
+					]
+				},
+				"description": "### Update Item\n\n\nrequired attributes \n  - **pk** \n  - **data**\n \n#### Update data attribute \n\n```json\n{\n\n    \"pk\":\"#PY#BASIC_CREDENTIALS#AMAZON_PRIME#FOX#939259bb09\",\n    \"data\":{\n        \"user\":\"new-user-user-new1-21222\",\n        \"pass\":\"new-pass-user-new2-21222\"\n    }\n    \n}\n```\n\n#### Update MSISDN type \n\n```json\n{\n\n    \"pk\":\"#CO#MSISDN#MI_tienda#backofficeco#77a446c72c\",\n    \"data\":{\n        \"msisdn\":\"571230434545465\"\n    },\n    \"planName\":\"POST_PAGO\"\n}\n```"
+			},
+			"response": []
+		},
+		{
+			"name": "ObtainItemByCountryAndTypeItemWithFilterQueryParams",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:3000/items/query/bo/basic_credentials?resourceGroup=amazon_prime&backendName=fox",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3000",
+					"path": [
+						"items",
+						"query",
+						"bo",
+						"basic_credentials"
+					],
+					"query": [
+						{
+							"key": "resourceGroup",
+							"value": "amazon_prime"
+						},
+						{
+							"key": "backendName",
+							"value": "fox"
+						}
+					]
+				},
+				"description": "Filter by QueryParams"
+			},
+			"response": []
+		},
+		{
+			"name": "SearchItemByPk",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"pk\":\"#BO#TOKEN#MI_tienda#ESPN#ce34421adc\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3000/items/search",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3000",
+					"path": [
+						"items",
+						"search"
+					]
+				},
+				"description": "#### Search item by PK\n\n\n```json\n\n{\n    \"pk\":\"#BO#BASIC_CREDENTIALS#AMAZON_PRIME#FOX#29a70b6e4a\"\n}\n\n```"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
