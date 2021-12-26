@@ -33,11 +33,14 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'insert.handler',
             environment: {
-                "ISLOCAL": "false"
+                "ISLOCAL": "false",
+                "arnKms":process.env.arnKms!!,
+                "arnKmsAlias":process.env.arnKmsAlias!!
             },
             timeout: cdk.Duration.minutes(1),
             code: lambda.Code.fromAsset(path.join(__dirname, '..', 'dynamo-items')),
         });
+
 
         const dynamoUpdateItem = new lambda.Function(this, 'dynamo-lambda-update-function', {
             runtime: lambda.Runtime.NODEJS_14_X,
@@ -88,7 +91,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             timeout: cdk.Duration.minutes(1),
             code: lambda.Code.fromAsset(path.join(__dirname, '..', 'dynamo-items')),
             environment: {
-                "ISLOCAL": "false"
+                "ISLOCAL": "false",
+                "arnKms":process.env.arnKms!!,
+                "arnKmsAlias":process.env.arnKmsAlias!!
             }
         });
 

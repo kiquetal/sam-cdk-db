@@ -1,7 +1,7 @@
 const middy = require("@middy/core");
 const AWS = require("aws-sdk");
 const cors = require('@middy/http-cors');
-
+const utilEncrypt = require('./util');
 const  jsonBodyParser = require('@middy/http-json-body-parser');
 const lib = require("lib");
 const options = {
@@ -28,6 +28,7 @@ const baseSearchHandler = async(event,context) => {
         });
 
         console.log(JSON.stringify(resp));
+
         if (resp && !resp.hasOwnProperty("Item"))
         {
             return {
@@ -42,6 +43,12 @@ const baseSearchHandler = async(event,context) => {
                 })
             };
         }
+        if (resp.Item.hasOwnProperty("enc"))
+        {
+            resp.Item.data = JSON.parse(await utilEncrypt.decrypt(resp.Item.data));
+
+        }
+
         return {
                 'headers': {
                     'Content-Type': 'application/json'

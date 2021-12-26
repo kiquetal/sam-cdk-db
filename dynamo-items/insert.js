@@ -11,6 +11,7 @@ const  jsonBodyParser = require('@middy/http-json-body-parser');
 const httpError = require('@middy/http-error-handler');
 const lib = require('lib');
 
+const utilEncrypt = require('./util');
 const cors = require('@middy/http-cors');
 const options = {
         region: "localhost",
@@ -19,6 +20,8 @@ const options = {
         accessKeyId: 'asdsd'
     };
 
+
+const crypto = require('@aws-crypto/client-node');
 
 /**
  *
@@ -46,9 +49,10 @@ const baseHandler = async (event, context) => {
 
         if (enc)
         {
-            //symmetric encrypt and base64
 
+            rest["enc"]="true";
         }
+        console.log(JSON.stringify(rest));
 
         const id= nano.customAlphabet("1234567890abcdef",10)();
         const pk=`#${country}#${typeItem}#${resourceGroup}#${backendName}#${id}`;
@@ -91,6 +95,15 @@ const baseHandler = async (event, context) => {
 
 
         }
+        if (enc)
+        {
+
+            const encrypt = await utilEncrypt.encrypt(data);
+
+            params.Item["data"]=encrypt;
+        }
+
+        else
         params.Item["data"]=dataValue;
 
         let dynamoResponse = await db.put(params).promise();

@@ -64,6 +64,7 @@ const baseHandlerCountryType=async (event,context)=> {
     try {
 
         let dynamoResponse = await db.query(params).promise();
+        console.log(JSON.stringify(dynamoResponse));
         return {
             'headers': {
                 'Content-Type': 'application/json'
