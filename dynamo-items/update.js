@@ -89,6 +89,11 @@ const handlerUpdate = async (event, context) => {
             }
             else {
                 console.log("data was no encrypted");
+
+                if (rest.hasOwnProperty("enc"))
+                {
+                    delete rest["enc"];
+                }
             }
 
             Object.entries(rest).forEach(([key, item]) => {

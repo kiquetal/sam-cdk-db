@@ -84,7 +84,6 @@ const baseHandler = async (event, context) => {
             case "OAUTH_CLIENT_CREDENTIALS":
                 dataValue = data
                 dataToClient="*"
-
                 break;
             case "MSISDN":
                 dataValue = data;
@@ -98,14 +97,19 @@ const baseHandler = async (event, context) => {
         if (enc)
         {
 
+            console.log("for enc");
             const encrypt = await utilEncrypt.encrypt(data);
 
             params.Item["data"]=encrypt;
         }
 
         else
-        params.Item["data"]=dataValue;
+        {
 
+            params.Item["data"] = dataValue;
+        }
+
+        console.log(JSON.stringify(params));
         let dynamoResponse = await db.put(params).promise();
      //   let insertIndex = insertIndexDb(id,pk,db);
 
