@@ -10,6 +10,7 @@ const AWS = require("aws-sdk");
 const lib = require('lib');
 const dayjs = require("dayjs");
 const cors = require('@middy/http-cors');
+const utilEncrypt = require('./util');
 
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -72,6 +73,24 @@ const handlerUpdate = async (event, context) => {
             }
 
             rest["updatedTime"] = dayjs.utc().unix();
+
+
+            if (resp.Item.hasOwnProperty("enc"))
+            {
+                console.log("logic update encrypt data");
+
+                if (rest["enc"])
+                {
+                    console.log("you cannot update enc attribute");
+                    delete rest["enc"];
+                }
+                rest["data"]= await utilEncrypt.encrypt(rest["data"]);
+
+            }
+            else {
+                console.log("data was no encrypted");
+            }
+
             Object.entries(rest).forEach(([key, item]) => {
                 expressionUpdate.UpdateExpression += ` #${key} = :${key},`;
                 expressionUpdate.ExpressionAttributeNames[`#${key}`] = key;
