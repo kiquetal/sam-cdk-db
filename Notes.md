@@ -120,7 +120,7 @@ Each value must be unique within the set.
 Order of values is not preserved.
 Empty binary set is not supported.
 
-### Create Secondar global indexes
+### Create Secondary global indexes
 
 aws dynamodb update-table \
    --table-name AccountsCollection \
@@ -183,4 +183,4 @@ aws dynamodb update-table \
 
 ## Eager container
 
-sam-beta-cdk local start-api --docker-network lambda-local --warm-containers EAGER
+sam-beta-cdk local start-api --docker-network lambda-local --warm-containers EAGER -n env.json
