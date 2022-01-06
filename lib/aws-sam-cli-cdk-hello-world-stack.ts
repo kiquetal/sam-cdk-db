@@ -4,7 +4,8 @@ import * as lambda from '@aws-cdk/aws-lambda';
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as apigateway from '@aws-cdk/aws-apigateway';
 import * as path from 'path';
-
+import * as s3 from '@aws-cdk/aws-s3';
+import * as s3Deployment from '@aws-cdk/aws-s3-deployment'
 export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
@@ -132,6 +133,15 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         countryAndTypeResource.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetCountryType))
         itemSubResources.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetItem))
         searchResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoSearchItem));
+
+
+
+        const myBucket = new s3.Bucket(this, "static-web-data-test", {
+            publicReadAccess: true,
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+            websiteIndexDocument: "index.html"
+        });
+
 
     }
 

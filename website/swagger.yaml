@@ -1,0 +1,355 @@
+openapi: "3.0.0"
+info:
+  description: "Data Test Mgmt"
+  version: "1.0.0"
+  title: "Data test Mgmt"
+  contact:
+    email: "enrique.melgarejo@edge.com.py"
+servers: 
+  - url: https://dnxdcc3yzg.execute-api.us-east-1.amazonaws.com/test
+    description: AWS API-GATEWAY
+
+    
+paths:
+  /items:
+    post:
+      summary: "Add a new item"
+      description: ""
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+              - $ref: "#/components/schemas/Token"
+              - $ref: '#/components/schemas/BasicCredentials'
+              - $ref: '#/components/schemas/OauthClientCredentiaLs'
+              - $ref: '#/components/schemas/Msisdn'
+              discriminator:
+                propertyName: typeItem
+      responses:
+        "201":
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        
+    put:
+      summary: "Update and existing item"
+      description: "OK"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+             $ref: "#/components/schemas/PutSchema"
+      responses:
+        "200":
+          description: "Successfully updated"
+          content:
+            application/json:
+              schema:
+                $ref : '#/components/schemas/PutResponse'
+        "404":
+          description: NOT FOUND
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PutNotFound'
+  
+  /items/query/{country}/{itemType}:
+    get:
+      summary: 'Return item by country and itemType'
+      parameters: 
+        - name : "country"
+          in: "path"
+          required: true
+          example: "co"
+          schema:
+            type: string
+        - name: "itemType"
+          in: "path"
+          required: true
+          example: "token"
+          schema:
+            type: string
+            
+        - name: "resourceGroup"
+          in: "query"
+          example: mitigo
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "List of items"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListItems'
+                
+  /items/search:
+    post:
+      summary: 'Search item'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchBody"
+      responses:
+        "200":
+          description: "Return object"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  typeItem:
+                    type: string
+                    example: "BASIC_CREDENTIALS"
+                  createdDate:
+                    type: number
+                    example: 1639679066
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        type: string
+                        example: user-1
+                      pass:
+                        type: string
+                        example: user-2
+                  backendName:
+                    type: string
+                    example: "backofficeco"
+                  pk:
+                    type: string
+                    example: "#CO#BASIC_CREDENTIALS#Mi-App#backofficeco#4f9dc21e64"
+                  country:
+                    type: string
+                    example: CO
+                  resourceGroup:
+                    type: string
+                    example: Mi-App
+
+          
+          
+components:
+  schemas:
+    Item:
+      type: "object"
+      properties:
+        resourceGroup:
+          type: "string"
+          example: MI-TIGO
+        typeItem:
+          type: string
+        country:
+          type: "string"
+          example: CO
+        backendName:
+          type: "string"
+          example: FOX
+      required:
+          - typeItem
+          - resourceGroup
+          - country
+          - backendName
+      discriminator:
+        propertyName: typeItem
+        
+    Token:
+      allOf:
+        - $ref: "#/components/schemas/Item"
+        - type: object
+          properties:
+            typeItem:
+              type: string
+              example: TOKEN
+            data:
+              type: object
+              properties:
+                token:
+                  type: string
+                  example: ffaaa3445-ffdggfgfd-34342342-xafdfdsfmN
+          required:
+            - data
+                
+                
+    BasicCredentials:
+      allOf:
+        - $ref: "#/components/schemas/Item"
+        - type: object
+          properties:
+            typeItem:
+              type: string
+              example: BASIC_CREDENTIALS
+            data:
+              type: object
+              properties:
+                user:
+                  type: string
+                pass:
+                  type: string
+  
+    OauthClientCredentiaLs:
+      allOf:
+        - $ref: "#/components/schemas/Item"
+        - type: object
+          properties:
+            typeItem:
+              type: string
+              example: OAUTH_CLIENT_CREDENTIALS
+            data:
+              type: object
+              properties:
+                clientId:
+                  type: "string"
+                  example: "4311123-232331-3213213"
+                clientSecret:
+                  type: "string"
+                  example: "b4333-33444343-343424242"
+                  
+                  
+    Msisdn:
+      allOf:
+        - $ref: "#/components/schemas/Item"
+        - type: object
+          properties:
+            typeItem:
+              type: string
+              example: MSISDN
+            data:
+              type: object
+              properties:
+                msisdn:
+                  type: string
+                  example: 57332432423
+            planName:
+              type: string
+              example: PRE_PAGO
+            conditions:
+              type: array
+              items:
+                type: string
+                example: "SIN_SALDO"
+                  
+    PutSchema:
+      type: object
+      properties:
+        pk:
+          type: string
+          example: "#CO#BASIC_CREDENTIALS#Mi-App#backofficeco#8d860685ef"
+        data:
+          type: object
+          properties:
+            user:
+              type: string
+              example: user-1
+            pass:
+              type: string
+              example: pass-1
+        newAttribute:
+          type: string
+          example: sold
+      required:
+        - pk
+      
+    PutResponse:
+      type: object
+      properties:
+        typeItem:
+          type: string
+          example: BASIC_CREDENTIALS
+        createdDate:
+          type: number
+          example: 1639678496
+        data:
+          type: object
+          properties:
+            user:
+              type: string
+              example: new-user
+            pass:
+              type: string
+              example: new password
+        backendName:
+          type: string
+          example: backofficeco
+        pk:
+          type: string
+          example: "#CO#BASIC_CREDENTIALS#Mi-App#backofficeco#8d860685ef"
+        updatedTime:
+          type: number
+          example: 1639704458
+        country:  
+          type: string
+          example: CO
+        resourceGroup:
+          type: string
+          example: MI_TIENDA
+        newAttribute:
+          type: string
+          example: sold
+          
+    PutNotFound:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Item not found
+              
+    ListItems:
+      type: object
+      properties:
+        Items:
+          type: array
+          items:
+            type: object
+            properties:
+              itemType:
+                type: string
+                example: TOKEN
+              createdDate:
+                type: number
+                example: 1639693386
+              data:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "ffaaa3445-ffdggfgfd-34342342-xafdfdsfmN"
+              backendName:
+                type: string
+                example: FOX
+              pk:
+                type: string
+                example: "#CO#TOKEN#MI-TIGO#FOX#9c0fc448b3"
+              country:
+                type: string
+                example: "CO"
+              resourceGroup:
+                type: string
+                example: "MI-TIGO"
+                
+  
+                
+    SearchBody:
+      type: object
+      properties:
+        pk:
+          type: string
+          example: "#CO#TOKEN#MI-TIGO#FOX#9c0fc448b3"
+      required:
+        - pk
+
+    ItemResponse:
+      type: object
+      properties:
+        pk:
+          type: string
+          example: "#BO#BASIC_CREDENTIALS#Mi-App#backofficeco#741f583a89"

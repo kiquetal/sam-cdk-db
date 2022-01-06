@@ -1,3 +1,4 @@
 node_modules
 cdk.out
 .aws-sam
+.secret
