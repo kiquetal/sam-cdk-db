@@ -43,7 +43,7 @@ const inputSchema = {
                 pk: {type: 'string'},
                 data: {type: 'object'}
             },
-            required: ['pk', 'data'] // Insert here all required event properties
+            required: ['pk'] // Insert here all required event properties
         }
     }
 }
