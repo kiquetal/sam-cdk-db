@@ -30,6 +30,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             projectionType: dynamodb.ProjectionType.ALL,
         })
 
+
         const dynamoInsertItem = new lambda.Function(this, 'dynamo-lambda-insert-function', {
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'insert.handler',

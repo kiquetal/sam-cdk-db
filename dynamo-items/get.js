@@ -55,24 +55,21 @@ const baseHandlerCountryType=async (event,context)=> {
             params.ExpressionAttributeValues[`:${key}`] = `${item}`
             params['FilterExpression'] += `${key} = :${key} AND `
         });
-
         params['FilterExpression'] = params['FilterExpression'].slice(0, -4);
 
     }
-
+    console.log("test this")
     console.log(JSON.stringify(params));
     try {
 
         let dynamoResponse = await db.query(params).promise();
-        console.log(JSON.stringify(dynamoResponse));
+        let items = dynamoResponse["Items"]
         return {
             'headers': {
                 'Content-Type': 'application/json'
             },
             'statusCode': 200,
-            'body': JSON.stringify({
-                ...dynamoResponse
-            })
+            'body': JSON.stringify(items)
         };
     } catch (err) {
 

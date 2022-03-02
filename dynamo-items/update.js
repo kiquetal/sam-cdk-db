@@ -63,8 +63,8 @@ const handlerUpdate = async (event, context) => {
                 'country': lib.obtainCountry(pk)
             }
         });
+;
         if (resp.hasOwnProperty('Item')) {
-
 
             let expressionUpdate = {
                 UpdateExpression: 'set ',
@@ -73,30 +73,25 @@ const handlerUpdate = async (event, context) => {
             }
 
             rest["updatedTime"] = dayjs.utc().unix();
-
-
             if (resp.Item.hasOwnProperty("enc"))
             {
-                console.log("logic update encrypt data");
-
-                if (rest["enc"])
-                {
-                    console.log("you cannot update enc attribute");
-                    delete rest["enc"];
-                }
-                rest["data"]= await utilEncrypt.encrypt(rest["data"]);
-
+                console.log("data was encrypted");
             }
             else {
                 console.log("data was no encrypted");
+                    if (rest["enc"]!="true")
+                        delete rest["enc"];
 
-                if (rest.hasOwnProperty("enc"))
-                {
-                    delete rest["enc"];
-                }
+                    else {
+                        console.log("going to encrypt");
+                        if (rest.hasOwnProperty("data"))
+                        rest["data"]=await encryptData(rest["data"]);
+
+                    }
+
             }
 
-            Object.entries(rest).forEach(([key, item]) => {
+                Object.entries(rest).forEach(([key, item]) => {
                 expressionUpdate.UpdateExpression += ` #${key} = :${key},`;
                 expressionUpdate.ExpressionAttributeNames[`#${key}`] = key;
                 expressionUpdate.ExpressionAttributeValues[`:${key}`] = item;
@@ -149,6 +144,12 @@ const handlerUpdate = async (event, context) => {
 
     }
 };
+
+const encryptData = async (data) => {
+
+    return await utilEncrypt.encrypt(data);
+}
+
 exports.handler = middy(handlerUpdate).use(jsonBodyParser()).use(validator({inputSchema})).use(cors()).onError(async (req) => {
 
 

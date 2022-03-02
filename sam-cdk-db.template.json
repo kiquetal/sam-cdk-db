@@ -1,0 +1,2497 @@
+{
+  "Resources": {
+    "AccountsCollection39D971E6": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "KeySchema": [
+          {
+            "AttributeName": "pk",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "country",
+            "KeyType": "RANGE"
+          }
+        ],
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "pk",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "country",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "typeItem",
+            "AttributeType": "S"
+          }
+        ],
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "TypeItemCountryIndex",
+            "KeySchema": [
+              {
+                "AttributeName": "country",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "typeItem",
+                "KeyType": "RANGE"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            },
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": 5,
+              "WriteCapacityUnits": 5
+            }
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5
+        },
+        "TableName": "AccountsCollection"
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/AccountsCollection/Resource"
+      }
+    },
+    "dynamolambdainsertfunctionServiceRoleF7D1229C": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-insert-function/ServiceRole/Resource"
+      }
+    },
+    "dynamolambdainsertfunctionServiceRoleDefaultPolicyFB5A3F30": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "AccountsCollection39D971E6",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "AccountsCollection39D971E6",
+                          "Arn"
+                        ]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "dynamolambdainsertfunctionServiceRoleDefaultPolicyFB5A3F30",
+        "Roles": [
+          {
+            "Ref": "dynamolambdainsertfunctionServiceRoleF7D1229C"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-insert-function/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "dynamolambdainsertfunction538236B5": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3BucketD60E1F1E"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3VersionKey9D592B61"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3VersionKey9D592B61"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "dynamolambdainsertfunctionServiceRoleF7D1229C",
+            "Arn"
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "ISLOCAL": "false",
+            "arnKms": "arn:aws:kms:us-east-1:825460165214:key/13ec15b1-3bdf-4046-af6d-d814aa9663cb",
+            "arnKmsAlias": "arn:aws:kms:us-east-1:825460165214:alias/keyForMgmt"
+          }
+        },
+        "Handler": "insert.handler",
+        "Runtime": "nodejs14.x",
+        "Timeout": 60
+      },
+      "DependsOn": [
+        "dynamolambdainsertfunctionServiceRoleDefaultPolicyFB5A3F30",
+        "dynamolambdainsertfunctionServiceRoleF7D1229C"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-insert-function/Resource",
+        "aws:asset:path": "asset.033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1",
+        "aws:asset:property": "Code"
+      }
+    },
+    "dynamolambdaupdatefunctionServiceRoleCA598577": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-update-function/ServiceRole/Resource"
+      }
+    },
+    "dynamolambdaupdatefunctionServiceRoleDefaultPolicyCC6F0437": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "AccountsCollection39D971E6",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "AccountsCollection39D971E6",
+                          "Arn"
+                        ]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "dynamolambdaupdatefunctionServiceRoleDefaultPolicyCC6F0437",
+        "Roles": [
+          {
+            "Ref": "dynamolambdaupdatefunctionServiceRoleCA598577"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-update-function/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "dynamolambdaupdatefunction19DC06E2": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3BucketD60E1F1E"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3VersionKey9D592B61"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3VersionKey9D592B61"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "dynamolambdaupdatefunctionServiceRoleCA598577",
+            "Arn"
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "ISLOCAL": "false",
+            "arnKms": "arn:aws:kms:us-east-1:825460165214:key/13ec15b1-3bdf-4046-af6d-d814aa9663cb",
+            "arnKmsAlias": "arn:aws:kms:us-east-1:825460165214:alias/keyForMgmt"
+          }
+        },
+        "Handler": "update.handler",
+        "Runtime": "nodejs14.x",
+        "Timeout": 60
+      },
+      "DependsOn": [
+        "dynamolambdaupdatefunctionServiceRoleDefaultPolicyCC6F0437",
+        "dynamolambdaupdatefunctionServiceRoleCA598577"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-update-function/Resource",
+        "aws:asset:path": "asset.033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1",
+        "aws:asset:property": "Code"
+      }
+    },
+    "dynamolambdagetfunctionServiceRole3B5B74E9": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-get-function/ServiceRole/Resource"
+      }
+    },
+    "dynamolambdagetfunctionServiceRoleDefaultPolicyEA9B0346": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "AccountsCollection39D971E6",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "AccountsCollection39D971E6",
+                          "Arn"
+                        ]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "dynamolambdagetfunctionServiceRoleDefaultPolicyEA9B0346",
+        "Roles": [
+          {
+            "Ref": "dynamolambdagetfunctionServiceRole3B5B74E9"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-get-function/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "dynamolambdagetfunction42988B1A": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3BucketD60E1F1E"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3VersionKey9D592B61"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3VersionKey9D592B61"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "dynamolambdagetfunctionServiceRole3B5B74E9",
+            "Arn"
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "ISLOCAL": "false"
+          }
+        },
+        "Handler": "get.handler",
+        "Runtime": "nodejs14.x",
+        "Timeout": 60
+      },
+      "DependsOn": [
+        "dynamolambdagetfunctionServiceRoleDefaultPolicyEA9B0346",
+        "dynamolambdagetfunctionServiceRole3B5B74E9"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-get-function/Resource",
+        "aws:asset:path": "asset.033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1",
+        "aws:asset:property": "Code"
+      }
+    },
+    "dynamolambdagetbycountrytypefunctionServiceRole9121470B": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-get-by-country-type-function/ServiceRole/Resource"
+      }
+    },
+    "dynamolambdagetbycountrytypefunctionServiceRoleDefaultPolicyB292AE14": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "AccountsCollection39D971E6",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "AccountsCollection39D971E6",
+                          "Arn"
+                        ]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "dynamolambdagetbycountrytypefunctionServiceRoleDefaultPolicyB292AE14",
+        "Roles": [
+          {
+            "Ref": "dynamolambdagetbycountrytypefunctionServiceRole9121470B"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-get-by-country-type-function/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "dynamolambdagetbycountrytypefunctionA11F172D": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3BucketD60E1F1E"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3VersionKey9D592B61"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3VersionKey9D592B61"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "dynamolambdagetbycountrytypefunctionServiceRole9121470B",
+            "Arn"
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "ISLOCAL": "false"
+          }
+        },
+        "Handler": "get.handlerCountryType",
+        "Runtime": "nodejs14.x",
+        "Timeout": 60
+      },
+      "DependsOn": [
+        "dynamolambdagetbycountrytypefunctionServiceRoleDefaultPolicyB292AE14",
+        "dynamolambdagetbycountrytypefunctionServiceRole9121470B"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-get-by-country-type-function/Resource",
+        "aws:asset:path": "asset.033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1",
+        "aws:asset:property": "Code"
+      }
+    },
+    "dynamolambdaremoveitemfunctionServiceRole7CC9B736": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-remove-item-function/ServiceRole/Resource"
+      }
+    },
+    "dynamolambdaremoveitemfunction1621A21F": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3BucketD60E1F1E"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3VersionKey9D592B61"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3VersionKey9D592B61"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "dynamolambdaremoveitemfunctionServiceRole7CC9B736",
+            "Arn"
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "ISLOCAL": "false"
+          }
+        },
+        "Handler": "remove.handler",
+        "Runtime": "nodejs14.x",
+        "Timeout": 60
+      },
+      "DependsOn": [
+        "dynamolambdaremoveitemfunctionServiceRole7CC9B736"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-remove-item-function/Resource",
+        "aws:asset:path": "asset.033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1",
+        "aws:asset:property": "Code"
+      }
+    },
+    "dynamolambdasearchitemfunctionServiceRoleA4A526DE": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-search-item-function/ServiceRole/Resource"
+      }
+    },
+    "dynamolambdasearchitemfunctionServiceRoleDefaultPolicy590BD765": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "AccountsCollection39D971E6",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "AccountsCollection39D971E6",
+                          "Arn"
+                        ]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "dynamolambdasearchitemfunctionServiceRoleDefaultPolicy590BD765",
+        "Roles": [
+          {
+            "Ref": "dynamolambdasearchitemfunctionServiceRoleA4A526DE"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-search-item-function/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "dynamolambdasearchitemfunction1D62E41E": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3BucketD60E1F1E"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3VersionKey9D592B61"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3VersionKey9D592B61"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "dynamolambdasearchitemfunctionServiceRoleA4A526DE",
+            "Arn"
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "ISLOCAL": "false",
+            "arnKms": "arn:aws:kms:us-east-1:825460165214:key/13ec15b1-3bdf-4046-af6d-d814aa9663cb",
+            "arnKmsAlias": "arn:aws:kms:us-east-1:825460165214:alias/keyForMgmt"
+          }
+        },
+        "Handler": "search.searchHandler",
+        "Runtime": "nodejs14.x",
+        "Timeout": 60
+      },
+      "DependsOn": [
+        "dynamolambdasearchitemfunctionServiceRoleDefaultPolicy590BD765",
+        "dynamolambdasearchitemfunctionServiceRoleA4A526DE"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-lambda-search-item-function/Resource",
+        "aws:asset:path": "asset.033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1",
+        "aws:asset:property": "Code"
+      }
+    },
+    "dynamoitems676A3953": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "Name": "dynamo-items"
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Resource"
+      }
+    },
+    "dynamoitemsCloudWatchRole771371C5": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/CloudWatchRole/Resource"
+      }
+    },
+    "dynamoitemsAccountC9453E35": {
+      "Type": "AWS::ApiGateway::Account",
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "dynamoitemsCloudWatchRole771371C5",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "dynamoitems676A3953"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Account"
+      }
+    },
+    "dynamoitemsDeploymentAE3330DB8c2a827b2a880d441f49c1c51d98af0c": {
+      "Type": "AWS::ApiGateway::Deployment",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        },
+        "Description": "Automatically created by the RestApi construct"
+      },
+      "DependsOn": [
+        "dynamoitemsitemIdGET634A8854",
+        "dynamoitemsitemIdOPTIONSBFF08641",
+        "dynamoitemsitemId9DDC34A7",
+        "dynamoitemsDELETE56124D1E",
+        "dynamoitemsOPTIONS2AD29DD2",
+        "dynamoitemsPOSTA9CF3B8E",
+        "dynamoitemsPUTD11E055F",
+        "dynamoitemsquerycountrytypeGET24F07459",
+        "dynamoitemsquerycountrytypeOPTIONS2868B859",
+        "dynamoitemsquerycountrytype8667E184",
+        "dynamoitemsquerycountryOPTIONS1FDDED9C",
+        "dynamoitemsquerycountry879D3B9C",
+        "dynamoitemsqueryOPTIONSABC7428B",
+        "dynamoitemsquery9190F3FE",
+        "dynamoitems0825D856",
+        "dynamoitemssearchOPTIONSB5E7C294",
+        "dynamoitemssearchPOST0DD73EC5",
+        "dynamoitemssearch098EDADC",
+        "dynamoitemsOPTIONS10ED5412"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Deployment/Resource"
+      }
+    },
+    "dynamoitemsDeploymentStagetestA5FCFFF3": {
+      "Type": "AWS::ApiGateway::Stage",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        },
+        "DeploymentId": {
+          "Ref": "dynamoitemsDeploymentAE3330DB8c2a827b2a880d441f49c1c51d98af0c"
+        },
+        "StageName": "test"
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/DeploymentStage.test/Resource"
+      }
+    },
+    "dynamoitemsOPTIONS10ED5412": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "OPTIONS",
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "dynamoitems676A3953",
+            "RootResourceId"
+          ]
+        },
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+              },
+              "StatusCode": "204"
+            }
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }"
+          },
+          "Type": "MOCK"
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            },
+            "StatusCode": "204"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/OPTIONS/Resource"
+      }
+    },
+    "dynamoitems0825D856": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "dynamoitems676A3953",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "items",
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/Resource"
+      }
+    },
+    "dynamoitemsOPTIONS2AD29DD2": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "OPTIONS",
+        "ResourceId": {
+          "Ref": "dynamoitems0825D856"
+        },
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+              },
+              "StatusCode": "204"
+            }
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }"
+          },
+          "Type": "MOCK"
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            },
+            "StatusCode": "204"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/OPTIONS/Resource"
+      }
+    },
+    "dynamoitemsPOSTApiPermissionsamcdkdbdynamoitems10C1489APOSTitems7AB86A91": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dynamolambdainsertfunction538236B5",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "dynamoitems676A3953"
+              },
+              "/",
+              {
+                "Ref": "dynamoitemsDeploymentStagetestA5FCFFF3"
+              },
+              "/POST/items"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/POST/ApiPermission.samcdkdbdynamoitems10C1489A.POST..items"
+      }
+    },
+    "dynamoitemsPOSTApiPermissionTestsamcdkdbdynamoitems10C1489APOSTitems65D9371D": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dynamolambdainsertfunction538236B5",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "dynamoitems676A3953"
+              },
+              "/test-invoke-stage/POST/items"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/POST/ApiPermission.Test.samcdkdbdynamoitems10C1489A.POST..items"
+      }
+    },
+    "dynamoitemsPOSTA9CF3B8E": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "POST",
+        "ResourceId": {
+          "Ref": "dynamoitems0825D856"
+        },
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "dynamolambdainsertfunction538236B5",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/POST/Resource"
+      }
+    },
+    "dynamoitemsPUTApiPermissionsamcdkdbdynamoitems10C1489APUTitems47DE626A": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dynamolambdaupdatefunction19DC06E2",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "dynamoitems676A3953"
+              },
+              "/",
+              {
+                "Ref": "dynamoitemsDeploymentStagetestA5FCFFF3"
+              },
+              "/PUT/items"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/PUT/ApiPermission.samcdkdbdynamoitems10C1489A.PUT..items"
+      }
+    },
+    "dynamoitemsPUTApiPermissionTestsamcdkdbdynamoitems10C1489APUTitems1AC8F18E": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dynamolambdaupdatefunction19DC06E2",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "dynamoitems676A3953"
+              },
+              "/test-invoke-stage/PUT/items"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/PUT/ApiPermission.Test.samcdkdbdynamoitems10C1489A.PUT..items"
+      }
+    },
+    "dynamoitemsPUTD11E055F": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "PUT",
+        "ResourceId": {
+          "Ref": "dynamoitems0825D856"
+        },
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "dynamolambdaupdatefunction19DC06E2",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/PUT/Resource"
+      }
+    },
+    "dynamoitemsDELETEApiPermissionsamcdkdbdynamoitems10C1489ADELETEitemsCC37CB33": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dynamolambdaremoveitemfunction1621A21F",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "dynamoitems676A3953"
+              },
+              "/",
+              {
+                "Ref": "dynamoitemsDeploymentStagetestA5FCFFF3"
+              },
+              "/DELETE/items"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/DELETE/ApiPermission.samcdkdbdynamoitems10C1489A.DELETE..items"
+      }
+    },
+    "dynamoitemsDELETEApiPermissionTestsamcdkdbdynamoitems10C1489ADELETEitems2A8C26BC": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dynamolambdaremoveitemfunction1621A21F",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "dynamoitems676A3953"
+              },
+              "/test-invoke-stage/DELETE/items"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/DELETE/ApiPermission.Test.samcdkdbdynamoitems10C1489A.DELETE..items"
+      }
+    },
+    "dynamoitemsDELETE56124D1E": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "DELETE",
+        "ResourceId": {
+          "Ref": "dynamoitems0825D856"
+        },
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "dynamolambdaremoveitemfunction1621A21F",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/DELETE/Resource"
+      }
+    },
+    "dynamoitemsitemId9DDC34A7": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Ref": "dynamoitems0825D856"
+        },
+        "PathPart": "{itemId}",
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/{itemId}/Resource"
+      }
+    },
+    "dynamoitemsitemIdOPTIONSBFF08641": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "OPTIONS",
+        "ResourceId": {
+          "Ref": "dynamoitemsitemId9DDC34A7"
+        },
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+              },
+              "StatusCode": "204"
+            }
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }"
+          },
+          "Type": "MOCK"
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            },
+            "StatusCode": "204"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/{itemId}/OPTIONS/Resource"
+      }
+    },
+    "dynamoitemsitemIdGETApiPermissionsamcdkdbdynamoitems10C1489AGETitemsitemId6D4CC1E2": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dynamolambdagetfunction42988B1A",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "dynamoitems676A3953"
+              },
+              "/",
+              {
+                "Ref": "dynamoitemsDeploymentStagetestA5FCFFF3"
+              },
+              "/GET/items/*"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/{itemId}/GET/ApiPermission.samcdkdbdynamoitems10C1489A.GET..items.{itemId}"
+      }
+    },
+    "dynamoitemsitemIdGETApiPermissionTestsamcdkdbdynamoitems10C1489AGETitemsitemId7FE98E2B": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dynamolambdagetfunction42988B1A",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "dynamoitems676A3953"
+              },
+              "/test-invoke-stage/GET/items/*"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/{itemId}/GET/ApiPermission.Test.samcdkdbdynamoitems10C1489A.GET..items.{itemId}"
+      }
+    },
+    "dynamoitemsitemIdGET634A8854": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "GET",
+        "ResourceId": {
+          "Ref": "dynamoitemsitemId9DDC34A7"
+        },
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "dynamolambdagetfunction42988B1A",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/{itemId}/GET/Resource"
+      }
+    },
+    "dynamoitemsquery9190F3FE": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Ref": "dynamoitems0825D856"
+        },
+        "PathPart": "query",
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/query/Resource"
+      }
+    },
+    "dynamoitemsqueryOPTIONSABC7428B": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "OPTIONS",
+        "ResourceId": {
+          "Ref": "dynamoitemsquery9190F3FE"
+        },
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+              },
+              "StatusCode": "204"
+            }
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }"
+          },
+          "Type": "MOCK"
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            },
+            "StatusCode": "204"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/query/OPTIONS/Resource"
+      }
+    },
+    "dynamoitemsquerycountry879D3B9C": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Ref": "dynamoitemsquery9190F3FE"
+        },
+        "PathPart": "{country}",
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/query/{country}/Resource"
+      }
+    },
+    "dynamoitemsquerycountryOPTIONS1FDDED9C": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "OPTIONS",
+        "ResourceId": {
+          "Ref": "dynamoitemsquerycountry879D3B9C"
+        },
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+              },
+              "StatusCode": "204"
+            }
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }"
+          },
+          "Type": "MOCK"
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            },
+            "StatusCode": "204"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/query/{country}/OPTIONS/Resource"
+      }
+    },
+    "dynamoitemsquerycountrytype8667E184": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Ref": "dynamoitemsquerycountry879D3B9C"
+        },
+        "PathPart": "{type}",
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/query/{country}/{type}/Resource"
+      }
+    },
+    "dynamoitemsquerycountrytypeOPTIONS2868B859": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "OPTIONS",
+        "ResourceId": {
+          "Ref": "dynamoitemsquerycountrytype8667E184"
+        },
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+              },
+              "StatusCode": "204"
+            }
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }"
+          },
+          "Type": "MOCK"
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            },
+            "StatusCode": "204"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/query/{country}/{type}/OPTIONS/Resource"
+      }
+    },
+    "dynamoitemsquerycountrytypeGETApiPermissionsamcdkdbdynamoitems10C1489AGETitemsquerycountrytypeCA074ECB": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dynamolambdagetbycountrytypefunctionA11F172D",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "dynamoitems676A3953"
+              },
+              "/",
+              {
+                "Ref": "dynamoitemsDeploymentStagetestA5FCFFF3"
+              },
+              "/GET/items/query/*/*"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/query/{country}/{type}/GET/ApiPermission.samcdkdbdynamoitems10C1489A.GET..items.query.{country}.{type}"
+      }
+    },
+    "dynamoitemsquerycountrytypeGETApiPermissionTestsamcdkdbdynamoitems10C1489AGETitemsquerycountrytypeADB7B9EE": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dynamolambdagetbycountrytypefunctionA11F172D",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "dynamoitems676A3953"
+              },
+              "/test-invoke-stage/GET/items/query/*/*"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/query/{country}/{type}/GET/ApiPermission.Test.samcdkdbdynamoitems10C1489A.GET..items.query.{country}.{type}"
+      }
+    },
+    "dynamoitemsquerycountrytypeGET24F07459": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "GET",
+        "ResourceId": {
+          "Ref": "dynamoitemsquerycountrytype8667E184"
+        },
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "dynamolambdagetbycountrytypefunctionA11F172D",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/query/{country}/{type}/GET/Resource"
+      }
+    },
+    "dynamoitemssearch098EDADC": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Ref": "dynamoitems0825D856"
+        },
+        "PathPart": "search",
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/search/Resource"
+      }
+    },
+    "dynamoitemssearchOPTIONSB5E7C294": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "OPTIONS",
+        "ResourceId": {
+          "Ref": "dynamoitemssearch098EDADC"
+        },
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+              },
+              "StatusCode": "204"
+            }
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }"
+          },
+          "Type": "MOCK"
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            },
+            "StatusCode": "204"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/search/OPTIONS/Resource"
+      }
+    },
+    "dynamoitemssearchPOSTApiPermissionsamcdkdbdynamoitems10C1489APOSTitemssearch3E50443F": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dynamolambdasearchitemfunction1D62E41E",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "dynamoitems676A3953"
+              },
+              "/",
+              {
+                "Ref": "dynamoitemsDeploymentStagetestA5FCFFF3"
+              },
+              "/POST/items/search"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/search/POST/ApiPermission.samcdkdbdynamoitems10C1489A.POST..items.search"
+      }
+    },
+    "dynamoitemssearchPOSTApiPermissionTestsamcdkdbdynamoitems10C1489APOSTitemssearchF8BABCC6": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "dynamolambdasearchitemfunction1D62E41E",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "dynamoitems676A3953"
+              },
+              "/test-invoke-stage/POST/items/search"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/search/POST/ApiPermission.Test.samcdkdbdynamoitems10C1489A.POST..items.search"
+      }
+    },
+    "dynamoitemssearchPOST0DD73EC5": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "POST",
+        "ResourceId": {
+          "Ref": "dynamoitemssearch098EDADC"
+        },
+        "RestApiId": {
+          "Ref": "dynamoitems676A3953"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "dynamolambdasearchitemfunction1D62E41E",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/dynamo-items/Default/items/search/POST/Resource"
+      }
+    },
+    "staticwebdatatest750E5220": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "WebsiteConfiguration": {
+          "IndexDocument": "index.html"
+        }
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/static-web-data-test/Resource"
+      }
+    },
+    "staticwebdatatestPolicyE1A2BBDD": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "staticwebdatatest750E5220"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Principal": "*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "staticwebdatatest750E5220",
+                        "Arn"
+                      ]
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/static-web-data-test/Policy/Resource"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Analytics": "v2:deflate64:H4sIAAAAAAAAA02R207EIBCGn8V7ytpoYryzu8YrjU31BaYwrmwLNBzcNIR3F2irvZpvzv9ATR/vaX3zBFdbMT4cAtMGafhwwAbSodXeMCSNtehS7CzUmZy0ss545sjpS7VgQKJDk5137yZfwn+diVM9F05oFUneEvisQGre0/AJ/VhKCkQyguw50PDiFcsNObXnFo0U1pZRAiQNnV76i231KNhc6gpFYu8qyMotLQcQmMQZHF5hpuG17Eo6XTOJVfKGDWPaK0eecRr1LFGVm3ZefoqyeIHt2iNYJG/ovjXPyZX2b7Fx1kbD0bMBy+yVFvN/yN6PMRKlOdKLPfzUD/Q2fdvFClGZJFVIpN1ifwF2oPb40gEAAA=="
+      },
+      "Metadata": {
+        "aws:cdk:path": "sam-cdk-db/CDKMetadata/Default"
+      },
+      "Condition": "CDKMetadataAvailable"
+    }
+  },
+  "Parameters": {
+    "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3BucketD60E1F1E": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1\""
+    },
+    "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1S3VersionKey9D592B61": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1\""
+    },
+    "AssetParameters033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1ArtifactHash6680E836": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"033ee381b42845aae4c5b9af53c7636484b2bb6c7a382c054271c749445696f1\""
+    }
+  },
+  "Outputs": {
+    "dynamoitemsEndpointC6030111": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "dynamoitems676A3953"
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region"
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix"
+            },
+            "/",
+            {
+              "Ref": "dynamoitemsDeploymentStagetestA5FCFFF3"
+            },
+            "/"
+          ]
+        ]
+      }
+    }
+  },
+  "Conditions": {
+    "CDKMetadataAvailable": {
+      "Fn::Or": [
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "af-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ca-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-northwest-1"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-3"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "me-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "sa-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-2"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-2"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
