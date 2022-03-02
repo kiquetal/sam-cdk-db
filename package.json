@@ -5,10 +5,11 @@
     "aws-sam-cli-cdk-hello-world": "bin/aws-sam-cli-cdk-hello-world-stack.ts"
   },
   "scripts": {
-    "build": "tsc & cdk1 synth --no-staging & sam build -t cdk.out/sam-cdk-db.template.json",
+    "build": "tsc & npm run synth & sam build -t cdk.out/sam-cdk-db.template.json",
     "watch": "tsc -w & sam-beta-cdk build",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+     "synth": "cdk1 synth --no-staging"
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.94.1",

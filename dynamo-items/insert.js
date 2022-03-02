@@ -53,7 +53,13 @@ const baseHandler = async (event, context) => {
             rest["enc"]="true";
         }
         console.log(JSON.stringify(rest));
-
+        if (!rest.hasOwnProperty("ttl"))
+        {
+            const plus7days = dayjs().add(7,'day').unix();
+            console.log(`we are goin to set ttl;${plus7days}`);
+            console.log(`we are goin to set ttl;${plus7days}`);
+            rest["ttl"]=plus7days;
+        }
         const id= nano.customAlphabet("1234567890abcdef",10)();
         const pk=`#${country}#${typeItem}#${resourceGroup}#${backendName}#${id}`;
         const params = {

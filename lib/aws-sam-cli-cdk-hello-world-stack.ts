@@ -18,6 +18,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
            tableName:'AccountsCollection',
             removalPolicy:RemovalPolicy.DESTROY,
             writeCapacity: 5,
+            timeToLiveAttribute:"ttl"
         });
 
         table.addGlobalSecondaryIndex({

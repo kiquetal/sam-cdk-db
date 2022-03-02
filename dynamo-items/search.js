@@ -4,6 +4,9 @@ const cors = require('@middy/http-cors');
 const utilEncrypt = require('./util');
 const  jsonBodyParser = require('@middy/http-json-body-parser');
 const lib = require("lib");
+const dayjs = require("dayjs");
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 const options = {
     region: "localhost",
     endpoint: "http://dynamodb:8000",
@@ -48,6 +51,8 @@ const baseSearchHandler = async(event,context) => {
             resp.Item.data = JSON.parse(await utilEncrypt.decrypt(resp.Item.data));
 
         }
+        console.log(resp.Item.ttl);
+        resp.Item.ttl=dayjs.unix(resp.Item.ttl).utc(true).format()
 
         return {
                 'headers': {
