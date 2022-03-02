@@ -32,7 +32,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
 
         const dynamoInsertItem = new lambda.Function(this, 'dynamo-lambda-insert-function', {
-
+            functionName:"sam-cdk-db-insert-function",
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'insert.handler',
             environment: {
@@ -47,6 +47,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         const dynamoUpdateItem = new lambda.Function(this, 'dynamo-lambda-update-function', {
             runtime: lambda.Runtime.NODEJS_14_X,
+            functionName:"sam-cdk-db-update-function",
             handler: 'update.handler',
             environment: {
                 "ISLOCAL": "false",
@@ -59,6 +60,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
 
         const dynamoGetItem = new lambda.Function(this, 'dynamo-lambda-get-function', {
+            functionName:"sam-cdk-db-get-function",
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'get.handler',
             environment: {
@@ -69,6 +71,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         const dynamoGetCountryType = new lambda.Function(this, 'dynamo-lambda-get-by-country-type-function', {
+            functionName:"sam-cdk-db-get-by-country-type-function",
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'get.handlerCountryType',
             environment: {
@@ -81,6 +84,8 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
 
         const dynamoRemoveItem = new lambda.Function(this, 'dynamo-lambda-remove-item-function', {
+            functionName:"sam-cdk-db-remove-item-function",
+
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'remove.handler',
             timeout: cdk.Duration.minutes(1),
@@ -91,6 +96,8 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         });
         const dynamoSearchItem = new lambda.Function(this, 'dynamo-lambda-search-item-function', {
+            functionName:"sam-cdk-db-search-item-function",
+
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'search.searchHandler',
             timeout: cdk.Duration.minutes(1),
