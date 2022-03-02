@@ -184,3 +184,8 @@ aws dynamodb update-table \
 ## Eager container
 
 sam-beta-cdk local start-api --docker-network lambda-local --warm-containers EAGER -n env.json
+
+
+### Create ttl 
+
+aws dynamodb update-time-to-live --table-name TTLExample --time-to-live-specification "Enabled=true, AttributeName=ttl"
