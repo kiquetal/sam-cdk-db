@@ -188,4 +188,5 @@ sam-beta-cdk local start-api --docker-network lambda-local --warm-containers EAG
 
 ### Create ttl 
 
-aws dynamodb update-time-to-live --table-name TTLExample --time-to-live-specification "Enabled=true, AttributeName=ttl"
+aws dynamodb update-time-to-live --table-name AccountsCollection --time-to-live-specification "Enabled=true, AttributeName=ttl"
+-- endpoint http://127.0.0.1:8000 --profile devKiquetal
