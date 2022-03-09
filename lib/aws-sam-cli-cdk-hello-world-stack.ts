@@ -3,6 +3,7 @@ import {RemovalPolicy} from '@aws-cdk/core';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as apigateway from '@aws-cdk/aws-apigateway';
+import * as iam from '@aws-cdk/aws-iam'
 import * as path from 'path';
 
 export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
@@ -123,6 +124,28 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             },
             proxy: false
         });
+
+        const roleForCognito = new iam.Role(this,'RoleForCognito',{
+            roleName:"roleForCognito",
+            assumedBy:new iam.CompositePrincipal(new iam.ServicePrincipal("cognito-idp.amazonaws.com"),
+            new iam.ServicePrincipal("lambda.amazonaws.com")),
+        managedPolicies:[iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess"),
+                       iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
+        })
+
+
+        const cognitoTrigger = new lambda.Function(this, 'cognito-trigger', {
+            functionName:"sam-cdk-db-cognito-trigger",
+            role: roleForCognito,
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler: 'triggerCognito.main',
+            timeout: cdk.Duration.minutes(1),
+            code: lambda.Code.fromAsset(path.join(__dirname, '..', 'trigger')),
+            environment: {
+                "ISLOCAL": "false",
+            }
+        });
+
 
 
         table.grantReadWriteData(dynamoInsertItem);
