@@ -16,7 +16,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             sortKey: { name:'country',type:dynamodb.AttributeType.STRING},
             billingMode: dynamodb.BillingMode.PROVISIONED,
             readCapacity: 5,
-           tableName:'AccountsCollection',
+            tableName:'AccountsCollection',
             removalPolicy:RemovalPolicy.DESTROY,
             writeCapacity: 5,
             timeToLiveAttribute:"ttl"
@@ -31,6 +31,16 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             projectionType: dynamodb.ProjectionType.ALL,
         })
 
+
+        const usersTable = new dynamodb.Table(this, 'UsersTable', {
+            partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
+            sortKey: { name:'sk',type:dynamodb.AttributeType.STRING},
+            billingMode: dynamodb.BillingMode.PROVISIONED,
+            readCapacity: 5,
+            tableName:'UsersTable',
+            removalPolicy:RemovalPolicy.DESTROY,
+            writeCapacity: 5
+        });
 
         const dynamoInsertItem = new lambda.Function(this, 'dynamo-lambda-insert-function', {
             functionName:"sam-cdk-db-insert-function",
@@ -83,7 +93,6 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         });
 
-
         const dynamoRemoveItem = new lambda.Function(this, 'dynamo-lambda-remove-item-function', {
             functionName:"sam-cdk-db-remove-item-function",
 
@@ -133,6 +142,23 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
                        iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
         })
 
+        const roleForAdminCognitoAndDB = new iam.Role(this,'RoleForAdminUsers',{
+           roleName:"RoleForAdminUser",
+           assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+            inlinePolicies: {
+                  CognitoAdmin: new iam.PolicyDocument({
+                      statements:[new iam.PolicyStatement({
+                          actions:['cognito-idp:AdminDeleteUser',],
+                          resources:["*"],
+                          effect:iam.Effect.ALLOW
+                      })]
+                  }),
+
+
+                }
+
+        });
+
 
         const cognitoTrigger = new lambda.Function(this, 'cognito-trigger', {
             functionName:"sam-cdk-db-cognito-trigger",
@@ -146,13 +172,26 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             }
         });
 
-
+        const adminUserCognito = new lambda.Function(this,'admin-user-cognit-db',{
+            functionName:'sam-cdk-db-admin-user-cognito',
+            role: roleForAdminCognitoAndDB,
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler:'users.removeUser',
+            timeout:cdk.Duration.minutes(1),
+            code:lambda.Code.fromAsset(path.join(__dirname,'..','users')),
+            environment: {
+                "POOL_ID": process.env.POOL_ID!!,
+                "USERNAME":"replace-userneme-cognito"
+            }
+        })
 
         table.grantReadWriteData(dynamoInsertItem);
         table.grantReadWriteData(dynamoUpdateItem);
         table.grantReadData(dynamoGetItem);
         table.grantReadData(dynamoSearchItem);
         table.grantReadData(dynamoGetCountryType);
+        table.grantReadWriteData(roleForAdminCognitoAndDB)
+
         const itemsRootResource = api.root.addResource('items')
         itemsRootResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoInsertItem))
         itemsRootResource.addMethod('PUT', new apigateway.LambdaIntegration(dynamoUpdateItem));
@@ -165,10 +204,6 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         countryAndTypeResource.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetCountryType))
         itemSubResources.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetItem))
         searchResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoSearchItem));
-
-
-
-
 
 
     }

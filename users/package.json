@@ -1,0 +1,28 @@
+{
+  "name": "hello_world",
+  "version": "1.0.0",
+  "description": "hello world sample for NodeJS",
+  "main": "insert.js",
+  "repository": "https://github.com/awslabs/aws-sam-cli/tree/develop/samcli/local/init/templates/cookiecutter-aws-sam-hello-nodejs",
+  "author": "SAM CLI",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-cdk/aws-dynamodb": "^1.136.0",
+    "@aws-crypto/client-node": "^3.1.0",
+    "@middy/core": "^2.5.3",
+    "@middy/http-cors": "^2.5.3",
+    "@middy/http-error-handler": "^2.5.3",
+    "@middy/http-json-body-parser": "^2.5.3",
+    "@middy/validator": "^2.5.3",
+    "aws-sdk": "^2.1090.0",
+    "axios": "^0.21.1",
+    "dayjs": "^1.10.7",
+    "install": "^0.13.0",
+    "nanoid": "^3.1.30"
+  },
+  "scripts": {},
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^8.2.1"
+  }
+}

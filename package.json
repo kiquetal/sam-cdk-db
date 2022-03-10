@@ -9,7 +9,7 @@
     "watch": "tsc -w & sam-beta-cdk build",
     "test": "jest",
     "cdk": "cdk",
-     "synth": "cdk1 synth --no-staging"
+    "synth": "cdk1 synth --no-staging"
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.94.1",

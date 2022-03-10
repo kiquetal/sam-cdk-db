@@ -52,6 +52,7 @@ const baseSearchHandler = async(event,context) => {
 
         }
         console.log(resp.Item.ttl);
+        if (resp.Item.hasOwnProperty("ttl"))
         resp.Item.ttl=dayjs.unix(resp.Item.ttl).utc(true).format()
 
         return {
