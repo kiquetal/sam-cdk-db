@@ -19,7 +19,5 @@ const removeUserFn = async(event,context)=>{
     return {
           "message":"finish"
     }
-
-
 }
 exports.removeUser = removeUserFn

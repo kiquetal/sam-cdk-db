@@ -157,9 +157,10 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
                 }
 
+
         });
 
-
+        usersTable.grantReadData(roleForCognito)
         const cognitoTrigger = new lambda.Function(this, 'cognito-trigger', {
             functionName:"sam-cdk-db-cognito-trigger",
             role: roleForCognito,
@@ -172,7 +173,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             }
         });
 
-        const adminUserCognito = new lambda.Function(this,'admin-user-cognit-db',{
+        const adminUserCognito = new lambda.Function(this,'admin-user-cognito:q-db',{
             functionName:'sam-cdk-db-admin-user-cognito',
             role: roleForAdminCognitoAndDB,
             runtime: lambda.Runtime.NODEJS_14_X,
