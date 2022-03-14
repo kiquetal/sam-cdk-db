@@ -138,8 +138,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             roleName:"roleForCognito",
             assumedBy:new iam.CompositePrincipal(new iam.ServicePrincipal("cognito-idp.amazonaws.com"),
             new iam.ServicePrincipal("lambda.amazonaws.com")),
-        managedPolicies:[iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess"),
-                       iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
+        managedPolicies:[iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
         })
 
         const roleForAdminCognitoAndDB = new iam.Role(this,'RoleForAdminUsers',{
@@ -148,7 +147,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             inlinePolicies: {
                   CognitoAdmin: new iam.PolicyDocument({
                       statements:[new iam.PolicyStatement({
-                          actions:['cognito-idp:AdminDeleteUser',],
+                          actions:['cognito-idp:AdminDeleteUser','cognito-idp:AdminCreateUser','cognito-idp:AdminInitiateAuth','cognito-idp:AdminSetUserPassword'],
                           resources:["*"],
                           effect:iam.Effect.ALLOW
                       })]
@@ -160,7 +159,8 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         });
 
-        usersTable.grantReadData(roleForCognito)
+        usersTable.grantReadWriteData(roleForCognito);
+        usersTable.grantReadWriteData(roleForAdminCognitoAndDB);
         const cognitoTrigger = new lambda.Function(this, 'cognito-trigger', {
             functionName:"sam-cdk-db-cognito-trigger",
             role: roleForCognito,

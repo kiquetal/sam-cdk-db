@@ -4,7 +4,7 @@ const cognitoHandler = async(event,context) => {
     console.log(event.request.userAttributes)
 
     let userType="SERVERID"
-    if (event.request.userAttribtes.hasOwnProperty("identities"))
+    if (event.request.userAttributes.hasOwnProperty("identities"))
     {
         userType="USERID"
     }
@@ -17,7 +17,7 @@ const cognitoHandler = async(event,context) => {
             email:event.request.userAttributes["email"]
 
         },
-        ConditionExpression:"attribute_not_exists(pk) AND atribute_not_exists(sk)"
+        ConditionExpression:"attribute_not_exists(pk) AND attribute_not_exists(sk)"
     };
 
     try {
