@@ -5,7 +5,7 @@ import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as apigateway from '@aws-cdk/aws-apigateway';
 import * as iam from '@aws-cdk/aws-iam'
 import * as path from 'path';
-
+import * as cognito from '@aws-cdk/aws-cognito';
 export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
@@ -230,6 +230,11 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         const itemsRootResource = api.root.addResource('items')
         const userRootResource = api.root.addResource('users')
+
+
+        const poolCognito = cognito.UserPool.fromUserPoolId(this,"pool-id","");
+        
+
 
         itemsRootResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoInsertItem))
         itemsRootResource.addMethod('PUT', new apigateway.LambdaIntegration(dynamoUpdateItem));
