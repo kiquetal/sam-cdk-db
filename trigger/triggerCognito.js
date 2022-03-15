@@ -10,7 +10,7 @@ const cognitoHandler = async(event,context) => {
     }
     const db =new AWS.DynamoDB.DocumentClient();
     const params = {
-        TableName: 'UsersTable',
+        TableName: 'UsersCollection',
         Item: {
             pk:event.request.userAttributes["sub"],
             sk:userType,

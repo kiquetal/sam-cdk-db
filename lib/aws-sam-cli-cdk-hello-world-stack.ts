@@ -37,7 +37,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             sortKey: { name:'sk',type:dynamodb.AttributeType.STRING},
             billingMode: dynamodb.BillingMode.PROVISIONED,
             readCapacity: 5,
-            tableName:'UsersTable',
+            tableName:'UsersCollection',
             removalPolicy:RemovalPolicy.DESTROY,
             writeCapacity: 5
         });
@@ -144,7 +144,8 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const roleForAdminCognitoAndDB = new iam.Role(this,'RoleForAdminUsers',{
            roleName:"RoleForAdminUser",
            assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
-            inlinePolicies: {
+           managedPolicies:[iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")],
+           inlinePolicies: {
                   CognitoAdmin: new iam.PolicyDocument({
                       statements:[new iam.PolicyStatement({
                           actions:['cognito-idp:AdminDeleteUser','cognito-idp:AdminCreateUser','cognito-idp:AdminInitiateAuth','cognito-idp:AdminSetUserPassword'],
@@ -158,6 +159,39 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
 
         });
+
+
+        const adminUser = new lambda.Function(this, 'dynamo-lambda-create-user-function', {
+            functionName:"sam-cdk-db-create-user-function",
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler: 'users.createUser',
+            role:roleForAdminCognitoAndDB,
+            timeout: cdk.Duration.minutes(1),
+            code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users')),
+            environment: {
+                "ISLOCAL": "false",
+                "arnKms":process.env.arnKms!!,
+                "arnKmsAlias":process.env.arnKmsAlias!!,
+                "POOL_ID":process.env.POOL_ID!!
+            }
+        });
+
+        const loginUser = new lambda.Function(this, 'dynamo-lambda-login-user-function', {
+            functionName:"sam-cdk-db-login-user-function",
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler: 'users.loginUser',
+            role:roleForAdminCognitoAndDB,
+            timeout: cdk.Duration.minutes(1),
+            code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users')),
+            environment: {
+                "ISLOCAL": "false",
+                "arnKms":process.env.arnKms!!,
+                "arnKmsAlias":process.env.arnKmsAlias!!,
+                "POOL_ID":process.env.POOL_ID!!,
+                "sub":"replace-cognito-sub"
+            }
+        });
+
 
         usersTable.grantReadWriteData(roleForCognito);
         usersTable.grantReadWriteData(roleForAdminCognitoAndDB);
@@ -174,7 +208,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         const adminUserCognito = new lambda.Function(this,'admin-user-cognito:q-db',{
-            functionName:'sam-cdk-db-admin-user-cognito',
+            functionName:'sam-cdk-db-remove-user-cognito',
             role: roleForAdminCognitoAndDB,
             runtime: lambda.Runtime.NODEJS_14_X,
             handler:'users.removeUser',
@@ -194,9 +228,12 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         table.grantReadWriteData(roleForAdminCognitoAndDB)
 
         const itemsRootResource = api.root.addResource('items')
+        const userRootResource = api.root.addResource('users')
+
         itemsRootResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoInsertItem))
         itemsRootResource.addMethod('PUT', new apigateway.LambdaIntegration(dynamoUpdateItem));
         itemsRootResource.addMethod('DELETE', new apigateway.LambdaIntegration(dynamoRemoveItem));
+        userRootResource.addMethod('POST',new apigateway.LambdaIntegration(adminUser))
         const itemSubResources = itemsRootResource.addResource('{itemId}');
         const queryResource = itemsRootResource.addResource('query');
         const searchResource = itemsRootResource.addResource('search');

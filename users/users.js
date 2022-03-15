@@ -3,7 +3,8 @@ const cors = require('@middy/http-cors');
 const middy = require("@middy/core");
 const  jsonBodyParser = require('@middy/http-json-body-parser');
 const httpError = require('@middy/http-error-handler');
-const lib = require("lib");
+const lib = require("./lib");
+const util = require("./util");
 const removeUserFn = async(event,context)=>{
     const USERNAME = process.env.USERNAME
     const POOL_ID = process.env.POOL_ID
@@ -29,9 +30,9 @@ const removeUserFn = async(event,context)=>{
 
 const creatUser = async(event,context) => {
     try {
-        const body = JSON.parse(event.body);
+        const body = event.body;
         const params = {
-            UserPoolId: proccess.env.UserPoolId,
+            UserPoolId: process.env.POOL_ID,
             Username: body["username"],
             MessageAction: "SUPPRESS",
             UserAttributes:[
@@ -47,13 +48,94 @@ const creatUser = async(event,context) => {
         }
 
         const cognito = new AWS.CognitoIdentityServiceProvider();
-        await cognito.adminCreateUser(params).promise()
+        const responseCognito = await cognito.adminCreateUser(params).promise();
+        const attributes=responseCognito["User"]["Attributes"];
+        const sub = attributes.filter(a=>a["Name"]=="sub")[0]
 
+        const paramsPassword = {
+            Password:body["password"],
+            UserPoolId: process.env.POOL_ID,
+            Permanent: true,
+            Username: body["username"]
+        }
+         await cognito.adminSetUserPassword(paramsPassword).promise();
+
+        await saveCredentialsDb(sub["Value"],body["username"],body["password"],body["country"]);
+
+        return {
+            'headers': {
+                'Content-Type': 'application/json'
+            },
+            'statusCode': 201,
+            'body': JSON.stringify({"message":"User created successfully"})
+        };
     }
     catch (exception)
     {
-        console.log("creating user exception",ex);
+        console.log("creating user exception",exception);
     }
+}
+
+
+const saveCredentialsDb = async (sub,username,password,country)=>{
+
+    try {
+        const db =new AWS.DynamoDB.DocumentClient();
+        const password64 = await util.encrypt(password)
+        const params= {
+            TableName: 'UsersCollection',
+           Item: {
+               'pk': sub,
+               'sk': "USERID",
+               'password': password64,
+               "country":country,
+               'email':username
+           }
+        };
+        let dynamoResponse = await db.put(params).promise();
+    } catch (exception) {
+
+        console.log("exception saving credentialbs",exception.message)
+    }
+
+    return {
+        "ok": true
+    }
+}
+
+
+const loginUserFn = async(event,contex) => {
+
+    try {
+        const sub= process.env.sub;
+        const db =new AWS.DynamoDB.DocumentClient();
+
+        const params= {
+            TableName:'UsersCollection',
+            Key: {
+                'pk': sub,
+                'sk': 'USERID'
+            }
+        }
+        const rp = await db.get(params).promise()
+        if (rp && rp.hasOwnProperty("Item"))
+        {
+
+            const password =await util.decrypt(rp["Item"]["password"])
+            const username = rp["Item"]["email"]
+            console.log(`try login : ${username} ${password}`);
+        }
+        else
+        {
+            console.log("sub not found")
+        }
+    }
+    catch (ex)
+    {
+        console.log("exeception login",ex.message)
+    }
+
+
 }
 
 exports.createUser = middy(creatUser).use(jsonBodyParser()).use(httpError()).use(cors()).onError(async (req) => {
@@ -61,4 +143,9 @@ exports.createUser = middy(creatUser).use(jsonBodyParser()).use(httpError()).use
         return lib.return500Response(req.error);
     }
 })
+
+
+
 exports.removeUser = removeUserFn
+
+exports.loginUser = loginUserFn
