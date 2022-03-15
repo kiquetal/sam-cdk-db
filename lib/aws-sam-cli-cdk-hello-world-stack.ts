@@ -188,7 +188,8 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
                 "arnKms":process.env.arnKms!!,
                 "arnKmsAlias":process.env.arnKmsAlias!!,
                 "POOL_ID":process.env.POOL_ID!!,
-                "sub":"replace-cognito-sub"
+                "sub":"replace-cognito-sub",
+                "CLIENT_ID":process.env.CLIENT_ID!!
             }
         });
 

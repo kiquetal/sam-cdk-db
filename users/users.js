@@ -58,6 +58,7 @@ const creatUser = async(event,context) => {
             Permanent: true,
             Username: body["username"]
         }
+         console.log("for password"+ body["password"]);
          await cognito.adminSetUserPassword(paramsPassword).promise();
 
         await saveCredentialsDb(sub["Value"],body["username"],body["password"],body["country"]);
@@ -86,7 +87,7 @@ const saveCredentialsDb = async (sub,username,password,country)=>{
             TableName: 'UsersCollection',
            Item: {
                'pk': sub,
-               'sk': "USERID",
+               'sk': "SERVERID",
                'password': password64,
                "country":country,
                'email':username
@@ -114,7 +115,7 @@ const loginUserFn = async(event,contex) => {
             TableName:'UsersCollection',
             Key: {
                 'pk': sub,
-                'sk': 'USERID'
+                'sk': 'SERVERID'
             }
         }
         const rp = await db.get(params).promise()
@@ -123,7 +124,20 @@ const loginUserFn = async(event,contex) => {
 
             const password =await util.decrypt(rp["Item"]["password"])
             const username = rp["Item"]["email"]
-            console.log(`try login : ${username} ${password}`);
+
+
+            const cognito = new AWS.CognitoIdentityServiceProvider();
+            const initAuth = {
+                AuthFlow: "ADMIN_USER_PASSWORD_AUTH",
+                UserPoolId: process.env.POOL_ID,
+                ClientId: process.env.CLIENT_ID,
+                AuthParameters: {
+                    USERNAME: username,
+                    PASSWORD: JSON.parse(password)
+                }
+            }
+           const resp = await cognito.adminInitiateAuth(initAuth).promise()
+            console.log(JSON.stringify(resp));
         }
         else
         {
