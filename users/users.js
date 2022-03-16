@@ -87,10 +87,11 @@ const saveCredentialsDb = async (sub,username,password,country)=>{
             TableName: 'UsersCollection',
            Item: {
                'pk': sub,
-               'sk': "SERVERID",
+               'sk': "SERVER#ID",
                'password': password64,
                "country":country,
-               'email':username
+               'email':username,
+               "typeItem":"USER"
            }
         };
         let dynamoResponse = await db.put(params).promise();

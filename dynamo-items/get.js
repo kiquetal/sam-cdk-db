@@ -47,7 +47,6 @@ const baseHandlerCountryType=async (event,context)=> {
         IndexName: 'TypeItemCountryIndex',
         KeyConditionExpression: 'country = :country and typeItem = :typeItem',
         ExpressionAttributeValues: expressionAttributesValues,
-        Limit:5,
     };
 
     if (event.queryStringParameters) {
@@ -69,8 +68,8 @@ const baseHandlerCountryType=async (event,context)=> {
         while  (dynamoResponse.LastEvaluatedKey)
         {
             params["ExclusiveStartKey"]=dynamoResponse.LastEvaluatedKey
-            let rp = await db.query(params).promise();
-            items=items.concat(rp["Items"])
+            dynamoResponse = await db.query(params).promise();
+            items=items.concat(dynamoResponse["Items"])
         }
         return {
             'headers': {

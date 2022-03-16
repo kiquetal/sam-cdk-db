@@ -41,6 +41,16 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             removalPolicy:RemovalPolicy.DESTROY,
             writeCapacity: 5
         });
+        usersTable.addGlobalSecondaryIndex({
+            indexName:"index_sk_and_type",
+            partitionKey:{name:'sk',type:dynamodb.AttributeType.STRING},
+            sortKey:{name:"typeItem",type:dynamodb.AttributeType.STRING},
+            readCapacity:5,
+            writeCapacity:5,
+            projectionType:dynamodb.ProjectionType.ALL
+        })
+
+
 
         const dynamoInsertItem = new lambda.Function(this, 'dynamo-lambda-insert-function', {
             functionName:"sam-cdk-db-insert-function",
@@ -241,10 +251,18 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
 
-        itemsRootResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoInsertItem))
-        itemsRootResource.addMethod('PUT', new apigateway.LambdaIntegration(dynamoUpdateItem));
-        itemsRootResource.addMethod('DELETE', new apigateway.LambdaIntegration(dynamoRemoveItem));
-        userRootResource.addMethod('POST',new apigateway.LambdaIntegration(adminUser))
+        itemsRootResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoInsertItem),{
+            authorizer: auth
+        })
+        itemsRootResource.addMethod('PUT', new apigateway.LambdaIntegration(dynamoUpdateItem),{
+            authorizer: auth
+        });
+        itemsRootResource.addMethod('DELETE', new apigateway.LambdaIntegration(dynamoRemoveItem),{
+            authorizer: auth
+        });
+        userRootResource.addMethod('POST',new apigateway.LambdaIntegration(adminUser),{
+            authorizer: auth
+        })
         const itemSubResources = itemsRootResource.addResource('{itemId}');
         const queryResource = itemsRootResource.addResource('query');
         const searchResource = itemsRootResource.addResource('search');
@@ -253,8 +271,12 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         countryAndTypeResource.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetCountryType),{
             authorizer:auth
         })
-        itemSubResources.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetItem))
-        searchResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoSearchItem));
+        itemSubResources.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetItem),{
+            authorizer:auth
+        })
+        searchResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoSearchItem),{
+            authorizer:auth
+        });
 
 
     }

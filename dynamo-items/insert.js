@@ -163,8 +163,12 @@ const insertIndexDb = async (id,pk,db) => {
         console.log("error+setting+index"+err.toString());
     }
 }
+const checkPermissions=(request)=>{
 
-exports.handler = middy(baseHandler).use(jsonBodyParser()).use(httpError()).use(cors()).onError(async (req) => {
+    console.log(JSON.stringify(request.event.requestContext.authorizer))
+
+}
+exports.handler = middy(baseHandler).use(jsonBodyParser()).use(httpError()).use(cors()).use(checkPermissions()).onError(async (req) => {
     if (req.error) {
         return lib.return500Response(req.error);
     }
