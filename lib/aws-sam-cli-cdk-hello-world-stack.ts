@@ -50,6 +50,15 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             projectionType:dynamodb.ProjectionType.ALL
         })
 
+        const rolesTable=new dynamodb.Table(this, 'RolesTable', {
+            partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
+            sortKey: { name:'sk',type:dynamodb.AttributeType.STRING},
+            billingMode: dynamodb.BillingMode.PROVISIONED,
+            readCapacity: 5,
+            tableName:'RolesCollection',
+            removalPolicy:RemovalPolicy.DESTROY,
+            writeCapacity: 5
+        });
 
 
         const dynamoInsertItem = new lambda.Function(this, 'dynamo-lambda-insert-function', {
@@ -131,7 +140,6 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         const api = new apigateway.LambdaRestApi(this, 'dynamo-items', {
             handler: dynamoGetItem,
-
             defaultCorsPreflightOptions:{
                 allowOrigins: apigateway.Cors.ALL_ORIGINS,
                 allowMethods: apigateway.Cors.ALL_METHODS,
