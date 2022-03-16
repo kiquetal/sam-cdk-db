@@ -46,7 +46,8 @@ const baseHandlerCountryType=async (event,context)=> {
         TableName: 'AccountsCollection',
         IndexName: 'TypeItemCountryIndex',
         KeyConditionExpression: 'country = :country and typeItem = :typeItem',
-        ExpressionAttributeValues: expressionAttributesValues
+        ExpressionAttributeValues: expressionAttributesValues,
+        Limit:5,
     };
 
     if (event.queryStringParameters) {
@@ -63,7 +64,14 @@ const baseHandlerCountryType=async (event,context)=> {
     try {
 
         let dynamoResponse = await db.query(params).promise();
+
         let items = dynamoResponse["Items"]
+        while  (dynamoResponse.LastEvaluatedKey)
+        {
+            params["ExclusiveStartKey"]=dynamoResponse.LastEvaluatedKey
+            let rp = await db.query(params).promise();
+            items=items.concat(rp["Items"])
+        }
         return {
             'headers': {
                 'Content-Type': 'application/json'
@@ -80,6 +88,9 @@ const baseHandlerCountryType=async (event,context)=> {
 
     }
 }
+
+
+
 
 
 exports.handlerCountryType= middy(baseHandlerCountryType).use(cors()).onError(async (req) => {

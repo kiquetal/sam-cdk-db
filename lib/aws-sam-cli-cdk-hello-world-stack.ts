@@ -232,8 +232,13 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const userRootResource = api.root.addResource('users')
 
 
-        const poolCognito = cognito.UserPool.fromUserPoolId(this,"pool-id","");
-        
+        const poolCognito = cognito.UserPool.fromUserPoolId(this,"pool-id",process.env.POOL_ID!!);
+
+        const auth = new apigateway.CognitoUserPoolsAuthorizer(this,'cognito-authorizer',{
+           cognitoUserPools:[poolCognito],
+           authorizerName:"authorizer-pool",
+           identitySource:apigateway.IdentitySource.header('Authorization')
+        });
 
 
         itemsRootResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoInsertItem))
@@ -245,7 +250,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const searchResource = itemsRootResource.addResource('search');
         const countryQueryResource = queryResource.addResource('{country}');
         const countryAndTypeResource = countryQueryResource.addResource('{type}');
-        countryAndTypeResource.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetCountryType))
+        countryAndTypeResource.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetCountryType),{
+            authorizer:auth
+        })
         itemSubResources.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetItem))
         searchResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoSearchItem));
 
