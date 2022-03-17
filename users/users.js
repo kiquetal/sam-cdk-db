@@ -27,9 +27,20 @@ const removeUserFn = async (event, context) => {
 }
 
 
-const creatUser = async (event, context) => {
+const createServer = async (event, context) => {
     try {
         const body = event.body;
+        const requiredFields=["country","serverName","email","password"];
+        let missingFields=[]
+        requiredFields.forEach(value => {
+            if (!body.hasOwnProperty(value))
+                missingFields.push(value)
+        });
+        if (missingFields.length>0)
+        {
+            return lib.returnResponse(400,{"code":400,"message":`Required fields ${missingFields}`})
+        }
+
         const params = {
             UserPoolId: process.env.POOL_ID,
             Username: body["username"],
@@ -46,6 +57,9 @@ const creatUser = async (event, context) => {
             ]
         }
 
+        const emailCreator = event.requestContext.authorizer.claims.email;
+        const subCreator = event.requestContext.authorizer.claims.sub;
+
         const cognito = new AWS.CognitoIdentityServiceProvider();
         const responseCognito = await cognito.adminCreateUser(params).promise();
         const attributes = responseCognito["User"]["Attributes"];
@@ -57,10 +71,10 @@ const creatUser = async (event, context) => {
             Permanent: true,
             Username: body["username"]
         }
-        console.log("for password" + body["password"]);
         await cognito.adminSetUserPassword(paramsPassword).promise();
 
-        await saveCredentialsDb(sub["Value"], body["username"], body["password"], body["country"]);
+        await saveCredentialsDb(sub["Value"], body["username"], body["password"], body["country"],body["serverName"],{"email":emailCreator,
+        "sub":subCreator});
 
         return {
             'headers': {
@@ -82,7 +96,7 @@ const creatUser = async (event, context) => {
 }
 
 
-const saveCredentialsDb = async (sub, username, password, country) => {
+const saveCredentialsDb = async (sub, username, password, country,serverName,creator) => {
 
     try {
         const db = new AWS.DynamoDB.DocumentClient();
@@ -95,7 +109,9 @@ const saveCredentialsDb = async (sub, username, password, country) => {
                 'password': password64,
                 "country": country,
                 'email': username,
-                "typeItem": "USER"
+                "serverName":serverName,
+                "typeItem": "USER",
+                "creator":creator
             }
         };
         let dynamoResponse = await db.put(params).promise();
@@ -248,12 +264,14 @@ const fnDynamoQuery=async (objSearch) => {
     try {
         const db = new AWS.DynamoDB.DocumentClient();
         const params = {
-            IndexName: 'sk',
-            KeyConditionExpression: " sk=:sk",
+            TableName: 'UsersCollection',
+            IndexName: 'index_sk_and_type',
+            KeyConditionExpression: "sk=:sk",
             ExpressionAttributeValues: {
                 ":sk": objSearch["sk"]
             }
-        }
+        };
+        console.log(params);
         let dynamoResponse = await db.query(params).promise()
         let items = dynamoResponse["Items"]
         while (dynamoResponse.LastEvaluatedKey) {
@@ -298,7 +316,7 @@ const getServersFn= async (event,request)=>{
 
 }
 
-exports.createUser = middy(creatUser).use(jsonBodyParser()).use(httpError()).use(cors()).use(checkPermissions()).onError(fnError)
+exports.createServer = middy(createServer).use(jsonBodyParser()).use(httpError()).use(cors()).use(checkPermissions()).onError(fnError)
 exports.getUsers = middy(getUsersFn).use(cors()).onError(fnError);
 exports.getServers = middy(getServersFn).use(cors()).onError(fnError)
 exports.removeUser = removeUserFn

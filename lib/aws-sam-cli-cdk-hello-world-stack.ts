@@ -179,10 +179,10 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
 
-        const adminUser = new lambda.Function(this, 'dynamo-lambda-create-user-function', {
-            functionName:"sam-cdk-db-create-user-function",
+        const createServers = new lambda.Function(this, 'dynamo-lambda-create-server-function', {
+            functionName:"sam-cdk-db-create-server-function",
             runtime: lambda.Runtime.NODEJS_14_X,
-            handler: 'users.createUser',
+            handler: 'users.createServer',
             role:roleForAdminCognitoAndDB,
             timeout: cdk.Duration.minutes(1),
             code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users')),
@@ -212,8 +212,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
 
-        usersTable.grantReadWriteData(roleForCognito);
-        usersTable.grantReadWriteData(roleForAdminCognitoAndDB);
+
         const cognitoTrigger = new lambda.Function(this, 'cognito-trigger', {
             functionName:"sam-cdk-db-cognito-trigger",
             role: roleForCognito,
@@ -239,12 +238,42 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             }
         })
 
+        const fnGetUsers = new lambda.Function(this,'dynamo-lambda-get-users-function',{
+            functionName:'sam-cdk-db-get-all-users',
+            role: roleForAdminCognitoAndDB,
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler:'users.getUsers',
+            timeout:cdk.Duration.minutes(1),
+            code:lambda.Code.fromAsset(path.join(__dirname,'..','users')),
+            environment: {
+                "USERNAME":"replace-userneme-cognito"
+            }
+        });
+
+        const fnGetUServers = new lambda.Function(this,'dynamo-lambda-get-servers-function',{
+            functionName:'sam-cdk-db-get-all-servers',
+            role: roleForAdminCognitoAndDB,
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler:'users.getServers',
+            timeout:cdk.Duration.minutes(1),
+            code:lambda.Code.fromAsset(path.join(__dirname,'..','users')),
+            environment: {
+                "USERNAME":"replace-userneme-cognito"
+            }
+        });
+
+
+
         table.grantReadWriteData(dynamoInsertItem);
         table.grantReadWriteData(dynamoUpdateItem);
         table.grantReadData(dynamoGetItem);
         table.grantReadData(dynamoSearchItem);
         table.grantReadData(dynamoGetCountryType);
         table.grantReadWriteData(roleForAdminCognitoAndDB)
+        usersTable.grantReadData(fnGetUsers);
+        usersTable.grantReadData(fnGetUServers);
+        usersTable.grantReadWriteData(roleForCognito);
+        usersTable.grantReadWriteData(roleForAdminCognitoAndDB);
 
         const itemsRootResource = api.root.addResource('items')
         const userRootResource = api.root.addResource('users')
@@ -268,9 +297,14 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         itemsRootResource.addMethod('DELETE', new apigateway.LambdaIntegration(dynamoRemoveItem),{
             authorizer: auth
         });
-        userRootResource.addMethod('POST',new apigateway.LambdaIntegration(adminUser),{
+        userRootResource.addMethod('POST',new apigateway.LambdaIntegration(createServers),{
             authorizer: auth
         })
+        userRootResource.addMethod('GET',new apigateway.LambdaIntegration(fnGetUsers),{
+            authorizer:auth
+        })
+        const serverResource = userRootResource.addResource("servers");
+
         const itemSubResources = itemsRootResource.addResource('{itemId}');
         const queryResource = itemsRootResource.addResource('query');
         const searchResource = itemsRootResource.addResource('search');
@@ -283,6 +317,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             authorizer:auth
         })
         searchResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoSearchItem),{
+            authorizer:auth
+        });
+        serverResource.addMethod('GET',new apigateway.LambdaIntegration(fnGetUServers),{
             authorizer:auth
         });
 
