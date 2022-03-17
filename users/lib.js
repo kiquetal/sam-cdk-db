@@ -1,3 +1,4 @@
+const AWS = require("aws-sdk");
 const return500Response = (data) => {
 
 console.log(JSON.stringify(data));
@@ -63,6 +64,61 @@ console.log(JSON.stringify(params));
 }
 
 
+const checkPermissions = () => {
+    const logical = async (request) => {
+        const sub = request.event.requestContext.authorizer.claims.sub;
+        const db = new AWS.DynamoDB.DocumentClient();
+        const params = {
+            TableName: 'UsersCollection',
+            Key: {
+                "pk": sub,
+                "sk": "USER#ID"
+            },
+            ProjectionExpression: "email, #roles",
+            ExpressionAttributeNames: {
+                "#roles": "roles"
+            }
+        };
+        const rp = await db.get(params).promise();
+        let hasPermission = []
+
+        if (!rp.hasOwnProperty("Item")) {
+
+            return {
+                statusCode: 401,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({"code": 401, "message": "unathorized"})
+            };
+
+        }
+        const roles = rp["Item"]["roles"];
+        let {country} = request.event.body;
+        if (roles) {
+            if (roles.includes("admin"))
+                hasPermission = ["admin"];
+            else
+                hasPermission = roles.filter(r => r.includes(country));
+        }
+        if (!hasPermission.length > 0) {
+            return {
+                statusCode: 401,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({"code": 401, "message": "unathorized"})
+            };
+        }
+
+
+    }
+    return {
+        before: logical
+    }
+};
+
+
 const returnResponse=(statusCode,body)=>{
     return {
         statusCode:statusCode,
@@ -86,3 +142,4 @@ exports.updateItem = updateItemByPk;
 exports.return500Response = return500Response;
 exports.obtainCountry = obtainCountry;
 exports.returnResponse = returnResponse
+exports.checkPermisson = checkPermissions

@@ -173,60 +173,6 @@ const loginUserFn = async (event, contex) => {
 
 }
 
-const checkPermissions = () => {
-    const logical = async (request) => {
-        const sub = request.event.requestContext.authorizer.claims.sub;
-        const db = new AWS.DynamoDB.DocumentClient();
-        const params = {
-            TableName: 'UsersCollection',
-            Key: {
-                "pk": sub,
-                "sk": "USER#ID"
-            },
-            ProjectionExpression: "email, #roles",
-            ExpressionAttributeNames: {
-                "#roles": "roles"
-            }
-        };
-        const rp = await db.get(params).promise();
-        let hasPermission = []
-
-        if (!rp.hasOwnProperty("Item")) {
-
-            return {
-                statusCode: 401,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({"code": 401, "message": "unathorized"})
-            };
-
-        }
-        const roles = rp["Item"]["roles"];
-        let {country} = request.event.body;
-        if (roles) {
-            if (roles.includes("admin"))
-                hasPermission = ["admin"];
-            else
-                hasPermission = roles.filter(r => r.includes(country));
-        }
-        if (!hasPermission.length > 0) {
-            return {
-                statusCode: 401,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({"code": 401, "message": "unathorized"})
-            };
-        }
-
-
-    }
-    return {
-        before: logical
-    }
-};
-
 
 const getUsersFn = async (event, request) => {
     try {
@@ -323,8 +269,9 @@ const getServersFn= async (event,request)=>{
 
 }
 
-exports.createServer = middy(createServer).use(jsonBodyParser()).use(httpError()).use(cors()).use(checkPermissions()).onError(fnError)
+exports.createServer = middy(createServer).use(jsonBodyParser()).use(httpError()).use(cors()).use(lib.checkPermisson()).onError(fnError)
 exports.getUsers = middy(getUsersFn).use(cors()).onError(fnError);
 exports.getServers = middy(getServersFn).use(cors()).onError(fnError)
 exports.removeUser = removeUserFn
 exports.loginUser = loginUserFn
+exports.checkPermissions=checkPermissions
