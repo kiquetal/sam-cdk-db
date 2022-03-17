@@ -206,12 +206,89 @@ const checkPermissions = () => {
     }
 };
 
-exports.createUser = middy(creatUser).use(jsonBodyParser()).use(httpError()).use(cors()).use(checkPermissions()).onError(async (req) => {
+
+const getUsersFn = async (event, request) => {
+    try {
+        const items = await fnDynamoQuery({"sk":"USER#ID"});
+        if (!items){
+            return {
+                statusCode:404,
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    "code":404,
+                    "message":"Users not found"
+                })
+            }
+        }
+        const responseJson=[]
+        items.forEach(value => {
+            responseJson.push({
+                "email":value["email"],
+                "id":value["pk"],
+                "roles":value["roles"]
+            })
+        });
+        return {
+            statusCode:200,
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify(responseJson)
+        }
+    }
+    catch(ex)
+    {
+        return {
+            statusCode:500,
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({"code":500,"message":ex.message})
+        }
+    }
+
+
+}
+
+const fnError=async(req)=> {
     if (req.error) {
         return lib.return500Response(req.error);
+
     }
-})
+};
 
 
-exports.removeUser =: removeUserFn
+const fnDynamoQuery=async (objSearch) => {
+
+    try {
+        const db = new AWS.DynamoDB.DocumentClient();
+        const params = {
+            IndexName: 'sk',
+            KeyConditionExpression: " sk=:sk",
+            ExpressionAttributeValues: {
+                ":sk": objSearch["sk"]
+            }
+        }
+        let dynamoResponse = await db.query(params).promise()
+        let items = dynamoResponse["Items"]
+        while (dynamoResponse.LastEvaluatedKey) {
+            params["ExclusiveStartKey"] = dynamoResponse.LastEvaluatedKey
+            dynamoResponse = await db.query(params).promise();
+            items = items.concat(dynamoResponse["Items"])
+        }
+        return items;
+
+    }
+    catch(ex)
+    {
+        return null;
+    }
+}
+
+exports.createUser = middy(creatUser).use(jsonBodyParser()).use(httpError()).use(cors()).use(checkPermissions()).onError(fnError)
+exports.getUsers = middy(getUsersFn).use(cors()).onError(fnError);
+exports.getServers = getServersFn
+exports.removeUser = removeUserFn
 exports.loginUser = loginUserFn
