@@ -43,12 +43,12 @@ const createServer = async (event, context) => {
 
         const params = {
             UserPoolId: process.env.POOL_ID,
-            Username: body["username"],
+            Username: body["email"],
             MessageAction: "SUPPRESS",
             UserAttributes: [
                 {
                     "Name": "email",
-                    "Value": body["username"]
+                    "Value": body["email"]
                 },
                 {
                     "Name": "email_verified",
