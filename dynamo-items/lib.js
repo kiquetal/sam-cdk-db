@@ -71,6 +71,7 @@ const  obtainCountry = (pk) => {
 
 
 const checkPermissions = () => {
+    const AWS = require("aws-sdk");
     const logical = async (request) => {
         const sub = request.event.requestContext.authorizer.claims.sub;
         const db = new AWS.DynamoDB.DocumentClient();
@@ -100,6 +101,7 @@ const checkPermissions = () => {
 
         }
         const roles = rp["Item"]["roles"];
+        console.log("rolesForThisSub: "+JSON.stringify(roles));
         let {country} = request.event.body;
         if (roles) {
             if (roles.includes("admin"))

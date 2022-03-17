@@ -55,7 +55,7 @@ const handlerUpdate = async (event, context) => {
     try {
         console.log("env" +process.env.ISLOCAL);
         const db =process.env.ISLOCAL=="true"?new AWS.DynamoDB.DocumentClient(options):new AWS.DynamoDB.DocumentClient();
-        const {pk, type, ...rest} = event.body;
+        const {pk, type, country,...rest} = event.body;
         let resp = await lib.getItemByPk(db, {
             TableName: 'AccountsCollection',
             Key: {
@@ -106,7 +106,8 @@ const handlerUpdate = async (event, context) => {
                     country: lib.obtainCountry(pk)
                 },
                 ...expressionUpdate,
-                ReturnValues: "ALL_NEW"
+                ReturnValues: "ALL_NEW",
+                ConditionExpression:"attribute_exists(pk) AND attribute_exists(country)"
             });
 
             response = {

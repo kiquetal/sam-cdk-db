@@ -274,7 +274,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         usersTable.grantReadData(fnGetUServers);
         usersTable.grantReadWriteData(roleForCognito);
         usersTable.grantReadWriteData(roleForAdminCognitoAndDB);
-
+        usersTable.grantReadData(dynamoInsertItem);
         const itemsRootResource = api.root.addResource('items')
         const userRootResource = api.root.addResource('users')
 

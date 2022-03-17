@@ -41,6 +41,9 @@ const baseHandler = async (event, context) => {
     try {
 
         console.log("env" +process.env.ISLOCAL);
+
+        const sub = event.requestContext.authorizer.claims.sub;
+        const email = event.requestContext.authorizer.claims.email;
         const db =process.env.ISLOCAL=="true"?new AWS.DynamoDB.DocumentClient(options):new AWS.DynamoDB.DocumentClient();
 
         let {typeItem, country,data, resourceGroup, backendName,enc,...rest } = event.body;
@@ -71,7 +74,11 @@ const baseHandler = async (event, context) => {
                 resourceGroup,
                 createdDate : dayjs.utc().unix(),
                 typeItem,
-                ...rest
+                ...rest,
+                creator:{
+                    sub,
+                    email
+                }
             }
         };
 
