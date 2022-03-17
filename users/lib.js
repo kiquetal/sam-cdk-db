@@ -62,6 +62,17 @@ console.log(JSON.stringify(params));
 
 }
 
+
+const returnResponse=(statusCode,body)=>{
+    return {
+        statusCode:statusCode,
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify(body)
+    }
+}
+
 const  obtainCountry = (pk) => {
 
     const [_, country, ...rest] = pk.split("#");
@@ -74,3 +85,4 @@ exports.putItem = putItemByPk;
 exports.updateItem = updateItemByPk;
 exports.return500Response = return500Response;
 exports.obtainCountry = obtainCountry;
+exports.returnResponse = returnResponse

@@ -211,16 +211,11 @@ const getUsersFn = async (event, request) => {
     try {
         const items = await fnDynamoQuery({"sk":"USER#ID"});
         if (!items){
-            return {
-                statusCode:404,
-                headers:{
-                    "Content-Type":"application/json"
-                },
-                body:JSON.stringify({
+            return lib.returnResponse(404,{
                     "code":404,
                     "message":"Users not found"
-                })
-            }
+                });
+
         }
         const responseJson=[]
         items.forEach(value => {
@@ -230,23 +225,11 @@ const getUsersFn = async (event, request) => {
                 "roles":value["roles"]
             })
         });
-        return {
-            statusCode:200,
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify(responseJson)
-        }
+        return lib.returnResponse(200,responseJson)
     }
     catch(ex)
     {
-        return {
-            statusCode:500,
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({"code":500,"message":ex.message})
-        }
+        return lib.return500Response(ex.message);
     }
 
 
@@ -286,9 +269,37 @@ const fnDynamoQuery=async (objSearch) => {
         return null;
     }
 }
+const getServersFn= async (event,request)=>{
+
+    try {
+        const items = await fnDynamoQuery({"sk":"SERVER#ID"});
+        if (!items){
+            return lib.returnResponse(404,{
+                "code":404,
+                "message":"Servers not found"
+            });
+
+        }
+        const responseJson=[]
+        items.forEach(value => {
+            responseJson.push({
+                "serverName":value["email"],
+                "country":value["country"],
+                "id":value["pk"]
+            })
+        });
+        return lib.returnResponse(200,responseJson);
+    }
+    catch(ex)
+    {
+        return lib.return500Response(ex.message);
+    }
+
+
+}
 
 exports.createUser = middy(creatUser).use(jsonBodyParser()).use(httpError()).use(cors()).use(checkPermissions()).onError(fnError)
 exports.getUsers = middy(getUsersFn).use(cors()).onError(fnError);
-exports.getServers = getServersFn
+exports.getServers = middy(getServersFn).use(cors()).onError(fnError)
 exports.removeUser = removeUserFn
 exports.loginUser = loginUserFn
