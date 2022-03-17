@@ -102,6 +102,7 @@ const checkPermissions = () => {
         }
         const roles = rp["Item"]["roles"];
         console.log("rolesForThisSub: "+JSON.stringify(roles));
+        Object.assign(request.context,{"roles":roles});
         let {country} = request.event.body;
         if (roles) {
             if (roles.includes("admin"))

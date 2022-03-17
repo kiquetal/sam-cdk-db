@@ -274,4 +274,4 @@ exports.getUsers = middy(getUsersFn).use(cors()).onError(fnError);
 exports.getServers = middy(getServersFn).use(cors()).onError(fnError)
 exports.removeUser = removeUserFn
 exports.loginUser = loginUserFn
-exports.checkPermissions=checkPermissions
+
