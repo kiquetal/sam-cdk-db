@@ -5,6 +5,10 @@ const jsonBodyParser = require('@middy/http-json-body-parser');
 const httpError = require('@middy/http-error-handler');
 const lib = require("./lib");
 const util = require("./util");
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
+
 const removeUserFn = async (event, context) => {
     const USERNAME = process.env.USERNAME
     const POOL_ID = process.env.POOL_ID
@@ -69,11 +73,11 @@ const createServer = async (event, context) => {
             Password: body["password"],
             UserPoolId: process.env.POOL_ID,
             Permanent: true,
-            Username: body["username"]
+            Username: body["email"]
         }
         await cognito.adminSetUserPassword(paramsPassword).promise();
 
-        await saveCredentialsDb(sub["Value"], body["username"], body["password"], body["country"],body["serverName"],{"email":emailCreator,
+        await saveCredentialsDb(sub["Value"], body["email"], body["password"], body["country"],body["serverName"],{"email":emailCreator,
         "sub":subCreator});
 
         return {
@@ -111,7 +115,8 @@ const saveCredentialsDb = async (sub, username, password, country,serverName,cre
                 'email': username,
                 "serverName":serverName,
                 "typeItem": "USER",
-                "creator":creator
+                "creator":creator,
+                "createdAt":dayjs.utc().unix()
             }
         };
         let dynamoResponse = await db.put(params).promise();
@@ -301,9 +306,11 @@ const getServersFn= async (event,request)=>{
         const responseJson=[]
         items.forEach(value => {
             responseJson.push({
-                "serverName":value["email"],
+                "serverName":value["serverName"],
+                "email":value["email"],
                 "country":value["country"],
-                "id":value["pk"]
+                "id":value["pk"],
+                "creator":value["creator"]
             })
         });
         return lib.returnResponse(200,responseJson);
