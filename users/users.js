@@ -153,15 +153,9 @@ const loginUserFn = async (event, contex) => {
 }
 
 const checkPermissions = () => {
-
-
     const logical = async (request) => {
-
         const sub = request.event.requestContext.authorizer.claims.sub;
-
-
         const db = new AWS.DynamoDB.DocumentClient();
-
         const params = {
             TableName: 'UsersCollection',
             Key: {
@@ -174,21 +168,10 @@ const checkPermissions = () => {
             }
         };
         const rp = await db.get(params).promise();
-        let hasPermission=[]
-        if (rp.hasOwnProperty("Item")) {
-            const roles = rp["Item"]["roles"];
+        let hasPermission = []
 
-            let { country } = request.event.body;
-            console.log(country)
-            if (roles.includes("admin"))
-                hasPermission=["admin"];
-            else
-            hasPermission= roles.filter(r=> r.includes(country));
+        if (!rp.hasOwnProperty("Item")) {
 
-        }
-
-
-        if (!hasPermission.length>0) {
             return {
                 statusCode: 401,
                 headers: {
@@ -197,9 +180,27 @@ const checkPermissions = () => {
                 body: JSON.stringify({"code": 401, "message": "unathorized"})
             };
 
+        }
+        const roles = rp["Item"]["roles"];
+        let {country} = request.event.body;
+        if (roles) {
+            if (roles.includes("admin"))
+                hasPermission = ["admin"];
+            else
+                hasPermission = roles.filter(r => r.includes(country));
+        }
+        if (!hasPermission.length > 0) {
+            return {
+                statusCode: 401,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({"code": 401, "message": "unathorized"})
+            };
+        }
+
 
     }
-
     return {
         before: logical
     }
@@ -212,6 +213,5 @@ exports.createUser = middy(creatUser).use(jsonBodyParser()).use(httpError()).use
 })
 
 
-exports.removeUser = removeUserFn
-
+exports.removeUser =: removeUserFn
 exports.loginUser = loginUserFn
