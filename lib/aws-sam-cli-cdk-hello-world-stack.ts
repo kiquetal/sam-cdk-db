@@ -55,10 +55,19 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             sortKey: { name:'sk',type:dynamodb.AttributeType.STRING},
             billingMode: dynamodb.BillingMode.PROVISIONED,
             readCapacity: 5,
-            tableName:'RolesCollection',
+            tableName:'RolesAccessCollection',
             removalPolicy:RemovalPolicy.DESTROY,
             writeCapacity: 5
         });
+
+        rolesTable.addGlobalSecondaryIndex({
+            indexName:"index_by_typeItem",
+            partitionKey:{name:'typeItem',type:dynamodb.AttributeType.STRING},
+            sortKey:{name:"sk",type:dynamodb.AttributeType.STRING},
+            projectionType:dynamodb.ProjectionType.ALL,
+            readCapacity:5,
+            writeCapacity:5
+        })
 
 
         const dynamoInsertItem = new lambda.Function(this, 'dynamo-lambda-insert-function', {

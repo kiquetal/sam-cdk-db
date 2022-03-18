@@ -81,9 +81,7 @@ const checkPermissions = () => {
         };
         const rp = await db.get(params).promise();
         let hasPermission = []
-
         if (!rp.hasOwnProperty("Item")) {
-
             return {
                 statusCode: 401,
                 headers: {
