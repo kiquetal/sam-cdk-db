@@ -42,7 +42,6 @@ const baseHandler = async (event, context) => {
 
         console.log("env" +process.env.ISLOCAL);
         console.log(JSON.stringify(context));
-        console.log(JSON.stringify(event));
         const sub = event.requestContext.authorizer.claims.sub;
         const email = event.requestContext.authorizer.claims.email;
         const db =process.env.ISLOCAL=="true"?new AWS.DynamoDB.DocumentClient(options):new AWS.DynamoDB.DocumentClient();

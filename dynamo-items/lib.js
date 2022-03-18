@@ -101,7 +101,6 @@ const checkPermissions = () => {
 
         }
         const roles = rp["Item"]["roles"];
-        console.log("rolesForThisSub: "+JSON.stringify(roles));
         Object.assign(request.context,{"roles":roles});
         let {country} = request.event.body;
         if (roles) {
@@ -116,7 +115,7 @@ const checkPermissions = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({"code": 401, "message": "unathorized"})
+                body: JSON.stringify({"code": 401, "message": "unauthorized"})
             };
         }
 

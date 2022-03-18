@@ -105,7 +105,7 @@ const checkPermissions = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({"code": 401, "message": "unathorized"})
+                body: JSON.stringify({"code": 401, "message": "unauthorized"})
             };
         }
 
@@ -134,6 +134,13 @@ const  obtainCountry = (pk) => {
 
 }
 
+const fnError=async(req)=> {
+    if (req.error) {
+        return return500Response(req.error);
+
+    }
+};
+
 exports.getItemByPk = getItemByPk;
 exports.putItem = putItemByPk;
 exports.updateItem = updateItemByPk;
@@ -141,3 +148,4 @@ exports.return500Response = return500Response;
 exports.obtainCountry = obtainCountry;
 exports.returnResponse = returnResponse
 exports.checkPermisson = checkPermissions
+exports.fnError = fnError

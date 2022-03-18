@@ -202,12 +202,6 @@ const getUsersFn = async (event, request) => {
 
 }
 
-const fnError=async(req)=> {
-    if (req.error) {
-        return lib.return500Response(req.error);
-
-    }
-};
 
 
 const fnDynamoQuery=async (objSearch) => {
@@ -269,7 +263,7 @@ const getServersFn= async (event,request)=>{
 
 }
 
-exports.createServer = middy(createServer).use(jsonBodyParser()).use(httpError()).use(cors()).use(lib.checkPermisson()).onError(fnError)
+exports.createServer = middy(createServer).use(jsonBodyParser()).use(httpError()).use(cors()).use(lib.checkPermisson()).onError(lib.fnError)
 exports.getUsers = middy(getUsersFn).use(cors()).onError(fnError);
 exports.getServers = middy(getServersFn).use(cors()).onError(fnError)
 exports.removeUser = removeUserFn

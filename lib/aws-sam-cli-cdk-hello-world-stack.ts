@@ -271,6 +271,14 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             }
         });
 
+        const fnGetRoles = new lambda.Function(this,'dynamo-lambda-get-roles-function',{
+            functionName:'sam-cdk-db-get-roles',
+            role: roleForAdminCognitoAndDB,
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler:'roles.obtainRoles',
+            timeout: cdk.Duration.minutes(1),
+            code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
+        })
 
 
         table.grantReadWriteData(dynamoInsertItem);
@@ -313,7 +321,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             authorizer:auth
         })
         const serverResource = userRootResource.addResource("servers");
-
+        const rolesResource = userRootResource.addResource("roles");
         const itemSubResources = itemsRootResource.addResource('{itemId}');
         const queryResource = itemsRootResource.addResource('query');
         const searchResource = itemsRootResource.addResource('search');
@@ -331,7 +339,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         serverResource.addMethod('GET',new apigateway.LambdaIntegration(fnGetUServers),{
             authorizer:auth
         });
-
+        rolesResource.addMethod('GET',new apigateway.LambdaIntegration(fnGetRoles),{
+            authorizer: auth
+        })
 
     }
 
