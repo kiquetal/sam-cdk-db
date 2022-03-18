@@ -5,7 +5,8 @@ const AWS = require("aws-sdk");
 const lib = require("./lib");
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
-const httpErrorHandler = require("@middy/http-error-handler");
+const validator = require('@middy/validator');
+
 const httpError = require("@middy/http-error-handler");
 dayjs.extend(utc);
 const obtainRoles = async(event,context)=>{
@@ -63,15 +64,26 @@ const obtainAccessGroup = async(event,contex)=> {
 
 const createRole = async(event,context)=>{
 
+    const { name ,description } = event.body;
+
+
 
 
 
 }
-const createAccessGroup = async(event,context)=>{
 
-
-
-
+const inputSchema = {
+    type: 'object',
+    properties: {
+        body: {
+            type: 'object',
+            properties: {
+                name: {type: 'string'},
+                description: {type: 'object'}
+            },
+            required: ['name']
+        }
+    }
 }
 
 const checkPermissions = () => {
@@ -91,5 +103,6 @@ const checkPermissions = () => {
 
 }
 
-exports.obtainRoles = middy(obtainRoles).use(cors()).use(httpError()).onError(lib.fnError),
-exports.obtainAccessGroups = middy(obtainAccessGroup).use(cors()).use(httpError()).onError(lib.fnError)
+exports.obtainRoles = middy(obtainRoles).use(cors()).use(httpError()).onError(lib.fnError);
+exports.obtainAccessGroups = middy(obtainAccessGroup).use(cors()).use(httpError()).onError(lib.fnError);
+exports.createRoles = middy(createRole).use(cors()).use(jsonBodyParser()).use(httpError()).use(validator({inputSchema:inputSchema})).onError(lib.fnError)

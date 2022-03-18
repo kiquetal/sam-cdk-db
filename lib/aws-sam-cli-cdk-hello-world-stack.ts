@@ -280,6 +280,11 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
         })
 
+        const fnCreateRole = new lambda.Function(this,'dynamo-lambda-create-roles-function',{
+
+            functionName:''
+        });
+
 
         table.grantReadWriteData(dynamoInsertItem);
         table.grantReadWriteData(dynamoUpdateItem);
@@ -340,6 +345,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             authorizer:auth
         });
         rolesResource.addMethod('GET',new apigateway.LambdaIntegration(fnGetRoles),{
+            authorizer: auth
+        })
+        rolesResource.addMethod('POST',new apigateway.LambdaIntegration(fnCreateRole),{
             authorizer: auth
         })
 
