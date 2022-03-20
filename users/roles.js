@@ -106,6 +106,6 @@ const checkPermissions = () => {
 
 }
 
-exports.obtainRoles = middy(obtainRoles).use(cors()).use(httpError()).use(lib.checkPermisson()).onError(lib.fnError);
-exports.obtainAccessGroups = middy(obtainAccessGroup).use(cors()).use(httpError()).onError(lib.fnError);
-exports.createRoles = middy(createRole).use(cors()).use(jsonBodyParser()).use(httpError()).use(validator({inputSchema:inputSchema})).onError(lib.fnError)
+exports.obtainRoles = middy(obtainRoles).use(cors()).use(httpError()).use(lib.checkPermisson()).onError(lib.fnErrors);
+exports.obtainAccessGroups = middy(obtainAccessGroup).use(cors()).use(httpError()).onError(lib.fnErrors);
+exports.createRoles = middy(createRole).use(cors()).use(jsonBodyParser()).use(httpError()).use(validator({inputSchema:inputSchema})).onError(lib.fnErrors)

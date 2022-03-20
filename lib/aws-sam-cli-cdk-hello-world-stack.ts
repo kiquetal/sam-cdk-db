@@ -284,7 +284,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
            functionName:'sam-cdk-db-get-accessGroup',
            role: roleForAdminCognitoAndDB,
            runtime: lambda.Runtime.NODEJS_14_X,
-           handler:'roles.accessGroup',
+           handler:'roles.obtainAccessGroups',
            timeout:cdk.Duration.minutes(1),
            code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
         });
@@ -336,7 +336,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const searchResource = itemsRootResource.addResource('search');
         const countryQueryResource = queryResource.addResource('{country}');
         const countryAndTypeResource = countryQueryResource.addResource('{type}');
-        const accessGroupsResource = itemsRootResource.addResource('accessGroup');
+        const accessGroupsResource = itemsRootResource.addResource('accessGroups');
         countryAndTypeResource.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetCountryType),{
             authorizer:auth
         })
