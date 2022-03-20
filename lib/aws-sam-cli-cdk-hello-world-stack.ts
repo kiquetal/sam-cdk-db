@@ -280,6 +280,14 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
         })
 
+        const fnAccessGroup = new lambda.Function(this,'dynamo-lambda-get-access-group-function',{
+           functionName:'sam-cdk-db-get-accessGroup',
+           role: roleForAdminCognitoAndDB,
+           runtime: lambda.Runtime.NODEJS_14_X,
+           handler:'roles.accessGroup',
+           timeout:cdk.Duration.minutes(1),
+           code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
+        });
 
         table.grantReadWriteData(dynamoInsertItem);
         table.grantReadWriteData(dynamoUpdateItem);
@@ -291,6 +299,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         usersTable.grantReadData(fnGetUServers);
         usersTable.grantReadWriteData(roleForCognito);
         usersTable.grantReadWriteData(roleForAdminCognitoAndDB);
+        rolesTable.grantReadWriteData(roleForAdminCognitoAndDB);
         usersTable.grantReadData(dynamoInsertItem);
         const itemsRootResource = api.root.addResource('items')
         const userRootResource = api.root.addResource('users')
@@ -327,6 +336,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const searchResource = itemsRootResource.addResource('search');
         const countryQueryResource = queryResource.addResource('{country}');
         const countryAndTypeResource = countryQueryResource.addResource('{type}');
+        const accessGroupsResource = itemsRootResource.addResource('accessGroup');
         countryAndTypeResource.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetCountryType),{
             authorizer:auth
         })
@@ -340,6 +350,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             authorizer:auth
         });
         rolesResource.addMethod('GET',new apigateway.LambdaIntegration(fnGetRoles),{
+            authorizer: auth
+        })
+        accessGroupsResource.addMethod('GET',new apigateway.LambdaIntegration(fnAccessGroup),{
             authorizer: auth
         })
 

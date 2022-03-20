@@ -263,9 +263,9 @@ const getServersFn= async (event,request)=>{
 
 }
 
-exports.createServer = middy(createServer).use(jsonBodyParser()).use(httpError()).use(cors()).use(lib.checkPermisson()).onError(lib.fnError)
-exports.getUsers = middy(getUsersFn).use(cors()).onError(fnError);
-exports.getServers = middy(getServersFn).use(cors()).onError(fnError)
+exports.createServer = middy(createServer).use(jsonBodyParser()).use(httpError()).use(cors()).use(lib.checkPermisson()).onError(lib.fnErrors)
+exports.getUsers = middy(getUsersFn).use(cors()).onError(lib.fnErrors);
+exports.getServers = middy(getServersFn).use(cors()).onError(lib.fnErrors)
 exports.removeUser = removeUserFn
 exports.loginUser = loginUserFn
 

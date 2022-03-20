@@ -13,10 +13,12 @@ const obtainRoles = async(event,context)=>{
 
     try {
 
+        console.log(JSON.stringify(context));
         const rp = await executeQuery("role");
-        return {
-            "roles":rp["Items"]
-        }
+        return lib.returnResponse(200,  {
+                "roles":rp["Items"]
+                }
+        );
 
     }
     catch(ex)
@@ -38,6 +40,7 @@ const executeQuery = async (typeItem)=>{
             }
         }
         const items = await db.query(params).promise()
+        return items;
     }
     catch( ex)
     {
@@ -50,9 +53,9 @@ const obtainAccessGroup = async(event,contex)=> {
     try {
 
         const rp = await executeQuery("accessGroup");
-        return {
+        return lib.returnResponse(200,{
             "accessGroup":rp["Items"]
-        }
+        })
 
     }
     catch(ex)
@@ -103,6 +106,6 @@ const checkPermissions = () => {
 
 }
 
-exports.obtainRoles = middy(obtainRoles).use(cors()).use(httpError()).onError(lib.fnError);
+exports.obtainRoles = middy(obtainRoles).use(cors()).use(httpError()).use(lib.checkPermisson()).onError(lib.fnError);
 exports.obtainAccessGroups = middy(obtainAccessGroup).use(cors()).use(httpError()).onError(lib.fnError);
 exports.createRoles = middy(createRole).use(cors()).use(jsonBodyParser()).use(httpError()).use(validator({inputSchema:inputSchema})).onError(lib.fnError)

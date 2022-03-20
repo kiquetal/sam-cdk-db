@@ -80,7 +80,7 @@ const checkPermissions = () => {
             }
         };
         const rp = await db.get(params).promise();
-        let hasPermission = []
+        console.log(JSON.stringify(rp));
         if (!rp.hasOwnProperty("Item")) {
             return {
                 statusCode: 401,
@@ -92,21 +92,9 @@ const checkPermissions = () => {
 
         }
         const roles = rp["Item"]["roles"];
-        let {country} = request.event.body;
+        console.log(JSON.stringify(roles));
         if (roles) {
-            if (roles.includes("admin"))
-                hasPermission = ["admin"];
-            else
-                hasPermission = roles.filter(r => r.includes(country));
-        }
-        if (!hasPermission.length > 0) {
-            return {
-                statusCode: 401,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({"code": 401, "message": "unauthorized"})
-            };
+            Object.assign(request.context,{"roles":roles})
         }
 
 
@@ -148,4 +136,4 @@ exports.return500Response = return500Response;
 exports.obtainCountry = obtainCountry;
 exports.returnResponse = returnResponse
 exports.checkPermisson = checkPermissions
-exports.fnError = fnError
+exports.fnErrors = fnError
