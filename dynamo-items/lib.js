@@ -87,29 +87,8 @@ const checkPermissions = () => {
             }
         };
         const rp = await db.get(params).promise();
-        let hasPermission = []
-
         if (!rp.hasOwnProperty("Item")) {
-
-            return {
-                statusCode: 401,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({"code": 401, "message": "unathorized"})
-            };
-
-        }
-        const roles = rp["Item"]["roles"];
-        Object.assign(request.context,{"roles":roles});
-        let {country} = request.event.body;
-        if (roles) {
-            if (roles.includes("admin"))
-                hasPermission = ["admin"];
-            else
-                hasPermission = roles.filter(r => r.includes(country));
-        }
-        if (!hasPermission.length > 0) {
+            console.log("User has no role attached");
             return {
                 statusCode: 401,
                 headers: {
@@ -117,9 +96,13 @@ const checkPermissions = () => {
                 },
                 body: JSON.stringify({"code": 401, "message": "unauthorized"})
             };
+
         }
-
-
+        const roles = rp["Item"]["roles"];
+        console.log(JSON.stringify(roles));
+        if (roles) {
+            Object.assign(request.context,{"roles":roles})
+        }
     }
     return {
         before: logical

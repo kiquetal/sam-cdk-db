@@ -41,15 +41,35 @@ const baseHandler = async (event, context) => {
     try {
 
         console.log("env" +process.env.ISLOCAL);
-        console.log(JSON.stringify(context));
         const sub = event.requestContext.authorizer.claims.sub;
         const email = event.requestContext.authorizer.claims.email;
         const db =process.env.ISLOCAL=="true"?new AWS.DynamoDB.DocumentClient(options):new AWS.DynamoDB.DocumentClient();
-
         let {typeItem, country,data, resourceGroup, backendName,enc,...rest } = event.body;
 
         //schema-de-input
 
+        const roles = context.roles;
+        if (!roles.includes("admin"))
+        {
+           const permissionsByCountry = roles.filter(v=>{
+                return v.includes(country.toLowerCase());
+            })
+
+            if (permissionsByCountry.length <1 )
+                return {
+                  "statusCode":403,
+                   "headers":{
+                      "Content-Type":"application/json"
+                   } ,
+                    "body":{
+                      "code":403,
+                        "message":"Forbbiden"
+                    }
+                }
+        }
+        else {
+            console.log("has admin role");
+        }
         if (enc)
         {
 
