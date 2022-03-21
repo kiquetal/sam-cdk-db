@@ -288,7 +288,15 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
            timeout:cdk.Duration.minutes(1),
            code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
         });
-
+        const batchUpdate = new lambda.Function(this,'dynamo-lambda-batch-update-function',{
+            functionName:'sam-cdk-db-batch-update',
+            runtime:lambda.Runtime.NODEJS_14_X,
+            handler:'batch.batchUpdate',
+            timeout:cdk.Duration.minutes(5),
+            code:lambda.Code.fromAsset(path.join(__dirname,'..','dynamo-items'),{
+                exclude:["node_modules"]
+            })
+        })
         table.grantReadWriteData(dynamoInsertItem);
         table.grantReadWriteData(dynamoUpdateItem);
         table.grantReadData(dynamoGetItem);
