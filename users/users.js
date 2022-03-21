@@ -116,7 +116,7 @@ const saveCredentialsDb = async (sub, username, password, country,serverName,cre
                 'pk': sub,
                 'sk': "SERVER#ID",
                 'password': password64,
-                "country": country,
+                "country": country.toUpperCase(),
                 'email': username,
                 "serverName":serverName,
                 "typeItem": "USER",
