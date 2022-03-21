@@ -336,7 +336,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const searchResource = itemsRootResource.addResource('search');
         const countryQueryResource = queryResource.addResource('{country}');
         const countryAndTypeResource = countryQueryResource.addResource('{type}');
-        const accessGroupsResource = itemsRootResource.addResource('accessGroups');
+        const accessGroupsResource = itemsRootResource.addResource('accessGroup');
         countryAndTypeResource.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetCountryType),{
             authorizer:auth
         })

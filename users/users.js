@@ -4,9 +4,12 @@ const middy = require("@middy/core");
 const jsonBodyParser = require('@middy/http-json-body-parser');
 const httpError = require('@middy/http-error-handler');
 const lib = require("./lib");
+const validator = require('@middy/validator');
+
 const util = require("./util");
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
+const httpErrorHandler = require("@middy/http-error-handler");
 dayjs.extend(utc);
 
 const removeUserFn = async (event, context) => {
@@ -34,7 +37,7 @@ const removeUserFn = async (event, context) => {
 const createServer = async (event, context) => {
     try {
         const body = event.body;
-        const requiredFields=["country","serverName","email","password"];
+  /*      const requiredFields=["country","serverName","email","password"];
         let missingFields=[]
         requiredFields.forEach(value => {
             if (!body.hasOwnProperty(value))
@@ -44,7 +47,9 @@ const createServer = async (event, context) => {
         {
             return lib.returnResponse(400,{"code":400,"message":`Required fields ${missingFields}`})
         }
-
+*/
+        const { roles } = context;
+        console.log(JSON.stringify(roles));
         const params = {
             UserPoolId: process.env.POOL_ID,
             Username: body["email"],
@@ -78,7 +83,7 @@ const createServer = async (event, context) => {
         await cognito.adminSetUserPassword(paramsPassword).promise();
 
         await saveCredentialsDb(sub["Value"], body["email"], body["password"], body["country"],body["serverName"],{"email":emailCreator,
-        "sub":subCreator});
+        "sub":subCreator,"accessGroup":body["accessGroup"]});
 
         return {
             'headers': {
@@ -263,7 +268,25 @@ const getServersFn= async (event,request)=>{
 
 }
 
-exports.createServer = middy(createServer).use(jsonBodyParser()).use(httpError()).use(cors()).use(lib.checkPermisson()).onError(lib.fnErrors)
+const inputSchema = {
+
+        type: 'object',
+        properties: {
+            body: {
+                type: 'object',
+                properties: {
+                    email: {type: 'string'},
+                    password: {type: 'string'},
+                    country:{type:'string'},
+                    serverName:{type:'string'},
+                    accessGroup:{ type:'array'}
+                },
+                required: ['email','password','country','serverName','accessGroup'] // Insert here all required event properties
+            }
+        }
+    }
+
+exports.createServer = middy(createServer).use(jsonBodyParser()).use(cors()).use(validator({ inputSchema: inputSchema})).use(lib.checkPermisson()).onError(lib.fnErrors)
 exports.getUsers = middy(getUsersFn).use(cors()).onError(lib.fnErrors);
 exports.getServers = middy(getServersFn).use(cors()).onError(lib.fnErrors)
 exports.removeUser = removeUserFn
