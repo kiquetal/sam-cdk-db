@@ -288,6 +288,16 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
            timeout:cdk.Duration.minutes(1),
            code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
         });
+
+        const fnAssignRoles = new lambda.Function(this, 'dynamodo-lambda-assign-role-function',{
+           functionName:'sam-cdk-sb-assign-role',
+           role: roleForAdminCognitoAndDB,
+           runtime: lambda.Runtime.NODEJS_14_X,
+           handler:'roles.asssingRoles',
+           timeout:cdk.Duration.minutes(1),
+           code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
+        });
+
         const batchUpdate = new lambda.Function(this,'dynamo-lambda-batch-update-function',{
             functionName:'sam-cdk-db-batch-update',
             runtime:lambda.Runtime.NODEJS_14_X,
@@ -340,6 +350,8 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         })
         const serverResource = userRootResource.addResource("servers");
         const rolesResource = userRootResource.addResource("roles");
+
+        const assingRoleResource= rolesResource.addResource("assign");
         const itemSubResources = itemsRootResource.addResource('{itemId}');
         const queryResource = itemsRootResource.addResource('query');
         const searchResource = itemsRootResource.addResource('search');
@@ -365,6 +377,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             authorizer: auth
         })
 
+        assingRoleResource.addMethod('POST',new apigateway.LambdaIntegration(fnAssignRoles),{
+            authorizer: auth
+        })
     }
 
 }

@@ -19,5 +19,9 @@
     "strictPropertyInitialization": false,
     "typeRoots": ["./node_modules/@types"]
   },
-  "exclude": ["cdk.out"]
+  "exclude": ["cdk.out"],
+  "baseUrl": ".",
+  "paths": {
+    "/opt/nodejs/node14": ["layers/nodejs/node14/*"]
+  }
 }

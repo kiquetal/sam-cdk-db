@@ -47,7 +47,7 @@ const baseHandler = async (event, context) => {
         let {typeItem, country,data, resourceGroup, backendName,enc,...rest } = event.body;
 
         //schema-de-input
-
+        country = country.toUpperCase();
         const roles = context.roles;
         if (!roles.includes("admin"))
         {
