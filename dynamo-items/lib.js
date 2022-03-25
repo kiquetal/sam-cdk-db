@@ -98,7 +98,11 @@ const checkPermissions = () => {
             };
 
         }
-        const roles = rp["Item"]["roles"];
+        const item = rp["Item"]
+        let roles=[];
+        if (item.hasOwnProperty("roles"))
+            roles= rp["Item"]["roles"]
+
         console.log(JSON.stringify(roles));
         if (roles) {
             Object.assign(request.context,{"roles":roles})
