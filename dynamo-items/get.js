@@ -58,12 +58,10 @@ const baseHandlerCountryType=async (event,context)=> {
         params['FilterExpression'] = params['FilterExpression'].slice(0, -4);
 
     }
-    console.log("test this")
     console.log(JSON.stringify(params));
     try {
 
         let dynamoResponse = await db.query(params).promise();
-
         let items = dynamoResponse["Items"]
         while  (dynamoResponse.LastEvaluatedKey)
         {
@@ -71,6 +69,10 @@ const baseHandlerCountryType=async (event,context)=> {
             dynamoResponse = await db.query(params).promise();
             items=items.concat(dynamoResponse["Items"])
         }
+
+
+
+
         return {
             'headers': {
                 'Content-Type': 'application/json'
@@ -92,11 +94,5 @@ const baseHandlerCountryType=async (event,context)=> {
 
 
 
-exports.handlerCountryType= middy(baseHandlerCountryType).use(cors()).onError(async (req) => {
-
-
-    if (req.error) {
-        return lib.return500Response(req.error);
-    }
-});
+exports.handlerCountryType= middy(baseHandlerCountryType).use(cors()).use(lib.checkPermission()).onError(lib.fnErrors);
 

@@ -11,7 +11,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         super(scope, id, props);
 
 
-        const table = new dynamodb.Table(this, 'AccountsCollection', {
+        const accountsTable = new dynamodb.Table(this, 'AccountsCollection', {
             partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
             sortKey: { name:'country',type:dynamodb.AttributeType.STRING},
             billingMode: dynamodb.BillingMode.PROVISIONED,
@@ -22,7 +22,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             timeToLiveAttribute:"ttl"
         });
 
-        table.addGlobalSecondaryIndex({
+        accountsTable.addGlobalSecondaryIndex({
             indexName:'TypeItemCountryIndex',
             partitionKey:{name:'country',type:dynamodb.AttributeType.STRING},
             sortKey:{name:'typeItem',type:dynamodb.AttributeType.STRING},
@@ -307,13 +307,13 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
                 exclude:["node_modules"]
             })
         })
-        table.grantReadWriteData(dynamoInsertItem);
-        table.grantReadWriteData(dynamoUpdateItem);
-        table.grantReadData(dynamoGetItem);
-        table.grantReadData(dynamoSearchItem);
-        table.grantReadData(dynamoGetCountryType);
-        table.grantReadWriteData(roleForAdminCognitoAndDB);
-        table.grantReadWriteData(batchUpdate);
+        accountsTable.grantReadWriteData(dynamoInsertItem);
+        accountsTable.grantReadWriteData(dynamoUpdateItem);
+        accountsTable.grantReadData(dynamoGetItem);
+        accountsTable.grantReadData(dynamoSearchItem);
+        accountsTable.grantReadData(dynamoGetCountryType);
+        accountsTable.grantReadWriteData(roleForAdminCognitoAndDB);
+        accountsTable.grantReadWriteData(batchUpdate);
         usersTable.grantReadData(fnGetUsers);
         usersTable.grantReadData(fnGetUServers);
         usersTable.grantReadWriteData(roleForCognito);

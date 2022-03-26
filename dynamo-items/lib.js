@@ -75,38 +75,51 @@ const checkPermissions = () => {
     const logical = async (request) => {
         const sub = request.event.requestContext.authorizer.claims.sub;
         const db = new AWS.DynamoDB.DocumentClient();
-        const params = {
+        const paramsUsers = {
             TableName: 'UsersCollection',
             Key: {
                 "pk": sub,
                 "sk": "USER#ID"
             },
-            ProjectionExpression: "email, #roles",
+            ProjectionExpression: "email, #roles, accessGroup",
             ExpressionAttributeNames: {
                 "#roles": "roles"
             }
         };
-        const rp = await db.get(params).promise();
+        const paramsServers = {
+            TableName: 'UsersCollection',
+            Key: {
+                "pk": sub,
+                "sk": "SERVER#ID"
+            },
+            ProjectionExpression: "email, #accessGroup",
+            ExpressionAttributeNames: {
+                "#accessGroup": "accessGroup"
+            }
+        };
+
+        let rp = await db.get(paramsUsers).promise();
         if (!rp.hasOwnProperty("Item")) {
-            console.log("User has no role attached");
-            return {
-                statusCode: 401,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({"code": 401, "message": "unauthorized"})
-            };
+            rp = await db.get(paramsServers).promise();
+            if (rp.hasOwnProperty("Item"))
+            {
+                const roles = rp["Item"]["roles"];
+                const accessGroup = rp["Item"]["accessGroup"];
+                Object.assign(request.context,{"roles":roles,"accessGroup":accessGroup});
+                console.log(JSON.stringify(rp["Item"]));
 
+            }
+            else {
+                console.log("not recognized user");
+            }
         }
-        const item = rp["Item"]
-        let roles=[];
-        if (item.hasOwnProperty("roles"))
-            roles= rp["Item"]["roles"]
+        else
+        {
+            const roles = rp["Item"]["roles"];
+            const accessGroup = rp["Item"]["accessGroup"];
+            Object.assign(request.context,{"roles":roles,"accessGroup":accessGroup});
+        }
 
-        console.log(JSON.stringify(roles));
-        if (roles) {
-            Object.assign(request.context,{"roles":roles})
-        }
     }
     return {
         before: logical
@@ -114,6 +127,12 @@ const checkPermissions = () => {
 };
 
 
+const fnError=async (req)=> {
+    if (req.error) {
+        return return500Response(req.error);
+
+    }
+};
 
 exports.getItemByPk = getItemByPk;
 exports.putItem = putItemByPk;
@@ -121,3 +140,4 @@ exports.updateItem = updateItemByPk;
 exports.return500Response = return500Response;
 exports.obtainCountry = obtainCountry;
 exports.checkPermission = checkPermissions
+exports.fnErrors = fnError
