@@ -83,7 +83,7 @@ const createServer = async (event, context) => {
         await cognito.adminSetUserPassword(paramsPassword).promise();
 
         await saveCredentialsDb(sub["Value"], body["email"], body["password"], body["country"],body["serverName"],{"email":emailCreator,
-        "sub":subCreator,"accessGroup":body["accessGroup"]});
+        "sub":subCreator},body["accessGroup"]);
 
         return {
             'headers': {
@@ -105,7 +105,7 @@ const createServer = async (event, context) => {
 }
 
 
-const saveCredentialsDb = async (sub, username, password, country,serverName,creator) => {
+const saveCredentialsDb = async (sub, username, password, country,serverName,creator,accessGroup) => {
 
     try {
         const db = new AWS.DynamoDB.DocumentClient();
@@ -117,6 +117,7 @@ const saveCredentialsDb = async (sub, username, password, country,serverName,cre
                 'sk': "SERVER#ID",
                 'password': password64,
                 "country": country.toUpperCase(),
+                "accessGroup":accessGroup,
                 'email': username,
                 "serverName":serverName,
                 "typeItem": "USER",

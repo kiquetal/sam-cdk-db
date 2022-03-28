@@ -31,9 +31,39 @@ exports.handler=async (event, context) => {
 
 };
 
+const filteredByAccessGroup=(items, accessGroup)=> {
+
+    if (accessGroup.length === 0) {
+        return [];
+    }
+   return items.filter(item => {
+            accessGroup.find(group => {
+                return item.accessGroup.includes(group)
+            });
+    });
+
+
+
+}
+
+const obtainRoleFromContext=(roles, country)=> {
+
+    if (roles.includes("admin")) return true;
+    const filteredRole =roles.filter(role => {
+        return role.includes(country);
+    });
+    console.log(filteredRole);
+    return filteredRole.length > 0
+
+
+}
+
 const baseHandlerCountryType=async (event,context)=> {
 
     console.log("env" +process.env.ISLOCAL);
+    console.log("context",context);
+    const roles = context.hasOwnProperty("roles")?context["roles"]:[]
+    const accessGroup = context.hasOwnProperty("accessGroup")?context["accessGroup"]?context["accessGroup"]:[]:[];
     const db =process.env.ISLOCAL=="true"?new AWS.DynamoDB.DocumentClient(options):new AWS.DynamoDB.DocumentClient();
     let {country, type} = event.pathParameters;
 
@@ -69,16 +99,22 @@ const baseHandlerCountryType=async (event,context)=> {
             dynamoResponse = await db.query(params).promise();
             items=items.concat(dynamoResponse["Items"])
         }
+        let filteredList=[]
+        const isAdminOrCountryContext = obtainRoleFromContext(roles,country.toLowerCase());
+        if (isAdminOrCountryContext)
+        {
+               filteredList = items;
+        }
+        else {
 
-
-
-
+            filteredList = filteredByAccessGroup(items, accessGroup);
+        }
         return {
             'headers': {
                 'Content-Type': 'application/json'
             },
             'statusCode': 200,
-            'body': JSON.stringify(items)
+            'body': JSON.stringify(filteredList)
         };
     } catch (err) {
 

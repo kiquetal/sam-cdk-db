@@ -312,6 +312,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         accountsTable.grantReadData(dynamoGetItem);
         accountsTable.grantReadData(dynamoSearchItem);
         accountsTable.grantReadData(dynamoGetCountryType);
+        usersTable.grantReadData(dynamoGetCountryType);
         accountsTable.grantReadWriteData(roleForAdminCognitoAndDB);
         accountsTable.grantReadWriteData(batchUpdate);
         usersTable.grantReadData(fnGetUsers);
