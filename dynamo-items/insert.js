@@ -44,27 +44,37 @@ const baseHandler = async (event, context) => {
         const sub = event.requestContext.authorizer.claims.sub;
         const email = event.requestContext.authorizer.claims.email;
         const db =process.env.ISLOCAL=="true"?new AWS.DynamoDB.DocumentClient(options):new AWS.DynamoDB.DocumentClient();
-        let {typeItem, country,data, resourceGroup, backendName,enc,...rest } = event.body;
+        let {typeItem, country,data, resourceGroup, accessGroup ,backendName,enc,...rest } = event.body;
 
+        if (!Array.isArray(accessGroup))
+            return {
+                statusCode: 400,
+                body: JSON.stringify({
+                    code: "400",
+                    message: "accessGroup must be an array"
+                })
+            };
+        console.log("after array validation");
         //schema-de-input
         country = country.toUpperCase();
         const roles = context.roles;
+        console.log(roles);
         if (!roles.includes("admin"))
         {
            const permissionsByCountry = roles.filter(v=>{
                 return v.includes(country.toLowerCase());
             })
-
+            console.log(permissionsByCountry);
             if (permissionsByCountry.length <1 )
                 return {
                   "statusCode":403,
                    "headers":{
                       "Content-Type":"application/json"
                    } ,
-                    "body":{
-                      "code":403,
-                        "message":"Forbbiden"
-                    }
+                    "body":JSON.stringify({
+                      code:403,
+                        message:"Forbbiden"
+                    })
                 }
         }
         else {
@@ -94,6 +104,7 @@ const baseHandler = async (event, context) => {
                 resourceGroup,
                 createdDate : dayjs.utc().unix(),
                 typeItem,
+                accessGroup,
                 ...rest,
                 creator:{
                     sub,
@@ -156,19 +167,20 @@ const baseHandler = async (event, context) => {
                 pk
             })
         }
+        return response;
 
     }
     catch(err)
     {
+        console.log("error",err.message);
         if (err.message)
-            return lib.return500Response({"message":err.message});
+            return lib.return500Response(err.message);
         else
             return lib.return500Response(err.message);
 
     }
 
 
-return response;
 };
 
 

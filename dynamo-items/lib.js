@@ -7,7 +7,8 @@ console.log(JSON.stringify(data));
         },
         'statusCode': 500,
         'body': JSON.stringify({
-            'error': data
+            code:500,
+            message: data
         })
 
     };

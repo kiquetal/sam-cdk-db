@@ -52,7 +52,8 @@ const obtainRoleFromContext=(roles, country)=> {
     const filteredRole =roles.filter(role => {
         return role.includes(country);
     });
-    console.log(filteredRole);
+    console.log("roles from auth", filteredRole);
+    console.log("roles from query", country);
     return filteredRole.length > 0
 
 
