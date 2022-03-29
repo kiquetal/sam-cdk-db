@@ -37,7 +37,7 @@ const filteredByAccessGroup=(items, accessGroup)=> {
         return [];
     }
    return items.filter(item => {
-            accessGroup.find(group => {
+           return accessGroup.find(group => {
                 return item.accessGroup.includes(group)
             });
     });
@@ -47,7 +47,9 @@ const filteredByAccessGroup=(items, accessGroup)=> {
 }
 
 const obtainRoleFromContext=(roles, country)=> {
-
+    if (roles.length === 0) {
+        return false;
+    }
     if (roles.includes("admin")) return true;
     const filteredRole =roles.filter(role => {
         return role.includes(country);
@@ -63,7 +65,7 @@ const baseHandlerCountryType=async (event,context)=> {
 
     console.log("env" +process.env.ISLOCAL);
     console.log("context",context);
-    const roles = context.hasOwnProperty("roles")?context["roles"]:[]
+    const roles = context.hasOwnProperty("roles")?context["roles"]?context["roles"]:[]:[];
     const accessGroup = context.hasOwnProperty("accessGroup")?context["accessGroup"]?context["accessGroup"]:[]:[];
     const db =process.env.ISLOCAL=="true"?new AWS.DynamoDB.DocumentClient(options):new AWS.DynamoDB.DocumentClient();
     let {country, type} = event.pathParameters;
@@ -108,6 +110,8 @@ const baseHandlerCountryType=async (event,context)=> {
         }
         else {
 
+            console.log(accessGroup);
+            console.log(items)
             filteredList = filteredByAccessGroup(items, accessGroup);
         }
         return {

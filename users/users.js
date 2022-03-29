@@ -147,7 +147,7 @@ const loginUserFn = async (event, contex) => {
             TableName: 'UsersCollection',
             Key: {
                 'pk': sub,
-                'sk': 'SERVERID'
+                'sk': 'SERVER#ID'
             }
         }
         const rp = await db.get(params).promise()
