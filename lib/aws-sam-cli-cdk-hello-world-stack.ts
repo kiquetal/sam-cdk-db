@@ -307,6 +307,24 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
                 exclude:["node_modules"]
             })
         })
+
+        const fnCreateRoles = new lambda.Function(this,'dynamo-lambda-create-roles-function',{
+            functionName:'sam-cdk-db-create-roles',
+            role: roleForAdminCognitoAndDB,
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler:'roles.createRoles',
+            timeout:cdk.Duration.minutes(1),
+            code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
+        });
+
+        const fnCreateAccessGroup = new lambda.Function(this,'dynamo-lambda-create-access-group-function',{
+            functionName:'sam-cdk-db-create-access-group',
+            role: roleForAdminCognitoAndDB,
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler:'roles.createAccessGroups',
+            timeout:cdk.Duration.minutes(1),
+            code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
+        });
         accountsTable.grantReadWriteData(dynamoInsertItem);
         accountsTable.grantReadWriteData(dynamoUpdateItem);
         accountsTable.grantReadData(dynamoGetItem);
@@ -374,10 +392,17 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         rolesResource.addMethod('GET',new apigateway.LambdaIntegration(fnGetRoles),{
             authorizer: auth
         })
+
+        rolesResource.addMethod('POST',new apigateway.LambdaIntegration(fnCreateRoles),{
+            authorizer: auth
+        })
         accessGroupsResource.addMethod('GET',new apigateway.LambdaIntegration(fnAccessGroup),{
             authorizer: auth
         })
 
+        accessGroupsResource.addMethod('POST',new apigateway.LambdaIntegration(fnCreateAccessGroup),{
+            authorizer: auth
+        })
         assingRoleResource.addMethod('POST',new apigateway.LambdaIntegration(fnAssignRoles),{
             authorizer: auth
         })

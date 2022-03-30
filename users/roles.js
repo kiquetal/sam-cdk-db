@@ -79,18 +79,25 @@ const createRole = async(event,context)=>{
                 "description": description,
                 "typeItem": "role",
                 "createdAt": dayjs().utc().format(),
-                "creator":sub
+                "creator":{
+                    "sub": sub,
+                    "email":context.email
+                }
+
             },
             ConditionExpression: "attribute_not_exists(pk)",
             ReturnValues: "ALL_OLD"
         };
-        const res = db.put(params).promise();
+        const res = await db.put(params).promise();
+        console.log(JSON.stringify(res));
         return {
             statusCode: 201,
             headers: {
                 ContentType: "application/json",
             },
-            body: JSON.stringify(res)
+            body: JSON.stringify({
+                "message": "Role created successfully"
+            })
         }
     }
     catch(ex)   {
@@ -111,7 +118,7 @@ const inputSchema = {
             type: 'object',
             properties: {
                 name: {type: 'string'},
-                description: {type: 'object'}
+                description: {type: 'string'}
             },
             required: ['name']
         }
@@ -222,11 +229,47 @@ const hasAlreadyRole = async (role,subId) =>
     }
 
 
+}
 
+const createAccessGroup= async(event,context)=>{
+
+    try {
+        const { accessGroup, description } = event.body;
+        const db = new AWS.DynamoDB.DocumentClient();
+        const params = {
+            TableName: 'RolesAccessCollection',
+            Item: {
+                pk: accessGroup,
+                sk: "access#group",
+                description: description,
+                typeItem: "accessGroup",
+                creator:{
+                    email:context.email,
+                    sub:event.requestContext.authorizer.claims.sub
+                },
+                createdAt:  dayjs.utc().format()
+            }
+        };
+        const res = await db.put(params).promise();
+        return {
+            "statusCode":200,
+            "headers":{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                "message":"Access group created"
+            })
+        }
+    }
+    catch (e) {
+        console.log("error create access group",e.message);
+        return lib.return500Response({"code":500,"message":e.message})
+    }
 
 }
 
 exports.obtainRoles = middy(obtainRoles).use(cors()).use(httpError()).use(lib.checkPermisson()).onError(lib.fnErrors);
 exports.obtainAccessGroups = middy(obtainAccessGroup).use(cors()).use(httpError()).onError(lib.fnErrors);
-exports.createRoles = middy(createRole).use(cors()).use(jsonBodyParser()).use(httpError()).use(validator({inputSchema:inputSchema})).onError(lib.fnErrors);
+exports.createRoles = middy(createRole).use(cors()).use(jsonBodyParser()).use(lib.checkPermisson()).use(validator({inputSchema:inputSchema})).onError(lib.fnErrors);
 exports.asssingRoles = middy(assignRole).use(lib.checkPermisson()).use(cors()).use(jsonBodyParser()).onError(lib.fnErrors);
+exports.createAccessGroups = middy(createAccessGroup).use(cors()).use(jsonBodyParser()).use(lib.checkPermisson()).onError(lib.fnErrors);
