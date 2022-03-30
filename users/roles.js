@@ -234,12 +234,12 @@ const hasAlreadyRole = async (role,subId) =>
 const createAccessGroup= async(event,context)=>{
 
     try {
-        const { accessGroup, description } = event.body;
+        const { name, description } = event.body;
         const db = new AWS.DynamoDB.DocumentClient();
         const params = {
             TableName: 'RolesAccessCollection',
             Item: {
-                pk: accessGroup,
+                pk: name,
                 sk: "access#group",
                 description: description,
                 typeItem: "accessGroup",
@@ -252,7 +252,7 @@ const createAccessGroup= async(event,context)=>{
         };
         const res = await db.put(params).promise();
         return {
-            "statusCode":200,
+            "statusCode":201,
             "headers":{
                 "Content-Type":"application/json"
             },
