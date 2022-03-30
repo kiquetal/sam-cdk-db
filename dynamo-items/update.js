@@ -55,7 +55,7 @@ const handlerUpdate = async (event, context) => {
     try {
         console.log("env" +process.env.ISLOCAL);
         const db =process.env.ISLOCAL=="true"?new AWS.DynamoDB.DocumentClient(options):new AWS.DynamoDB.DocumentClient();
-        const {pk, type, country,...rest} = event.body;
+        const {pk, type, country,...rest,accessGroup} = event.body;
         let resp = await lib.getItemByPk(db, {
             TableName: 'AccountsCollection',
             Key: {
@@ -91,6 +91,8 @@ const handlerUpdate = async (event, context) => {
 
             }
 
+                console.log(accessGroup);
+                console.log(resp.Item.accessGroup)
                 Object.entries(rest).forEach(([key, item]) => {
                 expressionUpdate.UpdateExpression += ` #${key} = :${key},`;
                 expressionUpdate.ExpressionAttributeNames[`#${key}`] = key;
