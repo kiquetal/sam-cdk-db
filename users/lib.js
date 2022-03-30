@@ -94,7 +94,7 @@ const checkPermissions = () => {
         const roles = rp["Item"]["roles"];
         console.log(JSON.stringify(roles));
         if (roles) {
-            Object.assign(request.context,{"roles":roles})
+            Object.assign(request.context,{"roles":roles,"email":rp["Item"]["email"]});
         }
 
 

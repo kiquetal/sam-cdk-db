@@ -67,8 +67,37 @@ const obtainAccessGroup = async(event,contex)=> {
 
 const createRole = async(event,context)=>{
 
-    const { name ,description } = event.body;
+    try {
+        const {name, description} = event.body;
+        const sub = event.requestContext.authorizer.claims.sub;
+        const db = new AWS.DynamoDB.DocumentClient();
+        const params = {
+            TableName: "RolesAccessCollection",
+            Item: {
+                "pk": name,
+                "sk":"access#role",
+                "description": description,
+                "typeItem": "role",
+                "createdAt": dayjs().utc().format(),
+                "creator":sub
+            },
+            ConditionExpression: "attribute_not_exists(pk)",
+            ReturnValues: "ALL_OLD"
+        };
+        const res = db.put(params).promise();
+        return {
+            statusCode: 201,
+            headers: {
+                ContentType: "application/json",
+            },
+            body: JSON.stringify(res)
+        }
+    }
+    catch(ex)   {
+        console.log("exception",ex.message);
+        return lib.return500Response({"code":500,"message":ex.message})
 
+    }
 
 
 
@@ -177,7 +206,7 @@ const hasAlreadyRole = async (role,subId) =>
         };
 
         const rp= await db.get(params).promise()
-        console.log(JSON.stringify(rp));
+        console.log(JSON.stringify(rp));cd
         if (!rp.hasOwnProperty("Item"))
             return false;
         const roles= rp["Item"]["roles"];
