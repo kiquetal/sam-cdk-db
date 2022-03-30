@@ -287,9 +287,39 @@ const inputSchema = {
         }
     }
 
+
+const createAccessGroupsFn=async (event,context)=>{
+
+    try {
+
+    const roles = context.roles;
+    if (!roles.include("admin") )
+        return {
+            statusCode: 403,
+            headers:{
+                ContentType:"application/json"
+            },
+            body: JSON.stringify({
+                code:403,
+                message: "Forbbiden"
+            })
+        }
+
+
+
+    }
+    catch (ex) {
+        console.log(ex.message);
+        return lib.return500Response(ex.message);
+    }
+
+
+}   ;
+
 exports.createServer = middy(createServer).use(jsonBodyParser()).use(cors()).use(validator({ inputSchema: inputSchema})).use(lib.checkPermisson()).onError(lib.fnErrors)
 exports.getUsers = middy(getUsersFn).use(cors()).onError(lib.fnErrors);
-exports.getServers = middy(getServersFn).use(cors()).onError(lib.fnErrors)
+exports.getServers = middy(getServersFn).use(cors()).onError(lib.fnErrors);
+exports.createAccessGroups = middy(createAccessGroupsFn).use(cors()).use(jsonBodyParser()).use(lib.checkPermisson()).onError(lib.fnErrors);
 exports.removeUser = removeUserFn
 exports.loginUser = loginUserFn
 

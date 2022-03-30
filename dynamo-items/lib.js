@@ -106,7 +106,7 @@ const checkPermissions = () => {
             {
                 const roles = rp["Item"]["roles"];
                 const accessGroup = rp["Item"]["accessGroup"];
-                Object.assign(request.context,{"roles":roles,"accessGroup":accessGroup});
+                Object.assign(request.context,{"roles":roles,"accessGroup":accessGroup,"isServer":true});
                 console.log(JSON.stringify(rp["Item"]));
 
             }
@@ -118,7 +118,7 @@ const checkPermissions = () => {
         {
             const roles = rp["Item"]["roles"];
             const accessGroup = rp["Item"]["accessGroup"];
-            Object.assign(request.context,{"roles":roles,"accessGroup":accessGroup});
+            Object.assign(request.context,{"roles":roles,"accessGroup":accessGroup,"isServer":false});
         }
 
     }

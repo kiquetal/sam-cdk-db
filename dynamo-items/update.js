@@ -55,7 +55,7 @@ const handlerUpdate = async (event, context) => {
     try {
         console.log("env" +process.env.ISLOCAL);
         const db =process.env.ISLOCAL=="true"?new AWS.DynamoDB.DocumentClient(options):new AWS.DynamoDB.DocumentClient();
-        const {pk, type, country,...rest,accessGroup} = event.body;
+        const {pk, type, country,accessGroup,...rest} = event.body;
         let resp = await lib.getItemByPk(db, {
             TableName: 'AccountsCollection',
             Key: {
@@ -63,7 +63,20 @@ const handlerUpdate = async (event, context) => {
                 'country': lib.obtainCountry(pk)
             }
         });
-;
+
+        if (!Array.isArray(accessGroup)){
+            return {
+                statusCode:400,
+                headers:{
+                    ContentType:'application/json',
+                },
+                body: JSON.stringify({
+                    code:400,
+                    message: "accessGroup must be an array"
+                })
+            }
+        }
+
         if (resp.hasOwnProperty('Item')) {
 
             let expressionUpdate = {
@@ -93,6 +106,9 @@ const handlerUpdate = async (event, context) => {
 
                 console.log(accessGroup);
                 console.log(resp.Item.accessGroup)
+
+
+                const uniqueAccessGroup = [...new Set(accessGroup)];
                 Object.entries(rest).forEach(([key, item]) => {
                 expressionUpdate.UpdateExpression += ` #${key} = :${key},`;
                 expressionUpdate.ExpressionAttributeNames[`#${key}`] = key;
@@ -100,7 +116,8 @@ const handlerUpdate = async (event, context) => {
             });
 
             expressionUpdate.UpdateExpression = expressionUpdate.UpdateExpression.slice(0, -1);
-
+            expressionUpdate.UpdateExpression=expressionUpdate.UpdateExpression+', accessGroup = :accessGroup';
+            expressionUpdate.ExpressionAttributeValues[':accessGroup'] = uniqueAccessGroup;
             let updateItem = await lib.updateItem(db, {
                 TableName: 'AccountsCollection',
                 Key: {
