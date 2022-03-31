@@ -54,7 +54,7 @@ const obtainRoleFromContext=(roles, country)=> {
     const filteredRole =roles.filter(role => {
         return role.includes(country);
     });
-    console.log("roles from auth", filteredRole);
+    console.log("roles from auth", JSON.stringify(roles));
     console.log("roles from query", country);
     return filteredRole.length > 0
 
@@ -110,13 +110,15 @@ const baseHandlerCountryType=async (event,context)=> {
         }
         else {
 
-            console.log(accessGroup);
+            console.log("accessGroup from user:" + accessGroup);
             console.log(items)
             filteredList = filteredByAccessGroup(items, accessGroup);
+
+
             const decryptList = filteredList.map(async item => {
                 return {
                     ...item,
-                    data:  item.enc=="true"?JSON.parse(await util.decrypt(item.data)):item.data
+                    data:  item.enc=="true" && context.isServer?JSON.parse(await util.decrypt(item.data)):item.data
                 }
             });
             filteredList = await Promise.all(decryptList);
