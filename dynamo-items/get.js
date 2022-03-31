@@ -1,7 +1,7 @@
 const AWS = require("aws-sdk");
 const middy = require("@middy/core");
-const lib = require('lib');
-
+const lib = require('./lib');
+const util = require('./util');
 const cors = require('@middy/http-cors');
 
 const options = {
@@ -113,6 +113,13 @@ const baseHandlerCountryType=async (event,context)=> {
             console.log(accessGroup);
             console.log(items)
             filteredList = filteredByAccessGroup(items, accessGroup);
+            const decryptList = filteredList.map(async item => {
+                return {
+                    ...item,
+                    data:  item.enc=="true"?await util.decrypt(item.data):item.data
+                }
+            });
+            filteredList = await Promise.all(decryptList);
         }
         return {
             'headers': {

@@ -114,7 +114,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'get.handlerCountryType',
             environment: {
-                "ISLOCAL": "false"
+                "ISLOCAL": "false",
+                "arnKms":process.env.arnKms!!,
+                "arnKmsAlias":process.env.arnKmsAlias!!
             },
             timeout: cdk.Duration.minutes(1),
             code: lambda.Code.fromAsset(path.join(__dirname, '..', 'dynamo-items'))
