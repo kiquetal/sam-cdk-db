@@ -116,7 +116,7 @@ const baseHandlerCountryType=async (event,context)=> {
             const decryptList = filteredList.map(async item => {
                 return {
                     ...item,
-                    data:  item.enc=="true"?await util.decrypt(item.data):item.data
+                    data:  item.enc=="true"?JSON.parse(await util.decrypt(item.data)):item.data
                 }
             });
             filteredList = await Promise.all(decryptList);
