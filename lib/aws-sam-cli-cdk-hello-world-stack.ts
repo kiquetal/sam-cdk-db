@@ -71,7 +71,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
 
         const dynamoInsertItem = new lambda.Function(this, 'dynamo-lambda-insert-function', {
-            functionName:"sam-cdk-db-insert-function",
+            functionName:"tdms-db-insert-function",
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'insert.handler',
             environment: {
@@ -86,7 +86,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         const dynamoUpdateItem = new lambda.Function(this, 'dynamo-lambda-update-function', {
             runtime: lambda.Runtime.NODEJS_14_X,
-            functionName:"sam-cdk-db-update-function",
+            functionName:"tdms-db-update-function",
             handler: 'update.handler',
             environment: {
                 "ISLOCAL": "false",
@@ -99,7 +99,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
 
         const dynamoGetItem = new lambda.Function(this, 'dynamo-lambda-get-function', {
-            functionName:"sam-cdk-db-get-function",
+            functionName:"tdms-db-get-function",
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'get.handler',
             environment: {
@@ -110,7 +110,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         const dynamoGetCountryType = new lambda.Function(this, 'dynamo-lambda-get-by-country-type-function', {
-            functionName:"sam-cdk-db-get-by-country-type-function",
+            functionName:"tdms-db-get-by-country-type-function",
             runtime: lambda.Runtime.NODEJS_14_X,
 
             handler: 'get.handlerCountryType',
@@ -125,7 +125,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         const dynamoRemoveItem = new lambda.Function(this, 'dynamo-lambda-remove-item-function', {
-            functionName:"sam-cdk-db-remove-item-function",
+            functionName:"tdms-db-remove-item-function",
 
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'remove.handler',
@@ -137,7 +137,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         });
         const dynamoSearchItem = new lambda.Function(this, 'dynamo-lambda-search-item-function', {
-            functionName:"sam-cdk-db-search-item-function",
+            functionName:"tdms-db-search-item-function",
 
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'search.searchHandler',
@@ -205,7 +205,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
 
         const createServers = new lambda.Function(this, 'dynamo-lambda-create-server-function', {
-            functionName:"sam-cdk-db-create-server-function",
+            functionName:"tdms-db-create-server-function",
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'users.createServer',
             role:roleForAdminCognitoAndDB,
@@ -220,7 +220,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         const loginUser = new lambda.Function(this, 'dynamo-lambda-login-user-function', {
-            functionName:"sam-cdk-db-login-user-function",
+            functionName:"tdms-db-login-user-function",
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'users.loginUser',
             role:roleForAdminCognitoAndDB,
@@ -239,7 +239,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
 
         const cognitoTrigger = new lambda.Function(this, 'cognito-trigger', {
-            functionName:"sam-cdk-db-cognito-trigger",
+            functionName:"tdms-db-cognito-trigger",
             role: roleForCognito,
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'triggerCognito.main',
@@ -251,7 +251,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         const adminUserCognito = new lambda.Function(this,'admin-user-cognito:q-db',{
-            functionName:'sam-cdk-db-remove-user-cognito',
+            functionName:'tdms-db-remove-user-cognito',
             role: roleForAdminCognitoAndDB,
             runtime: lambda.Runtime.NODEJS_14_X,
             handler:'users.removeUser',
@@ -264,7 +264,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         })
 
         const fnGetUsers = new lambda.Function(this,'dynamo-lambda-get-users-function',{
-            functionName:'sam-cdk-db-get-all-users',
+            functionName:'tdms-db-get-all-users',
             role: roleForAdminCognitoAndDB,
             runtime: lambda.Runtime.NODEJS_14_X,
             handler:'users.getUsers',
@@ -276,7 +276,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         const fnGetUServers = new lambda.Function(this,'dynamo-lambda-get-servers-function',{
-            functionName:'sam-cdk-db-get-all-servers',
+            functionName:'tdms-db-get-all-servers',
             role: roleForAdminCognitoAndDB,
             runtime: lambda.Runtime.NODEJS_14_X,
             handler:'users.getServers',
@@ -288,7 +288,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         const fnGetRoles = new lambda.Function(this,'dynamo-lambda-get-roles-function',{
-            functionName:'sam-cdk-db-get-roles',
+            functionName:'tdms-db-get-roles',
             role: roleForAdminCognitoAndDB,
             runtime: lambda.Runtime.NODEJS_14_X,
             handler:'roles.obtainRoles',
@@ -297,7 +297,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         })
 
         const fnAccessGroup = new lambda.Function(this,'dynamo-lambda-get-access-group-function',{
-           functionName:'sam-cdk-db-get-accessGroup',
+           functionName:'tdms-db-get-accessGroup',
            role: roleForAdminCognitoAndDB,
            runtime: lambda.Runtime.NODEJS_14_X,
            handler:'roles.obtainAccessGroups',
@@ -306,7 +306,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         const fnAssignRoles = new lambda.Function(this, 'dynamodo-lambda-assign-role-function',{
-           functionName:'sam-cdk-sb-assign-role',
+           functionName:'tdms-sb-assign-role',
            role: roleForAdminCognitoAndDB,
            runtime: lambda.Runtime.NODEJS_14_X,
            handler:'roles.asssingRoles',
@@ -315,7 +315,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         const batchUpdate = new lambda.Function(this,'dynamo-lambda-batch-update-function',{
-            functionName:'sam-cdk-db-batch-update',
+            functionName:'tdms-db-batch-update',
             runtime:lambda.Runtime.NODEJS_14_X,
             handler:'batch.batchUpdate',
             timeout:cdk.Duration.minutes(5),
@@ -325,7 +325,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         })
 
         const fnCreateRoles = new lambda.Function(this,'dynamo-lambda-create-roles-function',{
-            functionName:'sam-cdk-db-create-roles',
+            functionName:'tdms-db-create-roles',
             role: roleForAdminCognitoAndDB,
             runtime: lambda.Runtime.NODEJS_14_X,
             handler:'roles.createRoles',
@@ -334,7 +334,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         const fnCreateAccessGroup = new lambda.Function(this,'dynamo-lambda-create-access-group-function',{
-            functionName:'sam-cdk-db-create-access-group',
+            functionName:'tdms-db-create-access-group',
             role: roleForAdminCognitoAndDB,
             runtime: lambda.Runtime.NODEJS_14_X,
             handler:'roles.createAccessGroups',
@@ -343,7 +343,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         const fnGetItemsForServer = new lambda.Function(this,'dynamo-lambda-get-items-for-server-function',{
-            functionName:'sam-cdk-db-get-items-for-server',
+            functionName:'tdms-db-get-items-for-server',
             role: roleForAdminCognitoAndDB,
             runtime: lambda.Runtime.NODEJS_14_X,
             handler:'server.obtainItems',
