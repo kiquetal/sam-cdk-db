@@ -344,9 +344,17 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         const fnGetItemsForServer = new lambda.Function(this,'dynamo-lambda-get-items-for-server-function',{
             functionName:'sam-cdk-db-get-items-for-server',
+            role: roleForAdminCognitoAndDB,
             runtime: lambda.Runtime.NODEJS_14_X,
             handler:'server.obtainItems',
             timeout:cdk.Duration.minutes(1),
+            environment:{
+                "arnKms":process.env.arnKms!!,
+                "arnKmsAlias":process.env.arnKmsAlias!!,
+                "POOL_ID":process.env.POOL_ID!!,
+                "CLIENT_ID":process.env.CLIENT_ID!!,
+                URL_ITEMS: process.env.URL_ITEMS!!,
+            },
             code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
         });
 
