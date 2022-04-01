@@ -40,6 +40,7 @@ const executeQuery = async (typeItem)=>{
             }
         }
         const items = await db.query(params).promise()
+        console.log(JSON.stringify(items))
         return items;
     }
     catch( ex)

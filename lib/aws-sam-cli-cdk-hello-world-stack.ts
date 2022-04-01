@@ -112,6 +112,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const dynamoGetCountryType = new lambda.Function(this, 'dynamo-lambda-get-by-country-type-function', {
             functionName:"sam-cdk-db-get-by-country-type-function",
             runtime: lambda.Runtime.NODEJS_14_X,
+
             handler: 'get.handlerCountryType',
             environment: {
                 "ISLOCAL": "false",
@@ -163,7 +164,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             proxy: false
         });
 
-        const apiServer = new apigateway.LambdaRestApi(this,'tdms-server',{
+        const apiServer = new apigateway.LambdaRestApi(this,'tdms-servers',{
             handler: dynamoGetItem,
             defaultCorsPreflightOptions:{
                 allowOrigins: apigateway.Cors.ALL_ORIGINS,
@@ -173,6 +174,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             deployOptions:{
                 stageName:'test'
             },
+            proxy:false
         });
 
         const roleForCognito = new iam.Role(this,'RoleForCognito',{
@@ -364,22 +366,6 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
 
-        itemsRootResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoInsertItem),{
-            authorizer: auth
-        })
-        itemsRootResource.addMethod('PUT', new apigateway.LambdaIntegration(dynamoUpdateItem),{
-            authorizer: auth
-        });
-        itemsRootResource.addMethod('DELETE', new apigateway.LambdaIntegration(dynamoRemoveItem),{
-            authorizer: auth
-        });
-        userRootResource.addMethod('POST',new apigateway.LambdaIntegration(createServers),{
-            authorizer: auth
-        })
-        userRootResource.addMethod('GET',new apigateway.LambdaIntegration(fnGetUsers),{
-            authorizer:auth
-        })
-
         //FOR API ITEMS
         const itemsRootResource = api.root.addResource('items')
         const userRootResource = api.root.addResource('users');
@@ -399,6 +385,24 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         //Resources for api SERVERS
         const itemForServers = serverRootApi.addResource('items');
+
+
+        itemsRootResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoInsertItem),{
+            authorizer: auth
+        })
+        itemsRootResource.addMethod('PUT', new apigateway.LambdaIntegration(dynamoUpdateItem),{
+            authorizer: auth
+        });
+        itemsRootResource.addMethod('DELETE', new apigateway.LambdaIntegration(dynamoRemoveItem),{
+            authorizer: auth
+        });
+        userRootResource.addMethod('POST',new apigateway.LambdaIntegration(createServers),{
+            authorizer: auth
+        })
+        userRootResource.addMethod('GET',new apigateway.LambdaIntegration(fnGetUsers),{
+            authorizer:auth
+        })
+
 
 
         countryAndTypeResource.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetCountryType),{
