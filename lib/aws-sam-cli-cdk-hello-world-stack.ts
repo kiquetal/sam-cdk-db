@@ -341,6 +341,16 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             timeout:cdk.Duration.minutes(1),
             code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
         });
+
+        const fnGetItemsForServer = new lambda.Function(this,'dynamo-lambda-get-items-for-server-function',{
+            functionName:'sam-cdk-db-get-items-for-server',
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler:'server.obtainItems',
+            timeout:cdk.Duration.minutes(1),
+            code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
+        });
+
+
         accountsTable.grantReadWriteData(dynamoInsertItem);
         accountsTable.grantReadWriteData(dynamoUpdateItem);
         accountsTable.grantReadData(dynamoGetItem);
@@ -385,7 +395,10 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         //Resources for api SERVERS
         const itemForServers = serverRootApi.addResource('items');
+        const countryItemServer = itemForServers.addResource('{country}');
+        const countryAndTypeItemServer = countryItemServer.addResource('{type}');
 
+        countryAndTypeItemServer.addMethod('GET',new apigateway.LambdaIntegration(fnGetItemsForServer));
 
         itemsRootResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoInsertItem),{
             authorizer: auth

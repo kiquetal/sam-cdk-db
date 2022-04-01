@@ -14,7 +14,18 @@ dayjs.extend(utc);
 
 const obtainItems = (event,context) => {
 
-    
+    try
+    {
+
+        const subId = event.queryStringParameters.subId;
+        console.log(subId)
+
+    }
+    catch (e)   {
+        console.log(e);
+        return lib.return500Response({ code: "500", message: e.message});
+    }
+
 
 
 }
