@@ -65,6 +65,7 @@ const baseHandlerCountryType=async (event,context)=> {
 
     console.log("env" +process.env.ISLOCAL);
     console.log("context",context);
+    console.log("change event");
     const roles = context.hasOwnProperty("roles")?context["roles"]?context["roles"]:[]:[];
     const accessGroup = context.hasOwnProperty("accessGroup")?context["accessGroup"]?context["accessGroup"]:[]:[];
     const db =process.env.ISLOCAL=="true"?new AWS.DynamoDB.DocumentClient(options):new AWS.DynamoDB.DocumentClient();

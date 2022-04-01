@@ -106,7 +106,7 @@ const handlerUpdate = async (event, context) => {
 
                 console.log(accessGroup);
                 console.log(resp.Item.accessGroup)
-
+                console.log("check diferencias")
 
                 const uniqueAccessGroup = [...new Set(accessGroup)];
                 Object.entries(rest).forEach(([key, item]) => {

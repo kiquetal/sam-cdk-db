@@ -149,7 +149,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             }
         });
 
-        const api = new apigateway.LambdaRestApi(this, 'dynamo-items', {
+        const api = new apigateway.LambdaRestApi(this, 'tdms', {
             handler: dynamoGetItem,
             defaultCorsPreflightOptions:{
                 allowOrigins: apigateway.Cors.ALL_ORIGINS,
@@ -161,6 +161,18 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
             },
             proxy: false
+        });
+
+        const apiServer = new apigateway.LambdaRestApi(this,'tdms-server',{
+            handler: dynamoGetItem,
+            defaultCorsPreflightOptions:{
+                allowOrigins: apigateway.Cors.ALL_ORIGINS,
+                allowMethods: apigateway.Cors.ALL_METHODS,
+                allowHeaders:apigateway.Cors.DEFAULT_HEADERS
+            },
+            deployOptions:{
+                stageName:'test'
+            },
         });
 
         const roleForCognito = new iam.Role(this,'RoleForCognito',{
@@ -341,8 +353,6 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         usersTable.grantReadWriteData(roleForAdminCognitoAndDB);
         rolesTable.grantReadWriteData(roleForAdminCognitoAndDB);
         usersTable.grantReadData(dynamoInsertItem);
-        const itemsRootResource = api.root.addResource('items')
-        const userRootResource = api.root.addResource('users')
 
 
         const poolCognito = cognito.UserPool.fromUserPoolId(this,"pool-id",process.env.POOL_ID!!);
@@ -369,9 +379,16 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         userRootResource.addMethod('GET',new apigateway.LambdaIntegration(fnGetUsers),{
             authorizer:auth
         })
+
+        //FOR API ITEMS
+        const itemsRootResource = api.root.addResource('items')
+        const userRootResource = api.root.addResource('users');
+        //FOR API SERVERS
+        const serverRootApi = apiServer.root.addResource( 'servers');
+
+        //Resources for api ITEMS
         const serverResource = userRootResource.addResource("servers");
         const rolesResource = userRootResource.addResource("roles");
-
         const assingRoleResource= rolesResource.addResource("assign");
         const itemSubResources = itemsRootResource.addResource('{itemId}');
         const queryResource = itemsRootResource.addResource('query');
@@ -379,6 +396,11 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const countryQueryResource = queryResource.addResource('{country}');
         const countryAndTypeResource = countryQueryResource.addResource('{type}');
         const accessGroupsResource = itemsRootResource.addResource('accessGroup');
+
+        //Resources for api SERVERS
+        const itemForServers = serverRootApi.addResource('items');
+
+
         countryAndTypeResource.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetCountryType),{
             authorizer:auth
         })
