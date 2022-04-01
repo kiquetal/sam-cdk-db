@@ -22,10 +22,10 @@ const obtainItems = async (event,context) => {
         const { subId , ...rest}= event.queryStringParameters;
 
 
-        const { country, itemType} = event.pathParameters
+        const { country, type} = event.pathParameters
         console.log(subId);
         console.log(country);
-        console.log(itemType);
+        console.log(type);
         const db = new AWS.DynamoDB.DocumentClient();
 
         const params = {
@@ -52,23 +52,18 @@ const obtainItems = async (event,context) => {
             const resp = await cognito.adminInitiateAuth(initAuth).promise()
             const idToken = resp["AuthenticationResult"]["IdToken"]
 
-            axios.get(process.env.URL_ITEMS+`/items/query/${country}/${itemType}`,{
+
+            const data = await axios.get(process.env.URL_ITEMS+`/items/query/${country}/${type}`,{
                 headers:{
                     "Authorization": idToken
                 },
                 params:rest
-            }).then(resp => {
-                console.log(resp.data);
-                return {
-                    statusCode: 200,
-                    body: JSON.stringify(resp.data)
-                }
-            }).catch(err => {
-                return {
-                    statusCode: 500,
-                    body: JSON.stringify(err)
-                }
-            })
+            });
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify(data.data)
+            }
 
         }
 
