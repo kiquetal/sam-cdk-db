@@ -22,6 +22,7 @@ const options = {
 
 
 const crypto = require('@aws-crypto/client-node');
+const {insertToAudit, AUDIT_ACTIONS} = require("./lib");
 
 /**
  *
@@ -155,7 +156,11 @@ const baseHandler = async (event, context) => {
 
         console.log(JSON.stringify(params));
         let dynamoResponse = await db.put(params).promise();
-     //   let insertIndex = insertIndexDb(id,pk,db);
+
+        await insertToAudit({
+            pk: sub,
+            currentValue: params["Item"],
+            },AUDIT_ACTIONS.CREATE);
 
 
         response = {

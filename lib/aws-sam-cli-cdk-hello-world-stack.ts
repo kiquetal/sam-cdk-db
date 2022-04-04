@@ -68,6 +68,24 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             readCapacity:5,
             writeCapacity:5
         })
+        const auditTable = new dynamodb.Table(this,'AuditTable',{
+            partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
+            sortKey: { name:'sk',type:dynamodb.AttributeType.STRING},
+            billingMode: dynamodb.BillingMode.PROVISIONED,
+            readCapacity: 5,
+            tableName:'AuditCollection',
+            removalPolicy:RemovalPolicy.DESTROY,
+            writeCapacity: 5
+        });
+        auditTable.addGlobalSecondaryIndex({
+            indexName:"index_by_date_action",
+            partitionKey:{name:'sk',type:dynamodb.AttributeType.STRING},
+            sortKey:{name:"action",type:dynamodb.AttributeType.STRING},
+            projectionType:dynamodb.ProjectionType.ALL,
+            readCapacity:5,
+            writeCapacity:5
+        })
+
 
 
         const dynamoInsertItem = new lambda.Function(this, 'dynamo-lambda-insert-function', {
@@ -208,7 +226,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             functionName:"tdms-db-create-server-function",
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'users.createServer',
-            role:roleForAdminCognitoAndDB,
+            role: roleForAdminCognitoAndDB,
             timeout: cdk.Duration.minutes(1),
             code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users')),
             environment: {
@@ -359,6 +377,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
 
+        auditTable.grantReadWriteData(dynamoRemoveItem);
+        auditTable.grantReadWriteData(roleForAdminCognitoAndDB);
+        auditTable.grantReadWriteData(dynamoUpdateItem);
         accountsTable.grantReadWriteData(dynamoInsertItem);
         accountsTable.grantReadWriteData(dynamoUpdateItem);
         accountsTable.grantReadData(dynamoGetItem);

@@ -1,3 +1,8 @@
+
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
+
 const return500Response = (data) => {
 
 console.log(JSON.stringify(data));
@@ -135,6 +140,41 @@ const fnError=async (req)=> {
     }
 };
 
+const AUDIT_ACTIONS = {
+    CREATE: "CREATE_ITEM",
+    UPDATE: "UPDATE_ITEM",
+    DELETE: "DELETE_ITEM",
+    CREATE_SERVER: "CREATE_SERVER",
+    DELETE_SERVER: "DELETE_SERVER",
+    UPDATE_SERVER: "UPDATE_SERVER",
+    };
+
+const insertToAudit= async ({pk,...rest},action) => {
+
+    const AWS = require("aws-sdk");
+    const db = new AWS.DynamoDB.DocumentClient();
+    const params = {
+        TableName: 'AuditCollection',
+        Item: {
+            pk: pk,
+            sk: dayjs().utc().format("YYYY-MM-DDTHH:mm:ss.SSS"),
+            ...rest,
+            action: action,
+            timestamp: dayjs.utc().unix()
+        }
+    };
+    try {
+        await db.put(params).promise();
+    }
+    catch (err) {
+        console.log(err);
+    }
+
+}
+
+
+
+
 exports.getItemByPk = getItemByPk;
 exports.putItem = putItemByPk;
 exports.updateItem = updateItemByPk;
@@ -142,3 +182,5 @@ exports.return500Response = return500Response;
 exports.obtainCountry = obtainCountry;
 exports.checkPermission = checkPermissions
 exports.fnErrors = fnError
+exports.insertToAudit = insertToAudit;
+exports.AUDIT_ACTIONS = AUDIT_ACTIONS;
