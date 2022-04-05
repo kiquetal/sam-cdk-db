@@ -1,4 +1,6 @@
 const crypto = require("@aws-crypto/client-node");
+
+
 const { encrypt, decrypt } = crypto.buildClient(
     crypto.CommitmentPolicy.REQUIRE_ENCRYPT_REQUIRE_DECRYPT
 )
@@ -50,7 +52,7 @@ exports.encrypt = async (dataToEncrypt) => {
         const cleartext = JSON.stringify(dataToEncrypt);
 
         /* Encrypt the data. */
-        const {result} = await encrypt(keyring, cleartext, {
+        const {result} = await encrypt(keyring,  cleartext, {
             encryptionContext: context,
         })
         const base64Encrypt = result.toString('base64');
@@ -60,6 +62,8 @@ exports.encrypt = async (dataToEncrypt) => {
     }
 exports.decrypt = async (base64String) => {
 
+
+
    if (process.env.ISLOCAL=="true")
    {
        console.log("simulate decrypt");
@@ -68,8 +72,20 @@ exports.decrypt = async (base64String) => {
    }
    else {
        const keyring = new crypto.KmsKeyringNode({generatorKeyId, keyIds})
+       const maxAge = 1000 * 60 * 60
+       const capacity = 500
+       const cache =  crypto.getLocalCryptographicMaterialsCache(capacity)
+       const partition ="local partition";
+       const cachingCMM = new crypto.NodeCachingMaterialsManager({
+           backingMaterials: keyring,
+           cache,
+           partition,
+           maxAge
+       });
 
-       const {plaintext, messageHeader} = await decrypt(keyring, Buffer.from(base64String, 'base64'));
+
+
+       const {plaintext, messageHeader} = await decrypt(cachingCMM, Buffer.from(base64String, 'base64'));
 
        return plaintext.toString('utf8');
    }

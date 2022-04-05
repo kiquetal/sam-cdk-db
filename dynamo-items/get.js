@@ -3,6 +3,7 @@ const middy = require("@middy/core");
 const lib = require('./lib');
 const util = require('./util');
 const cors = require('@middy/http-cors');
+const {AUDIT_ACTIONS} = require("./lib");
 
 const options = {
     region: "localhost",
@@ -68,6 +69,7 @@ const baseHandlerCountryType=async (event,context)=> {
     console.log("change event");
     const roles = context.hasOwnProperty("roles")?context["roles"]?context["roles"]:[]:[];
     const accessGroup = context.hasOwnProperty("accessGroup")?context["accessGroup"]?context["accessGroup"]:[]:[];
+    const sub = event.requestContext.authorizer.claims.sub;
     const db =process.env.ISLOCAL=="true"?new AWS.DynamoDB.DocumentClient(options):new AWS.DynamoDB.DocumentClient();
     let {country, type} = event.pathParameters;
 
@@ -112,17 +114,20 @@ const baseHandlerCountryType=async (event,context)=> {
         else {
 
             console.log("accessGroup from user:" + accessGroup);
-            console.log(items)
             filteredList = filteredByAccessGroup(items, accessGroup);
+            console.log(JSON.stringify(filteredList));
 
+            if (context.isServer==true)
+            {
+                console.log("isServer");
+               filteredList = await decryptListKms(filteredList);
+            }
 
-            const decryptList = filteredList.map(async item => {
-                return {
-                    ...item,
-                    data:  item.enc=="true" && context.isServer?JSON.parse(await util.decrypt(item.data)):item.data
-                }
-            });
-            filteredList = await Promise.all(decryptList);
+            await  lib.insertToAudit({
+                pk: sub,
+                items: filteredList.map(value => value["pk"]),
+            },AUDIT_ACTIONS.GET)
+
         }
         return {
             'headers': {
@@ -141,7 +146,22 @@ const baseHandlerCountryType=async (event,context)=> {
     }
 }
 
+const decryptListKms= async (list) =>{
 
+    const decrypt = []
+    for (const item in list)
+    {
+
+       if (list[item]["enc"]=="true")
+       {
+           const dItem = await util.decrypt(list[item].data)
+          list[item].data=JSON.parse(dItem);
+       }
+       decrypt.push(list[item])
+
+    }
+    return decrypt;
+}
 
 
 

@@ -14,11 +14,11 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const accountsTable = new dynamodb.Table(this, 'AccountsCollection', {
             partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
             sortKey: { name:'country',type:dynamodb.AttributeType.STRING},
-            billingMode: dynamodb.BillingMode.PROVISIONED,
-            readCapacity: 5,
+            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+
             tableName:'AccountsCollection',
             removalPolicy:RemovalPolicy.DESTROY,
-            writeCapacity: 5,
+
             timeToLiveAttribute:"ttl"
         });
 
@@ -26,8 +26,6 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             indexName:'TypeItemCountryIndex',
             partitionKey:{name:'country',type:dynamodb.AttributeType.STRING},
             sortKey:{name:'typeItem',type:dynamodb.AttributeType.STRING},
-            readCapacity: 5,
-            writeCapacity: 5,
             projectionType: dynamodb.ProjectionType.ALL,
         })
 
@@ -36,17 +34,17 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
             sortKey: { name:'sk',type:dynamodb.AttributeType.STRING},
             billingMode: dynamodb.BillingMode.PROVISIONED,
-            readCapacity: 5,
+            readCapacity: 10,
             tableName:'UsersCollection',
             removalPolicy:RemovalPolicy.DESTROY,
-            writeCapacity: 5
+            writeCapacity: 10
         });
         usersTable.addGlobalSecondaryIndex({
             indexName:"index_sk_and_type",
             partitionKey:{name:'sk',type:dynamodb.AttributeType.STRING},
             sortKey:{name:"typeItem",type:dynamodb.AttributeType.STRING},
-            readCapacity:5,
-            writeCapacity:5,
+            readCapacity:10,
+            writeCapacity:10,
             projectionType:dynamodb.ProjectionType.ALL
         })
 
@@ -54,10 +52,10 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
             sortKey: { name:'sk',type:dynamodb.AttributeType.STRING},
             billingMode: dynamodb.BillingMode.PROVISIONED,
-            readCapacity: 5,
+            readCapacity: 10,
             tableName:'RolesAccessCollection',
             removalPolicy:RemovalPolicy.DESTROY,
-            writeCapacity: 5
+            writeCapacity: 10
         });
 
         rolesTable.addGlobalSecondaryIndex({
@@ -65,8 +63,8 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             partitionKey:{name:'typeItem',type:dynamodb.AttributeType.STRING},
             sortKey:{name:"sk",type:dynamodb.AttributeType.STRING},
             projectionType:dynamodb.ProjectionType.ALL,
-            readCapacity:5,
-            writeCapacity:5
+            readCapacity:10,
+            writeCapacity:10
         })
         const auditTable = new dynamodb.Table(this,'AuditTable',{
             partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
@@ -135,7 +133,8 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             environment: {
                 "ISLOCAL": "false",
                 "arnKms":process.env.arnKms!!,
-                "arnKmsAlias":process.env.arnKmsAlias!!
+                "arnKmsAlias":process.env.arnKmsAlias!!,
+                AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
             },
             timeout: cdk.Duration.minutes(1),
             code: lambda.Code.fromAsset(path.join(__dirname, '..', 'dynamo-items'))
@@ -164,7 +163,8 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             environment: {
                 "ISLOCAL": "false",
                 "arnKms":process.env.arnKms!!,
-                "arnKmsAlias":process.env.arnKmsAlias!!
+                "arnKmsAlias":process.env.arnKmsAlias!!,
+                AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
             }
         });
 
@@ -381,6 +381,8 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         auditTable.grantReadWriteData(roleForAdminCognitoAndDB);
         auditTable.grantReadWriteData(dynamoUpdateItem);
         auditTable.grantReadWriteData(dynamoInsertItem);
+        auditTable.grantReadWriteData(dynamoGetItem);
+        auditTable.grantReadWriteData(dynamoGetCountryType)
         accountsTable.grantReadWriteData(dynamoInsertItem);
         accountsTable.grantReadWriteData(dynamoUpdateItem);
         accountsTable.grantReadData(dynamoGetItem);

@@ -285,7 +285,7 @@ const inputSchema = {
                 required: ['email','password','country','serverName','accessGroup'] // Insert here all required event properties
             }
         }
-    }
+   };
 
 
 const createAccessGroupsFn=async (event,context)=>{
@@ -336,6 +336,18 @@ const updateUsersFn = async (event,context) =>{
         const sub = event.requestContext.authorizer.claims.sub;
         const roles = context.roles;
         const { pk, typeItem, password,...rest} = event.body;
+        const params = {
+            TableName: 'UsersCollection',
+            Key: {
+                pk: pk,
+                typeItem: typeItem
+            },
+
+            ReturnValues: "UPDATED_NEW"
+        };
+
+
+
 
         if (!roles.include("admin") )
             return {
@@ -348,7 +360,6 @@ const updateUsersFn = async (event,context) =>{
                     message: "Forbbiden"
                 })
             }
-
         const expressionAttributeValues = {}
         const expressionAttributeNames = {}
         let updateExpression = "SET";
@@ -359,6 +370,11 @@ const updateUsersFn = async (event,context) =>{
         });
         updateExpression = updateExpression.slice(0, -1);
 
+        Object.assign(params, {
+            UpdateExpression: updateExpression,
+            ExpressionAttributeValues: expressionAttributeValues,
+            ExpressionAttributeNames: expressionAttributeNames
+        });
         console.log(JSON.stringify(updateExpression))
 
 
@@ -376,4 +392,4 @@ exports.getServers = middy(getServersFn).use(cors()).onError(lib.fnErrors);
 exports.createAccessGroups = middy(createAccessGroupsFn).use(cors()).use(jsonBodyParser()).use(lib.checkPermisson()).onError(lib.fnErrors);
 exports.removeUser = removeUserFn
 exports.loginUser = loginUserFn
-exports.updateUsers = middy(updateUsersFn).use(cors()).use(validator({inputSchema:inputSchemaUpdateUser}).use(jsonBodyParser()).use(lib.checkPermisson()).onError(lib.fnErrors);
+exports.updateUsers = middy(updateUsersFn).use(cors()).use(validator({inputSchema:inputSchemaUpdateUser})).use(jsonBodyParser()).use(lib.checkPermisson()).onError(lib.fnErrors)
