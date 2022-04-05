@@ -380,6 +380,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         auditTable.grantReadWriteData(dynamoRemoveItem);
         auditTable.grantReadWriteData(roleForAdminCognitoAndDB);
         auditTable.grantReadWriteData(dynamoUpdateItem);
+        auditTable.grantReadWriteData(dynamoInsertItem);
         accountsTable.grantReadWriteData(dynamoInsertItem);
         accountsTable.grantReadWriteData(dynamoUpdateItem);
         accountsTable.grantReadData(dynamoGetItem);
