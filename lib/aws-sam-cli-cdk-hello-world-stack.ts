@@ -141,7 +141,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         });
         dynamoGetCountryType.currentVersion.addAlias('latest',{
-            provisionedConcurrentExecutions:1
+            provisionedConcurrentExecutions:2
         });
 
         const dynamoRemoveItem = new lambda.Function(this, 'dynamo-lambda-remove-item-function', {
@@ -380,7 +380,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         fnGetItemsForServer.currentVersion.addAlias('latest',{
-           provisionedConcurrentExecutions:1
+           provisionedConcurrentExecutions:2
         });
 
         auditTable.grantReadWriteData(dynamoRemoveItem);
