@@ -64,9 +64,19 @@ const obtainRoleFromContext=(roles, country)=> {
 
 const baseHandlerCountryType=async (event,context)=> {
 
+
+    console.log(JSON.stringify(event));
+    if (event.hasOwnProperty("warmInput"))
+    {
+        console.log("warmInput detected");
+        return "ok"
+    }
+
     console.log("env" +process.env.ISLOCAL);
     console.log("context",context);
     console.log("change event");
+
+
     const roles = context.hasOwnProperty("roles")?context["roles"]?context["roles"]:[]:[];
     const accessGroup = context.hasOwnProperty("accessGroup")?context["accessGroup"]?context["accessGroup"]:[]:[];
     const sub = event.requestContext.authorizer.claims.sub;

@@ -6,6 +6,8 @@ import * as apigateway from '@aws-cdk/aws-apigateway';
 import * as iam from '@aws-cdk/aws-iam'
 import * as path from 'path';
 import * as cognito from '@aws-cdk/aws-cognito';
+import * as events from '@aws-cdk/aws-events';
+import * as targets from "@aws-cdk/aws-events-targets";
 export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
@@ -170,6 +172,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
                 AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
             }
         });
+
 
         const api = new apigateway.LambdaRestApi(this, 'tdms', {
             handler: dynamoGetItem,
@@ -380,8 +383,27 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         fnGetItemsForServer.currentVersion.addAlias('latest',{
-           provisionedConcurrentExecutions:2
+           provisionedConcurrentExecutions:3
         });
+
+
+
+
+        const rule = new events.Rule(this,'Rule',{
+            description:"Rule to avoid coldstart lambda",
+            schedule:events.Schedule.expression('rate(5 minutes)')
+        });
+        const eventWarm = {
+            "warmInput":true
+        };
+
+        rule.addTarget(new targets.LambdaFunction(fnGetItemsForServer,{
+
+            event: events.RuleTargetInput.fromObject(eventWarm)
+        }));
+        rule.addTarget(new targets.LambdaFunction(dynamoGetCountryType,{
+            event: events.RuleTargetInput.fromObject(eventWarm)
+        }));
 
         auditTable.grantReadWriteData(dynamoRemoveItem);
         auditTable.grantReadWriteData(roleForAdminCognitoAndDB);
@@ -406,6 +428,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
 
         const poolCognito = cognito.UserPool.fromUserPoolId(this,"pool-id",process.env.POOL_ID!!);
+
+
+
 
         const auth = new apigateway.CognitoUserPoolsAuthorizer(this,'cognito-authorizer',{
            cognitoUserPools:[poolCognito],

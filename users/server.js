@@ -18,6 +18,10 @@ const obtainItems = async (event,context) => {
     try
     {
 
+        if (event.hasOwnProperty("warmInput")){
+            console.log("warmInput detected");
+            return "ok"
+        }
         console.log(JSON.stringify(event.queryStringParameters));
         const { subId , ...rest}= event.queryStringParameters;
 
@@ -65,6 +69,15 @@ const obtainItems = async (event,context) => {
                 body: JSON.stringify(data.data)
             }
 
+        }
+        else {
+            return {
+                statusCode: 401,
+                body: JSON.stringify({
+                    code:401,
+                    message: "Unauthorized"
+                })
+            }
         }
 
     }

@@ -79,6 +79,12 @@ const  obtainCountry = (pk) => {
 const checkPermissions = () => {
     const AWS = require("aws-sdk");
     const logical = async (request) => {
+
+        if (request.event.hasOwnProperty("warmInput")){
+            console.log("warmInput detected-middleware");
+            return "ok"
+        }
+
         const sub = request.event.requestContext.authorizer.claims.sub;
         const db = new AWS.DynamoDB.DocumentClient();
         const paramsUsers = {
