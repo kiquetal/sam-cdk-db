@@ -425,6 +425,8 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         usersTable.grantReadWriteData(roleForAdminCognitoAndDB);
         rolesTable.grantReadWriteData(roleForAdminCognitoAndDB);
         usersTable.grantReadData(dynamoInsertItem);
+        usersTable.grantReadData(dynamoUpdateItem);
+        auditTable.grantReadWriteData(dynamoInsertItem);
 
 
         const poolCognito = cognito.UserPool.fromUserPoolId(this,"pool-id",process.env.POOL_ID!!);

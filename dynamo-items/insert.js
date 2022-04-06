@@ -159,6 +159,7 @@ const baseHandler = async (event, context) => {
 
         await insertToAudit({
             pk: sub,
+            itemPk: pk,
             currentValue: params["Item"],
             },AUDIT_ACTIONS.CREATE);
 
