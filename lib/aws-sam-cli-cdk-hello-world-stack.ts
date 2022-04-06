@@ -140,6 +140,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             code: lambda.Code.fromAsset(path.join(__dirname, '..', 'dynamo-items'))
 
         });
+        dynamoGetCountryType.currentVersion.addAlias('latest',{
+            provisionedConcurrentExecutions:1
+        });
 
         const dynamoRemoveItem = new lambda.Function(this, 'dynamo-lambda-remove-item-function', {
             functionName:"tdms-db-remove-item-function",
@@ -376,6 +379,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
         });
 
+        fnGetItemsForServer.currentVersion.addAlias('latest',{
+           provisionedConcurrentExecutions:1
+        });
 
         auditTable.grantReadWriteData(dynamoRemoveItem);
         auditTable.grantReadWriteData(roleForAdminCognitoAndDB);
