@@ -77,15 +77,26 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             removalPolicy:RemovalPolicy.DESTROY,
             writeCapacity: 5
         });
+
         auditTable.addGlobalSecondaryIndex({
-            indexName:"index_by_date_action",
-            partitionKey:{name:'sk',type:dynamodb.AttributeType.STRING},
-            sortKey:{name:"action",type:dynamodb.AttributeType.STRING},
+            indexName:"index_by_action_date",
+            partitionKey:{name:'action',type:dynamodb.AttributeType.STRING},
+            sortKey:{name:"sk",type:dynamodb.AttributeType.STRING},
             projectionType:dynamodb.ProjectionType.ALL,
             readCapacity:5,
             writeCapacity:5
         })
 
+
+
+        auditTable.addGlobalSecondaryIndex({
+            indexName:"index_by_itemPk",
+            partitionKey:{name:'itemPk',type:dynamodb.AttributeType.STRING},
+            sortKey:{name:"sk",type:dynamodb.AttributeType.STRING},
+            projectionType:dynamodb.ProjectionType.ALL,
+            readCapacity:5,
+            writeCapacity:5
+        })
 
 
         const dynamoInsertItem = new lambda.Function(this, 'dynamo-lambda-insert-function', {
