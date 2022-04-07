@@ -25,12 +25,20 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         accountsTable.addGlobalSecondaryIndex({
-            indexName:'TypeItemCountryIndex',
+            indexName:'CountryTypeItemIndex',
             partitionKey:{name:'country',type:dynamodb.AttributeType.STRING},
             sortKey:{name:'typeItem',type:dynamodb.AttributeType.STRING},
             projectionType: dynamodb.ProjectionType.ALL,
         })
 
+
+
+        accountsTable.addGlobalSecondaryIndex({
+            indexName:'TypeItemCountryIndex',
+            partitionKey:{name:'typeItem',type:dynamodb.AttributeType.STRING},
+            sortKey:{name:'country',type:dynamodb.AttributeType.STRING},
+            projectionType: dynamodb.ProjectionType.ALL
+        })
 
         const usersTable = new dynamodb.Table(this, 'UsersTable', {
             partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
