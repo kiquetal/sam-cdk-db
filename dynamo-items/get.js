@@ -97,12 +97,39 @@ const baseHandlerCountryType=async (event,context)=> {
 
     if (event.queryStringParameters) {
         params['FilterExpression'] = "";
+        let filterExpression = "";
         Object.entries(event.queryStringParameters).forEach(([key, item]) => {
-            params.ExpressionAttributeValues[`:${key}`] = `${item}`
-            params['FilterExpression'] += `${key} = :${key} AND `
+            if (key!="conditions") {
+                params.ExpressionAttributeValues[`:${key}`] = `${item}`
+                params['FilterExpression'] += `${key} = :${key} AND `
+            }
+            else
+            {
+               const conditions = item.split(",")
+               console.log(JSON.stringify(conditions))
+
+                conditions.forEach((condition,index) => {
+
+                    params.ExpressionAttributeValues[`:con_${index}`] = `${condition}`
+                    filterExpression += ` contains(conditions,:con_${index})  AND`
+
+                });
+                console.log(filterExpression.substring(0, filterExpression.length - 3));
+
+            }
         });
         params['FilterExpression'] = params['FilterExpression'].slice(0, -4);
-
+        if (filterExpression>"")
+        {
+            if (params['FilterExpression'].length>0)
+            {
+                params['FilterExpression'] += " AND " + filterExpression.substring(0, filterExpression.length - 3);
+            }
+            else
+            {
+                params['FilterExpression'] = filterExpression.substring(0, filterExpression.length - 3);
+            }
+        }
     }
     console.log(JSON.stringify(params));
     try {
@@ -115,6 +142,8 @@ const baseHandlerCountryType=async (event,context)=> {
             dynamoResponse = await db.query(params).promise();
             items=items.concat(dynamoResponse["Items"])
         }
+
+
         let filteredList=[]
         const isAdminOrCountryContext = obtainRoleFromContext(roles,country.toLowerCase());
         if (isAdminOrCountryContext)
