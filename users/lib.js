@@ -1,8 +1,9 @@
 const AWS = require("aws-sdk");
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 const return500Response = (data) => {
-    const dayjs = require('dayjs');
-    const utc = require('dayjs/plugin/utc');
-    dayjs.extend(utc);
+
 console.log(JSON.stringify(data));
     return {
         'headers': {

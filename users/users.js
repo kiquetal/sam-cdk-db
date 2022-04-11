@@ -34,7 +34,7 @@ const removeUserFn = async (event, context) => {
 }
 
 
-const hasPermissions=(roles,country)=> {
+const hasPermissions=(roles,country,onlyAdmin)=> {
     console.log(JSON.stringify(roles));
    const admin= roles.filter(role => {
         if (role === "admin") {
@@ -44,6 +44,7 @@ const hasPermissions=(roles,country)=> {
     if (admin.length > 0) {
         return true;
     }
+    if (onlyAdmin) return false
    const filtered = roles.filter(role => {
         if (role.includes(country.toLowerCase())) {
             return true;
@@ -67,8 +68,10 @@ const createServer = async (event, context) => {
             return lib.returnResponse(400,{"code":400,"message":`Required fields ${missingFields}`})
         }
 */
-        const { roles } = context;
-        const hasPermission=hasPermissions(roles,body.country)
+        let { roles } = context;
+        if (!roles)
+            roles = [];
+        const hasPermission=hasPermissions(roles,body.country,false)
         if (!hasPermission) {
             return lib.returnResponse(403, {
                 "code": 403,
@@ -369,7 +372,7 @@ const updateUsersFn = async (event,context) =>{
     try {
         const sub = event.requestContext.authorizer.claims.sub;
         const db = new AWS.DynamoDB.DocumentClient();
-        const roles = context.roles;
+        const roles = context.roles?context.roles:[];
         const { pk, typeItem, password,...rest} = event.body;
 
         const params = {
@@ -388,9 +391,13 @@ const updateUsersFn = async (event,context) =>{
                 'pk': pk,
                 'sk': typeItem
             },
-            ProjectionExpression:"pk,sk,accessGroup,country,serverName"
+            ProjectionExpression:"pk,sk,accessGroup,country,serverName,#roles,email",
+            ExpressionAttributeNames:{
+                "#roles": "roles"
+            }
         };
         const user = await db.get(obtainParams).promise();
+        console.log(JSON.stringify(user))
         if (!user.hasOwnProperty("Item")) {
             return lib.returnResponse(404,{
                 "code":404,
@@ -398,9 +405,10 @@ const updateUsersFn = async (event,context) =>{
             })
 
         }
-
-
-        const hasPermission = hasPermissions(roles,user["Item"]["country"]);
+        let onlyAdmin = false;
+        if (typeItem==="USER#ID")
+            onlyAdmin = true;
+        const hasPermission = hasPermissions(roles,user["Item"]["country"],onlyAdmin);
         if (!hasPermission )
             return {
                 statusCode: 403,
@@ -415,6 +423,8 @@ const updateUsersFn = async (event,context) =>{
         const expressionAttributeValues = {}
         const expressionAttributeNames = {}
         let updateExpression = "SET";
+
+        rest["updatedAt"]= dayjs().utc().unix();
         Object.keys(rest).forEach(key => {
             expressionAttributeValues[`:${key}`] = rest[key];
             expressionAttributeNames[`#${key}`] = key;
@@ -433,8 +443,8 @@ const updateUsersFn = async (event,context) =>{
         const typeItemAudit = typeItem==="USER#ID"?lib.AUDIT_ACTIONS.UPDATE_USER:lib.AUDIT_ACTIONS.UPDATE_SERVER
         await lib.insertToAudit({
             pk: sub,
-            currentValue: data.Item,
-            itemPk: pk,
+            currentValue: data.Attributes,
+            subjectPk: pk,
             previousValue: user.Item,
         },typeItemAudit);
 
