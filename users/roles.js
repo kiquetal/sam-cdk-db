@@ -90,7 +90,9 @@ const createRole = async(event,context)=>{
             ReturnValues: "ALL_OLD"
         };
         const res = await db.put(params).promise();
-        console.log(JSON.stringify(res));
+        await lib.insertToAudit({pk:sub,
+        currentValue:name},lib.AUDIT_ACTIONS.CREATE_SERVER);
+
         return {
             statusCode: 201,
             headers: {

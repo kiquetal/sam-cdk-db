@@ -161,10 +161,11 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             code: lambda.Code.fromAsset(path.join(__dirname, '..', 'dynamo-items'))
 
         });
+        /*
         dynamoGetCountryType.currentVersion.addAlias('latest',{
             provisionedConcurrentExecutions:2
         });
-
+*/
         const dynamoRemoveItem = new lambda.Function(this, 'dynamo-lambda-remove-item-function', {
             functionName:"tdms-db-remove-item-function",
 
@@ -401,10 +402,20 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
         });
 
+        const fnUpdateUser = new lambda.Function(this,'dynamo-lambda-update-subject-function',{
+            functionName:'tdms-db-update-subject',
+            role: roleForAdminCognitoAndDB,
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler:'users.updateUsers',
+            timeout:cdk.Duration.minutes(1),
+            code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
+        });
+
+        /*
         fnGetItemsForServer.currentVersion.addAlias('latest',{
            provisionedConcurrentExecutions:3
         });
-
+*/
 
 
 
@@ -500,6 +511,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             authorizer:auth
         })
 
+        userRootResource.addMethod('PUT',new apigateway.LambdaIntegration(fnUpdateUser),{
+            authorizer:auth
+        })
 
 
         countryAndTypeResource.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetCountryType),{

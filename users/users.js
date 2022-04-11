@@ -34,6 +34,25 @@ const removeUserFn = async (event, context) => {
 }
 
 
+const hasPermissions=(roles,country)=> {
+    console.log(JSON.stringify(roles));
+   const admin= roles.filter(role => {
+        if (role === "admin") {
+            return true;
+        }
+    })
+    if (admin.length > 0) {
+        return true;
+    }
+   const filtered = roles.filter(role => {
+        if (role.includes(country.toLowerCase())) {
+            return true;
+        }
+    })
+
+    return filtered.length>0;
+}
+
 const createServer = async (event, context) => {
     try {
         const body = event.body;
@@ -49,7 +68,13 @@ const createServer = async (event, context) => {
         }
 */
         const { roles } = context;
-        console.log(JSON.stringify(roles));
+        const hasPermission=hasPermissions(roles,body.country)
+        if (!hasPermission) {
+            return lib.returnResponse(403, {
+                "code": 403,
+                "message": "You don't have permission to create server"
+            })
+        }
         const params = {
             UserPoolId: process.env.POOL_ID,
             Username: body["email"],
@@ -72,7 +97,7 @@ const createServer = async (event, context) => {
         const cognito = new AWS.CognitoIdentityServiceProvider();
         const responseCognito = await cognito.adminCreateUser(params).promise();
         const attributes = responseCognito["User"]["Attributes"];
-        const sub = attributes.filter(a => a["Name"] == "sub")[0]
+        const sub = attributes.filter(a => a["Name"] === "sub")[0]
 
         const paramsPassword = {
             Password: body["password"],
@@ -85,6 +110,14 @@ const createServer = async (event, context) => {
         await saveCredentialsDb(sub["Value"], body["email"], body["password"], body["country"],body["serverName"],{"email":emailCreator,
         "sub":subCreator},body["accessGroup"]);
 
+        await lib.insertToAudit({pk:subCreator,
+            currentValue:{
+            subjectId:sub["Value"],
+            country:body["country"],
+            serverName:body["serverName"]
+            }
+        },lib.AUDIT_ACTIONS.CREATE_SERVER)
+
         return {
             'headers': {
                 'Content-Type': 'application/json'
@@ -93,6 +126,7 @@ const createServer = async (event, context) => {
             'body': JSON.stringify({"message": "User created successfully"})
         };
     } catch (exception) {
+        console.log("error-for-create", exception);
         return {
             "headers": {
                 'Content-Type': 'application/json'
@@ -100,7 +134,6 @@ const createServer = async (event, context) => {
             "statusCode": 500,
             "body": JSON.stringify({"code": 500, "message": exception.message})
         }
-        console.log("creating user exception", exception);
     }
 }
 
@@ -125,7 +158,7 @@ const saveCredentialsDb = async (sub, username, password, country,serverName,cre
                 "createdAt":dayjs.utc().unix()
             }
         };
-        let dynamoResponse = await db.put(params).promise();
+         await db.put(params).promise();
     } catch (exception) {
 
         console.log("exception saving credentialbs", exception.message)
@@ -325,7 +358,8 @@ const inputSchemaUpdateUser = {
                 pk: {type: 'string'},
                 typeItem: {type: 'string'}
             },
-            required: ['pk','typeItem'] // Insert here all required event properties
+            required: ['pk', 'typeItem'] // Insert here all required event properties
+
         }
     }
 }
@@ -334,22 +368,40 @@ const updateUsersFn = async (event,context) =>{
 
     try {
         const sub = event.requestContext.authorizer.claims.sub;
+        const db = new AWS.DynamoDB.DocumentClient();
         const roles = context.roles;
         const { pk, typeItem, password,...rest} = event.body;
+
         const params = {
             TableName: 'UsersCollection',
             Key: {
                 pk: pk,
-                typeItem: typeItem
+                sk: typeItem
             },
 
             ReturnValues: "UPDATED_NEW"
         };
 
+        const obtainParams = {
+            TableName: 'UsersCollection',
+            Key: {
+                'pk': pk,
+                'sk': typeItem
+            },
+            ProjectionExpression:"pk,sk,accessGroup,country,serverName"
+        };
+        const user = await db.get(obtainParams).promise();
+        if (!user.hasOwnProperty("Item")) {
+            return lib.returnResponse(404,{
+                "code":404,
+                "message":"User not found"
+            })
+
+        }
 
 
-
-        if (!roles.include("admin") )
+        const hasPermission = hasPermissions(roles,user["Item"]["country"]);
+        if (!hasPermission )
             return {
                 statusCode: 403,
                 headers:{
@@ -366,7 +418,7 @@ const updateUsersFn = async (event,context) =>{
         Object.keys(rest).forEach(key => {
             expressionAttributeValues[`:${key}`] = rest[key];
             expressionAttributeNames[`#${key}`] = key;
-            updateExpression += ` ${key} = :${key},`
+            updateExpression += ` #${key} = :${key},`
         });
         updateExpression = updateExpression.slice(0, -1);
 
@@ -376,7 +428,27 @@ const updateUsersFn = async (event,context) =>{
             ExpressionAttributeNames: expressionAttributeNames
         });
         console.log(JSON.stringify(updateExpression))
+        const data = await db.update(params).promise();
 
+        const typeItemAudit = typeItem==="USER#ID"?lib.AUDIT_ACTIONS.UPDATE_USER:lib.AUDIT_ACTIONS.UPDATE_SERVER
+        await lib.insertToAudit({
+            pk: sub,
+            currentValue: data.Item,
+            itemPk: pk,
+            previousValue: user.Item,
+        },typeItemAudit);
+
+        return {
+            statusCode: 200,
+            headers:{
+                ContentType:"application/json"
+            },
+            body: JSON.stringify({
+                code:200,
+                message: "Subject updated",
+                pk: data["Attributes"]["pk"],
+            })
+        }
 
     }
     catch (e) {
@@ -392,4 +464,4 @@ exports.getServers = middy(getServersFn).use(cors()).onError(lib.fnErrors);
 exports.createAccessGroups = middy(createAccessGroupsFn).use(cors()).use(jsonBodyParser()).use(lib.checkPermisson()).onError(lib.fnErrors);
 exports.removeUser = removeUserFn
 exports.loginUser = loginUserFn
-exports.updateUsers = middy(updateUsersFn).use(cors()).use(validator({inputSchema:inputSchemaUpdateUser})).use(jsonBodyParser()).use(lib.checkPermisson()).onError(lib.fnErrors)
+exports.updateUsers = middy(updateUsersFn).use(jsonBodyParser()).use(cors()).use(validator({inputSchema:inputSchemaUpdateUser})).use(lib.checkPermisson()).onError(lib.fnErrors)

@@ -1,6 +1,8 @@
 const AWS = require("aws-sdk");
 const return500Response = (data) => {
-
+    const dayjs = require('dayjs');
+    const utc = require('dayjs/plugin/utc');
+    dayjs.extend(utc);
 console.log(JSON.stringify(data));
     return {
         'headers': {
@@ -129,6 +131,47 @@ const fnError=async(req)=> {
     }
 };
 
+
+const AUDIT_ACTIONS = {
+    CREATE: "CREATE_ITEM",
+    UPDATE: "UPDATE_ITEM",
+    DELETE: "DELETE_ITEM",
+    GET: "GET_ITEM",
+    UPDATE_USER: "UPDATE_USER",
+    CREATE_SERVER: "CREATE_SERVER",
+    DELETE_SERVER: "DELETE_SERVER",
+    UPDATE_SERVER: "UPDATE_SERVER",
+    CREATE_ROLE:"CREATE_ROLE",
+    UPDATE_ROLE:"UPDATE_ROLE",
+    DELETE_ROLE:"DELETE_ROLE",
+    CREATE_ACCESS_GROUP:"CREATE_ACCESS_GROUP",
+    UPDATE_ACCESS_GROUP:"UPDATE_ACCESS_GROUP",
+    DELETE_ACCESS_GROUP:"DELETE_ACCESS_GROUP",
+};
+
+const insertToAudit= async ({pk,...rest},action) => {
+
+    const AWS = require("aws-sdk");
+    const db = new AWS.DynamoDB.DocumentClient();
+    const params = {
+        TableName: 'AuditCollection',
+        Item: {
+            pk: pk,
+            sk: dayjs().utc().format("YYYY-MM-DDTHH:mm:ss.SSS"),
+            ...rest,
+            action: action,
+            timestamp: dayjs.utc().unix()
+        }
+    };
+    try {
+        await db.put(params).promise();
+    }
+    catch (err) {
+        console.log(err);
+    }
+
+}
+
 exports.getItemByPk = getItemByPk;
 exports.putItem = putItemByPk;
 exports.updateItem = updateItemByPk;
@@ -137,3 +180,5 @@ exports.obtainCountry = obtainCountry;
 exports.returnResponse = returnResponse
 exports.checkPermisson = checkPermissions
 exports.fnErrors = fnError
+exports.insertToAudit = insertToAudit
+exports.AUDIT_ACTIONS = AUDIT_ACTIONS
