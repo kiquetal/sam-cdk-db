@@ -117,7 +117,8 @@ const createServer = async (event, context) => {
             currentValue:{
             subjectId:sub["Value"],
             country:body["country"],
-            serverName:body["serverName"]
+            serverName:body["serverName"],
+            accessGroup:body["accessGroup"],
             }
         },lib.AUDIT_ACTIONS.CREATE_SERVER)
 
@@ -126,7 +127,7 @@ const createServer = async (event, context) => {
                 'Content-Type': 'application/json'
             },
             'statusCode': 201,
-            'body': JSON.stringify({"message": "User created successfully"})
+            'body': JSON.stringify({"message": "Sever created successfully"})
         };
     } catch (exception) {
         console.log("error-for-create", exception);
