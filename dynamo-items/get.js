@@ -98,24 +98,25 @@ const baseHandlerCountryType=async (event,context)=> {
     if (event.queryStringParameters) {
         params['FilterExpression'] = "";
         let filterExpression = "";
+        let indexTerm=0;
         Object.entries(event.queryStringParameters).forEach(([key, item]) => {
-            if (key!="conditions") {
+            if (key!="conditions" && key!="tags") {
                 params.ExpressionAttributeValues[`:${key}`] = `${item}`
                 params['FilterExpression'] += `${key} = :${key} AND `
             }
             else
             {
-               const conditions = item.split(",")
-               console.log(JSON.stringify(conditions))
+               const teramToSearch = item.split(",")
+               console.log(JSON.stringify(teramToSearch))
 
-                conditions.forEach((condition,index) => {
+                teramToSearch.forEach((term,index) => {
 
-                    params.ExpressionAttributeValues[`:con_${index}`] = `${condition}`
-                    filterExpression += ` contains(conditions,:con_${index})  AND`
+                    params.ExpressionAttributeValues[`:con_${indexTerm}`] = `${term}`
+                    filterExpression += ` contains(${key},:con_${indexTerm})  AND`
 
                 });
                 console.log(filterExpression.substring(0, filterExpression.length - 3));
-
+                indexTerm++;
             }
         });
         params['FilterExpression'] = params['FilterExpression'].slice(0, -4);
