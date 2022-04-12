@@ -106,10 +106,10 @@ const baseHandlerCountryType=async (event,context)=> {
             }
             else
             {
-               const teramToSearch = item.split(",")
-               console.log(JSON.stringify(teramToSearch))
+               const termToSearch = item.split(",")
+               console.log(JSON.stringify(termToSearch))
 
-                teramToSearch.forEach((term,index) => {
+                termToSearch.forEach((term,index) => {
 
                     params.ExpressionAttributeValues[`:con_${indexTerm}`] = `${term}`
                     filterExpression += ` contains(${key},:con_${indexTerm})  AND`
