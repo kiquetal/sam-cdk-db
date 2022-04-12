@@ -170,7 +170,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             functionName:"tdms-db-remove-item-function",
 
             runtime: lambda.Runtime.NODEJS_14_X,
-            handler: 'remove.handler',
+            handler: 'remove.removeFn',
             timeout: cdk.Duration.minutes(1),
             environment: {
                 "ISLOCAL": "false"
@@ -446,6 +446,8 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         accountsTable.grantReadData(dynamoGetItem);
         accountsTable.grantReadData(dynamoSearchItem);
         accountsTable.grantReadData(dynamoGetCountryType);
+        accountsTable.grantReadWriteData(dynamoRemoveItem);
+        usersTable.grantReadData(dynamoRemoveItem);
         usersTable.grantReadData(dynamoGetCountryType);
         accountsTable.grantReadWriteData(roleForAdminCognitoAndDB);
         accountsTable.grantReadWriteData(batchUpdate);
