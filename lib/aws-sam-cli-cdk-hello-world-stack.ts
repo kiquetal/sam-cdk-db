@@ -3,7 +3,8 @@ import {RemovalPolicy} from '@aws-cdk/core';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as apigateway from '@aws-cdk/aws-apigateway';
-import * as iam from '@aws-cdk/aws-iam'
+import * as iam from '@aws-cdk/aws-iam';
+import * as ec2 from '@aws-cdk/aws-ec2';
 import * as path from 'path';
 import * as cognito from '@aws-cdk/aws-cognito';
 import * as events from '@aws-cdk/aws-events';
@@ -12,6 +13,50 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
+
+        const vpc = new ec2.Vpc(this, 'tdms-vpc', {
+            vpcName:'tdms-vpc',
+            cidr:'10.0.0.0/16',
+            natGateways:1,
+            maxAzs:2,
+            subnetConfiguration:[{
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT,
+                name:'tdms-private-subnet',
+                cidrMask:24
+            },{
+                subnetType: ec2.SubnetType.PUBLIC,
+                name:'tdms-public-subnet',
+                cidrMask:24
+            }]
+
+        });
+
+        const dynamoGateway = vpc.addGatewayEndpoint('tdms-dynamo-gateway', {
+          service: ec2.GatewayVpcEndpointAwsService.DYNAMODB,
+          subnets: [{
+              subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+          }]
+        });
+
+
+
+        const lambdaSG = new ec2.SecurityGroup(this, 'tdms-sg', {
+          securityGroupName:'lambda-sg',
+          vpc: vpc
+        });
+
+        const interfaceKMSSG = new ec2.SecurityGroup(this, 'tdms-kms-sg', {
+          securityGroupName: 'tdms-kms-sg',
+          vpc: vpc
+        });
+
+        const awsInterfaceKMS = vpc.addInterfaceEndpoint('tdms-kms-interface', {
+            service: ec2.InterfaceVpcEndpointAwsService.KMS,
+            securityGroups:[interfaceKMSSG]
+        });
+
+        interfaceKMSSG.addIngressRule(lambdaSG,ec2.Port.tcp(443));
+        lambdaSG.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443));
 
         const accountsTable = new dynamodb.Table(this, 'AccountsCollection', {
             partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
@@ -29,7 +74,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             partitionKey:{name:'country',type:dynamodb.AttributeType.STRING},
             sortKey:{name:'typeItem',type:dynamodb.AttributeType.STRING},
             projectionType: dynamodb.ProjectionType.ALL,
-        })
+        });
 
 
 
@@ -116,6 +161,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
                 "arnKms":process.env.arnKms!!,
                 "arnKmsAlias":process.env.arnKmsAlias!!
             },
+
             timeout: cdk.Duration.minutes(1),
             code: lambda.Code.fromAsset(path.join(__dirname, '..', 'dynamo-items')),
         });
@@ -149,7 +195,11 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const dynamoGetCountryType = new lambda.Function(this, 'dynamo-lambda-get-by-country-type-function', {
             functionName:"tdms-db-get-by-country-type-function",
             runtime: lambda.Runtime.NODEJS_14_X,
-
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
             handler: 'get.handlerCountryType',
             environment: {
                 "ISLOCAL": "false",
@@ -226,12 +276,14 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             assumedBy:new iam.CompositePrincipal(new iam.ServicePrincipal("cognito-idp.amazonaws.com"),
             new iam.ServicePrincipal("lambda.amazonaws.com")),
         managedPolicies:[iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
-        })
+        });
 
         const roleForAdminCognitoAndDB = new iam.Role(this,'RoleForAdminUsers',{
            roleName:"RoleForAdminUser",
            assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
-           managedPolicies:[iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")],
+           managedPolicies:[//iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole"),
+                            iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaVpcAccessExecutionRole")
+           ],
            inlinePolicies: {
                   CognitoAdmin: new iam.PolicyDocument({
                       statements:[new iam.PolicyStatement({
@@ -247,11 +299,23 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         });
 
+        const roleForAdminVPCAndDB = new iam.Role(this,'RoleForVPCDB',{
+            roleName:"RoleForAdminVPCDBUser",
+            assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+            managedPolicies:[iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaVpcAccessExecutionRole")],
+                  });
+
+
 
         const createServers = new lambda.Function(this, 'dynamo-lambda-create-server-function', {
             functionName:"tdms-db-create-server-function",
             runtime: lambda.Runtime.NODEJS_14_X,
             handler: 'users.createServer',
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets:{
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
             role: roleForAdminCognitoAndDB,
             timeout: cdk.Duration.minutes(1),
             code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users')),
@@ -305,11 +369,16 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
                 "POOL_ID": process.env.POOL_ID!!,
                 "USERNAME":"replace-userneme-cognito"
             }
-        })
+        });
 
         const fnGetUsers = new lambda.Function(this,'dynamo-lambda-get-users-function',{
             functionName:'tdms-db-get-all-users',
             role: roleForAdminCognitoAndDB,
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets:{
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
             runtime: lambda.Runtime.NODEJS_14_X,
             handler:'users.getUsers',
             timeout:cdk.Duration.minutes(1),
@@ -322,6 +391,12 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const fnGetUServers = new lambda.Function(this,'dynamo-lambda-get-servers-function',{
             functionName:'tdms-db-get-all-servers',
             role: roleForAdminCognitoAndDB,
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets:{
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
+
             runtime: lambda.Runtime.NODEJS_14_X,
             handler:'users.getServers',
             timeout:cdk.Duration.minutes(1),
@@ -333,16 +408,26 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         const fnGetRoles = new lambda.Function(this,'dynamo-lambda-get-roles-function',{
             functionName:'tdms-db-get-roles',
-            role: roleForAdminCognitoAndDB,
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
+            role: roleForAdminVPCAndDB,
             runtime: lambda.Runtime.NODEJS_14_X,
             handler:'roles.obtainRoles',
             timeout: cdk.Duration.minutes(1),
             code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
-        })
+        });
 
         const fnAccessGroup = new lambda.Function(this,'dynamo-lambda-get-access-group-function',{
            functionName:'tdms-db-get-accessGroup',
            role: roleForAdminCognitoAndDB,
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
            runtime: lambda.Runtime.NODEJS_14_X,
            handler:'roles.obtainAccessGroups',
            timeout:cdk.Duration.minutes(1),
@@ -352,6 +437,11 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const fnAssignRoles = new lambda.Function(this, 'dynamodo-lambda-assign-role-function',{
            functionName:'tdms-sb-assign-role',
            role: roleForAdminCognitoAndDB,
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
            runtime: lambda.Runtime.NODEJS_14_X,
            handler:'roles.asssingRoles',
            timeout:cdk.Duration.minutes(1),
@@ -366,11 +456,16 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             code:lambda.Code.fromAsset(path.join(__dirname,'..','dynamo-items'),{
                 exclude:["node_modules"]
             })
-        })
+        });
 
         const fnCreateRoles = new lambda.Function(this,'dynamo-lambda-create-roles-function',{
             functionName:'tdms-db-create-roles',
             role: roleForAdminCognitoAndDB,
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
             runtime: lambda.Runtime.NODEJS_14_X,
             handler:'roles.createRoles',
             timeout:cdk.Duration.minutes(1),
@@ -380,6 +475,11 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const fnCreateAccessGroup = new lambda.Function(this,'dynamo-lambda-create-access-group-function',{
             functionName:'tdms-db-create-access-group',
             role: roleForAdminCognitoAndDB,
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
             runtime: lambda.Runtime.NODEJS_14_X,
             handler:'roles.createAccessGroups',
             timeout:cdk.Duration.minutes(1),
@@ -389,6 +489,11 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const fnGetItemsForServer = new lambda.Function(this,'dynamo-lambda-get-items-for-server-function',{
             functionName:'tdms-db-get-items-for-server',
             role: roleForAdminCognitoAndDB,
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
             runtime: lambda.Runtime.NODEJS_14_X,
             handler:'server.obtainItems',
             timeout:cdk.Duration.minutes(1),
@@ -405,8 +510,13 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const fnUpdateUser = new lambda.Function(this,'dynamo-lambda-update-subject-function',{
             functionName:'tdms-db-update-subject',
             role: roleForAdminCognitoAndDB,
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
             runtime: lambda.Runtime.NODEJS_14_X,
-            handler:'users.updateUsers',
+            handler: 'users.updateUsers',
             timeout:cdk.Duration.minutes(1),
             code:lambda.Code.fromAsset(path.join(__dirname,'..','users'))
         });
@@ -460,6 +570,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         usersTable.grantReadData(dynamoUpdateItem);
         auditTable.grantReadWriteData(dynamoInsertItem);
 
+        usersTable.grantReadData(roleForAdminVPCAndDB);
+        auditTable.grantReadWriteData(roleForAdminVPCAndDB);
+        rolesTable.grantReadData(roleForAdminVPCAndDB);
 
         const poolCognito = cognito.UserPool.fromUserPoolId(this,"pool-id",process.env.POOL_ID!!);
 
@@ -499,7 +612,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         itemsRootResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoInsertItem),{
             authorizer: auth
-        })
+        });
         itemsRootResource.addMethod('PUT', new apigateway.LambdaIntegration(dynamoUpdateItem),{
             authorizer: auth
         });
@@ -508,22 +621,22 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
         userRootResource.addMethod('POST',new apigateway.LambdaIntegration(createServers),{
             authorizer: auth
-        })
+        });
         userRootResource.addMethod('GET',new apigateway.LambdaIntegration(fnGetUsers),{
             authorizer:auth
-        })
+        });
 
         userRootResource.addMethod('PUT',new apigateway.LambdaIntegration(fnUpdateUser),{
             authorizer:auth
-        })
+        });
 
 
         countryAndTypeResource.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetCountryType),{
             authorizer:auth
-        })
+        });
         itemSubResources.addMethod('GET', new apigateway.LambdaIntegration(dynamoGetItem),{
             authorizer:auth
-        })
+        });
         searchResource.addMethod('POST', new apigateway.LambdaIntegration(dynamoSearchItem),{
             authorizer:auth
         });
@@ -532,21 +645,21 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
         rolesResource.addMethod('GET',new apigateway.LambdaIntegration(fnGetRoles),{
             authorizer: auth
-        })
+        });
 
         rolesResource.addMethod('POST',new apigateway.LambdaIntegration(fnCreateRoles),{
             authorizer: auth
-        })
+        });
         accessGroupsResource.addMethod('GET',new apigateway.LambdaIntegration(fnAccessGroup),{
             authorizer: auth
-        })
+        });
 
         accessGroupsResource.addMethod('POST',new apigateway.LambdaIntegration(fnCreateAccessGroup),{
             authorizer: auth
-        })
+        });
         assingRoleResource.addMethod('POST',new apigateway.LambdaIntegration(fnAssignRoles),{
             authorizer: auth
-        })
+        });
     }
 
 }

@@ -56,7 +56,7 @@ const obtainItems = async (event,context) => {
             const resp = await cognito.adminInitiateAuth(initAuth).promise()
             const idToken = resp["AuthenticationResult"]["IdToken"]
 
-
+            console.log(idToken);
             const data = await axios.get(process.env.URL_ITEMS+`/items/query/${country}/${type}`,{
                 headers:{
                     "Authorization": idToken
