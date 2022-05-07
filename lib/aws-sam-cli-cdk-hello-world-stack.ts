@@ -52,6 +52,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
 
         const awsInterfaceKMS = vpc.addInterfaceEndpoint('tdms-kms-interface', {
             service: ec2.InterfaceVpcEndpointAwsService.KMS,
+            subnets: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_NAT }),
             securityGroups:[interfaceKMSSG]
         });
 
