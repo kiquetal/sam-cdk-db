@@ -24,6 +24,45 @@ const options = {
 const crypto = require('@aws-crypto/client-node');
 const {insertToAudit, AUDIT_ACTIONS} = require("./lib");
 
+insertAccessGroup=(accessGroups,email,sub)=> {
+
+    const dynamodb = new AWS.DynamoDB.DocumentClient();
+
+    accessGroups.forEach(async (accessGroup) => {
+
+        const params = {
+            TableName: "RolesAccessCollection",
+            Key: {
+                "pk": accessGroup,
+                "sk": "access#group"
+            },
+            UpdateExpression: "set #createdAt = :createdAt, #typeItem = :typeItem, creator= :creator, #description = :description",
+            ExpressionAttributeNames: {
+                "#createdAt": "createdAt",
+                "#typeItem": "typeItem",
+                "#description": "description",
+            },
+            ExpressionAttributeValues: {
+                ":description": `access group for ${accessGroup}`,
+                ":createdAt": dayjs().utc().format('YYYY-MM-DD HH:mm:ss'),
+                ":typeItem": "accessGroup",
+                ":creator": {
+                    "sub":sub,
+                    "email":email
+                }
+            },
+            ReturnValues:"ALL_NEW",
+            ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)"
+            }
+      try {
+        await dynamodb.update(params).promise();
+      }  catch (e) {
+        console.log("creation-access-group"+e);
+      }
+
+    })
+}
+
 /**
  *
  * Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
@@ -157,6 +196,7 @@ const baseHandler = async (event, context) => {
         console.log(JSON.stringify(params));
         let dynamoResponse = await db.put(params).promise();
 
+        await insertAccessGroup(accessGroup,email,sub);
         await insertToAudit({
             pk: sub,
             itemPk: pk,

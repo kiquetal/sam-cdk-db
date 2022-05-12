@@ -293,7 +293,8 @@ const getServersFn= async (event,request)=>{
                 "email":value["email"],
                 "country":value["country"],
                 "id":value["pk"],
-                "creator":value["creator"]
+                "creator":value["creator"],
+                "accessGroup": value["accessGroup"],
             })
         });
         return lib.returnResponse(200,responseJson);

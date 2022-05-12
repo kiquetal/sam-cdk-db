@@ -38,9 +38,9 @@ const handler=async (event, context) => {
 
         const headersRequest = {
             Host: "ff6cs2tdu4.execute-api.us-east-1.amazonaws.com",
-            Authorization: "x-auth"
+            Authorization: "eyJraWQiOiIraXR5RVd6K2xjdDBWM1RoaFhRd3ZqaHRVUGRkaE51T3dKNFBZM2dDQU5NPSIsImFsZyI6IlJTMjU2In0.eyJhdF9oYXNoIjoiTkJxZUQ0cWVjRk9Uakl5TWpPWmV4USIsInN1YiI6ImIxNGY5MjA4LWI5NDAtNGYxNi1iZDkwLTQ2YzVhMzgxNGE0NyIsImNvZ25pdG86Z3JvdXBzIjpbInVzLWVhc3QtMV9DUU5GZ2FveHVfc3NvLW1pbGxpY29tIl0sImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLnVzLWVhc3QtMS5hbWF6b25hd3MuY29tXC91cy1lYXN0LTFfQ1FORmdhb3h1IiwiY29nbml0bzp1c2VybmFtZSI6InNzby1taWxsaWNvbV9lZHVhcmRvLmZpbGlwcGlAZWRnZS5jb20ucHkiLCJvcmlnaW5fanRp"
         };
-        const data = await axios.get('https://ff6cs2tdu4.execute-api.us-east-1.amazonaws.com/test/items/query/co/basic_credentials',{headers: headersRequest});
+        const data = await axios.get('https://vpce-03da84937f37c7213-8fywoafk.execute-api.us-east-1.vpce.amazonaws.com',{headers: headersRequest});
         console.log(JSON.stringify(data.data));
         return {
             statusCode: 200,

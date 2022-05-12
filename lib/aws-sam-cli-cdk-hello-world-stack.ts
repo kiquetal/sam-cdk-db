@@ -544,7 +544,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
                 "arnKmsAlias": process.env.arnKmsAlias!!,
                 "POOL_ID": process.env.POOL_ID!!,
                 "CLIENT_ID": process.env.CLIENT_ID!!,
-                URL_ITEMS: process.env.URL_ITEMS!!,
+                URL_ITEMS: process.env.URL_ITEMS_DOMAIN!!,
             },
             code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users'))
         });
@@ -610,6 +610,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         usersTable.grantReadData(dynamoInsertItem);
         usersTable.grantReadData(dynamoUpdateItem);
         auditTable.grantReadWriteData(dynamoInsertItem);
+        rolesTable.grantReadWriteData(dynamoInsertItem);
 
         usersTable.grantReadData(roleForAdminVPCAndDB);
         auditTable.grantReadWriteData(roleForAdminVPCAndDB);
