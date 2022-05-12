@@ -97,6 +97,7 @@ const baseHandler = async (event, context) => {
         console.log("after array validation");
         //schema-de-input
         country = country.toUpperCase();
+        typeItem = typeItem.toUpperCase();
         const roles = context.roles;
         console.log(roles);
         if (!roles.includes("admin"))

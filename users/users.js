@@ -232,7 +232,8 @@ const getUsersFn = async (event, request) => {
             responseJson.push({
                 "email":value["email"],
                 "id":value["pk"],
-                "roles":value["roles"]
+                "roles":value["roles"],
+                "accessGroup":value["accessGroup"],
             })
         });
         return lib.returnResponse(200,responseJson)

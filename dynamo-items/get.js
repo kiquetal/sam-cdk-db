@@ -146,6 +146,7 @@ const baseHandlerCountryType=async (event,context)=> {
 
 
         let filteredList=[]
+        console.log(JSON.stringify(items));
         const isAdminOrCountryContext = obtainRoleFromContext(roles,country.toLowerCase());
         if (isAdminOrCountryContext)
         {
