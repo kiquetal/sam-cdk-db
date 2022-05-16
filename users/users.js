@@ -471,6 +471,44 @@ const updateUsersFn = async (event,context) =>{
 
 }
 
+const profileFn = async(event,context) => {
+
+    try {
+
+        const sub = event.requestContext.authorizer.claims.sub;
+        const db = new AWS.DynamoDB.DocumentClient();
+        const params = {
+            TableName: 'UsersCollection',
+            Key: {
+                pk: sub,
+                sk: "USER#ID"
+            },
+            ProjectionExpression:"accessGroup,#roles",
+            ExpressionAttributeNames:{
+                "#roles": "roles"
+            }
+        };
+        const user = await db.get(params).promise();
+
+        if (!user.hasOwnProperty("Item")) {
+            return lib.returnResponse(404,{
+                "code":404,
+                "message":"User not found"
+            })
+
+        }
+        return lib.returnResponse(200,{
+            "data":user.Item
+        })
+
+    }
+    catch (e){
+        console.log(e.message);
+        return lib.return500Response(e.message);
+    }
+
+}
+
 exports.createServer = middy(createServer).use(jsonBodyParser()).use(cors()).use(validator({ inputSchema: inputSchema})).use(lib.checkPermisson()).onError(lib.fnErrors)
 exports.getUsers = middy(getUsersFn).use(cors()).onError(lib.fnErrors);
 exports.getServers = middy(getServersFn).use(cors()).onError(lib.fnErrors);
@@ -478,3 +516,4 @@ exports.createAccessGroups = middy(createAccessGroupsFn).use(cors()).use(jsonBod
 exports.removeUser = removeUserFn
 exports.loginUser = loginUserFn
 exports.updateUsers = middy(updateUsersFn).use(jsonBodyParser()).use(cors()).use(validator({inputSchema:inputSchemaUpdateUser})).use(lib.checkPermisson()).onError(lib.fnErrors)
+exports.profile = middy(profileFn).use(cors()).onError(lib.fnErrors)

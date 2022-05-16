@@ -563,6 +563,19 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users'))
         });
 
+        const fnGetUserProfile = new lambda.Function(this,'dynamo-lambda-get-profile',{
+           functionName: 'tdms-db-get-profile',
+           role: roleForAdminCognitoAndDB,
+           vpc: vpc,
+           securityGroups: [lambdaSG],
+           vpcSubnets: {
+               subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+           },
+           runtime: lambda.Runtime.NODEJS_14_X,
+           handler: 'users.profile',
+           timeout: cdk.Duration.minutes(1),
+           code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users'))
+        });
         /*
         fnGetItemsForServer.currentVersion.addAlias('latest',{
            provisionedConcurrentExecutions:3
@@ -635,6 +648,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         //Resources for api ITEMS
         const serverResource = userRootResource.addResource("servers");
         const rolesResource = userRootResource.addResource("roles");
+        const userProfile = userRootResource.addResource("profile");
         const assingRoleResource = rolesResource.addResource("assign");
         const itemSubResources = itemsRootResource.addResource('{itemId}');
         const queryResource = itemsRootResource.addResource('query');
@@ -701,6 +715,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             authorizer: auth
         });
 
+        userProfile.addMethod('GET', new apigateway.LambdaIntegration(fnGetUserProfile), {
+            authorizer: auth
+        });
 
     }
 
