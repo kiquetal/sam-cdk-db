@@ -509,6 +509,9 @@ const profileFn = async(event,context) => {
 
 }
 
+
+
+
 exports.createServer = middy(createServer).use(jsonBodyParser()).use(cors()).use(validator({ inputSchema: inputSchema})).use(lib.checkPermisson()).onError(lib.fnErrors)
 exports.getUsers = middy(getUsersFn).use(cors()).onError(lib.fnErrors);
 exports.getServers = middy(getServersFn).use(cors()).onError(lib.fnErrors);

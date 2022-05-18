@@ -46,11 +46,14 @@ const baseSearchHandler = async(event,context) => {
                 })
             };
         }
-        if (resp.Item.hasOwnProperty("enc"))
+        if (resp.Item.hasOwnProperty("enc") && resp.Item["enc"]=="true")
         {
+            console.log("before decrypt data")
             resp.Item.data = JSON.parse(await utilEncrypt.decrypt(resp.Item.data));
 
         }
+        else
+            console.log("no-enc")
         console.log(resp.Item.ttl);
         if (resp.Item.hasOwnProperty("ttl"))
         resp.Item.ttl=dayjs.unix(resp.Item.ttl).utc(true).format()
@@ -67,6 +70,7 @@ const baseSearchHandler = async(event,context) => {
     }
     catch (err)
     {
+        console.log(err.toString());
         if (err.message)
             return lib.return500Response({"message":err.message});
         else

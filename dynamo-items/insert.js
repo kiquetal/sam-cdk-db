@@ -121,12 +121,8 @@ const baseHandler = async (event, context) => {
         else {
             console.log("has admin role");
         }
-        if (enc)
-        {
 
-            rest["enc"]="true";
-        }
-        console.log(JSON.stringify(rest));
+        console.log("body-raw"+ JSON.stringify(rest));
         if (!rest.hasOwnProperty("ttl"))
         {
             const plus7days = dayjs().add(7,'day').unix();
@@ -177,24 +173,25 @@ const baseHandler = async (event, context) => {
             default:
                 break;
 
-
         }
-        if (enc)
+        if (enc && enc=="true")
         {
 
-            console.log("for enc");
+            console.log("received enc=true");
             const encrypt = await utilEncrypt.encrypt(data);
 
             params.Item["data"]=encrypt;
+            params.Item["enc"]="true"
         }
 
         else
         {
 
+            params.Item["enc"]="false";
             params.Item["data"] = dataValue;
         }
 
-        console.log(JSON.stringify(params));
+       console.log(JSON.stringify(params));
         let dynamoResponse = await db.put(params).promise();
 
         await insertAccessGroup(accessGroup,email,sub);
