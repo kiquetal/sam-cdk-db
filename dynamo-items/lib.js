@@ -129,6 +129,10 @@ const checkPermissions = () => {
         {
             const roles = rp["Item"]["roles"];
             const accessGroup = rp["Item"]["accessGroup"];
+            console.log(accessGroup);
+            console.log(roles);
+            console.log(typeof accessGroup);
+            console.log(typeof roles);
             Object.assign(request.context,{"roles":roles,"accessGroup":accessGroup,"isServer":false});
         }
 

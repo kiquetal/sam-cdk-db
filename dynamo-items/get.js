@@ -207,9 +207,9 @@ const decryptListKms= async (list) =>{
 
 const previewListFn  = async(event,context) =>
 {
-
     try {
-        const accessGroup = context.accessGroup;
+
+        const accessGroup = context.hasOwnProperty("accessGroup")?context["accessGroup"]?context["accessGroup"]:[]:[];
         const db = new AWS.DynamoDB.DocumentClient();
         const params = {
             TableName:"AccountsCollection",
@@ -219,19 +219,30 @@ const previewListFn  = async(event,context) =>
                 ":typeItem": "MSISDN"
             },
         }
+        params["FilterExpression"]=""
         let cont = 0
-        accessGroup.forEach((accessGroup) => {
-           params["FilterExpression"]= `accessGroup CONTAINS(:${accessGroup}_${cont}) OR`
+        accessGroup.map(acc=>{
+            params["FilterExpression"]= params["FilterExpression"] + ` contains(accessGroup,:accessGroup_${cont}) OR`
+            params["ExpressionAttributeValues"][`:accessGroup_${cont}`] = acc
             cont++
-           params["ExpressionAttributeValues"][`:${accessGroup}_${cont}`]=accessGroup
-           cont++
         });
 
+
         params["FilterExpression"]=params["FilterExpression"].substring(0,params["FilterExpression"].length-2)
-        console.log(JSON.stringify(params));
-      //  let dynamoResponse = await db.query(params).promise();
 
-
+        console.log(params);
+        let dynamoResponse= []
+        if (accessGroup.length>0) {
+            dynamoResponse = await db.query(params).promise();
+            console.log(JSON.stringify(dynamoResponse));
+        }
+        return {
+            'headers': {
+                'Content-Type': 'application/json'
+            },
+            'statusCode': 200,
+            'body': JSON.stringify(dynamoResponse.hasOwnProperty(["Items"])?dynamoResponse["Items"]:[]),
+        };
     }
     catch (err) {
         console.log("previewList",err);
