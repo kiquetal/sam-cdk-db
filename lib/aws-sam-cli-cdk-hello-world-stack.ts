@@ -576,6 +576,21 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
            timeout: cdk.Duration.minutes(1),
            code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users'))
         });
+
+        const fnPreviewList = new lambda.Function(this,'dynamo-lambda-query-preview',{
+           functionName: 'tdms-db-query-preview',
+           role: roleForAdminCognitoAndDB,
+           vpc: vpc,
+           securityGroups: [lambdaSG],
+           vpcSubnets: {
+               subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+           },
+           runtime: lambda.Runtime.NODEJS_14_X,
+           handler: 'get.previewList',
+           timeout: cdk.Duration.minutes(1),
+           code: lambda.Code.fromAsset(path.join(__dirname, '..', 'dynamo-items'))
+
+        });
         /*
         fnGetItemsForServer.currentVersion.addAlias('latest',{
            provisionedConcurrentExecutions:3
@@ -652,6 +667,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const assingRoleResource = rolesResource.addResource("assign");
         const itemSubResources = itemsRootResource.addResource('{itemId}');
         const queryResource = itemsRootResource.addResource('query');
+        const previewResource = queryResource.addResource('preview');
         const searchResource = itemsRootResource.addResource('search');
         const countryQueryResource = queryResource.addResource('{country}');
         const countryAndTypeResource = countryQueryResource.addResource('{type}');
@@ -719,6 +735,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             authorizer: auth
         });
 
+        previewResource.addMethod('GET', new apigateway.LambdaIntegration(fnPreviewList), {
+            authorizer: auth
+        });
     }
 
 

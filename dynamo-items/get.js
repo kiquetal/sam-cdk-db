@@ -205,6 +205,39 @@ const decryptListKms= async (list) =>{
 }
 
 
+const previewListFn  = async(event,context) =>
+{
+
+    try {
+        const accessGroup = context.accessGroup;
+        const db = new AWS.DynamoDB.DocumentClient();
+        const params = {
+            TableName:"AccountsCollection",
+            IndexName: "TypeItemCountryIndex",
+            KeyConditionExpression:  "typeItem = :typeItem",
+            ExpressionAttributeValues: {
+                ":typeItem": "MSISDN"
+            },
+        }
+        let cont = 0
+        accessGroup.forEach((accessGroup) => {
+           params["FilterExpression"]= `accessGroup CONTAINS(:${accessGroup}_${cont}) OR`
+            cont++
+           params["ExpressionAttributeValues"][`:${accessGroup}_${cont}`]=accessGroup
+           cont++
+        });
+
+        params["FilterExpression"]=params["FilterExpression"].substring(0,params["FilterExpression"].length-2)
+        console.log(JSON.stringify(params));
+      //  let dynamoResponse = await db.query(params).promise();
+
+
+    }
+    catch (err) {
+        console.log("previewList",err);
+        return lib.return500Response(err.message);
+    }
+}
 
 exports.handlerCountryType= middy(baseHandlerCountryType).use(cors()).use(lib.checkPermission()).onError(lib.fnErrors);
-
+exports.previewList = middy(previewListFn).use(cors()).use(lib.checkPermission()).onError(lib.fnErrors);
