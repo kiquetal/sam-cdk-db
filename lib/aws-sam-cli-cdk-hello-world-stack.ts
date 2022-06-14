@@ -128,6 +128,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             readCapacity: 10,
             writeCapacity: 10
         })
+
+
+
         const auditTable = new dynamodb.Table(this, 'AuditTable', {
             partitionKey: {name: 'pk', type: dynamodb.AttributeType.STRING},
             sortKey: {name: 'sk', type: dynamodb.AttributeType.STRING},

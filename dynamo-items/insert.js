@@ -149,31 +149,26 @@ const baseHandler = async (event, context) => {
                 }
             }
         };
-
-        console.log(JSON.stringify(rest));
         let dataValue={}
-        let dataToClient="";
-        switch(typeItem)
-        {
-            case "TOKEN":
-                dataValue =  data
-                break;
-            case "BASIC_CREDENTIALS":
-                dataValue = data
-                dataToClient="*"
-                break;
-            case "OAUTH_CLIENT_CREDENTIALS":
-                dataValue = data
-                dataToClient="*"
-                break;
-            case "MSISDN":
-                dataValue = data;
-                dataToClient=dataValue;
-                break;
-            default:
-                break;
+        dataValue = data;
 
+        const itemsInDb = await getTypeItems();
+
+        const nameItems = itemsInDb.map(v=>v.pk);
+        if (!nameItems.includes(typeItem)){
+            return {
+                "statusCode":400,
+                "headers":{
+                    "Content-Type":"application/json"
+                } ,
+                "body":JSON.stringify({
+                    code:400,
+                    message:"Unrecognized typeItem"
+                })
+            }
         }
+        console.log(JSON.stringify(itemsInDb));
+
         if (enc && enc=="true")
         {
 
@@ -227,6 +222,31 @@ const baseHandler = async (event, context) => {
 
 };
 
+
+const getTypeItems = async () => {
+    try
+    {
+     const db = process.env.ISLOCAL=="true"?new AWS.DynamoDB.DocumentClient(options):new AWS.DynamoDB.DocumentClient();
+        const params = {
+            TableName: "RolesAccessCollection",
+            IndexName: "index_by_typeItem",
+            KeyConditionExpression :"#typeItem = :typeItem",
+            ExpressionAttributeNames: {
+                "#typeItem": "typeItem"
+            },
+            ExpressionAttributeValues: {
+                ":typeItem": "ItemType"
+            }
+        }
+        let response = await db.query(params).promise();
+        return response["Items"];
+    }
+    catch (err)
+    {
+        console.log("error en getItems()",err.message);
+
+    }
+}
 
 const insertIndexDb = async (id,pk,db) => {
 
