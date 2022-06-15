@@ -130,7 +130,6 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         })
 
 
-
         const auditTable = new dynamodb.Table(this, 'AuditTable', {
             partitionKey: {name: 'pk', type: dynamodb.AttributeType.STRING},
             sortKey: {name: 'sk', type: dynamodb.AttributeType.STRING},
@@ -566,33 +565,47 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users'))
         });
 
-        const fnGetUserProfile = new lambda.Function(this,'dynamo-lambda-get-profile',{
-           functionName: 'tdms-db-get-profile',
-           role: roleForAdminCognitoAndDB,
-           vpc: vpc,
-           securityGroups: [lambdaSG],
-           vpcSubnets: {
-               subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
-           },
-           runtime: lambda.Runtime.NODEJS_14_X,
-           handler: 'users.profile',
-           timeout: cdk.Duration.minutes(1),
-           code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users'))
+        const fnGetUserProfile = new lambda.Function(this, 'dynamo-lambda-get-profile', {
+            functionName: 'tdms-db-get-profile',
+            role: roleForAdminCognitoAndDB,
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler: 'users.profile',
+            timeout: cdk.Duration.minutes(1),
+            code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users'))
         });
 
-        const fnPreviewList = new lambda.Function(this,'dynamo-lambda-query-preview',{
-           functionName: 'tdms-db-query-preview',
-           role: roleForAdminCognitoAndDB,
-           vpc: vpc,
-           securityGroups: [lambdaSG],
-           vpcSubnets: {
-               subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
-           },
-           runtime: lambda.Runtime.NODEJS_14_X,
-           handler: 'get.previewList',
-           timeout: cdk.Duration.minutes(1),
-           code: lambda.Code.fromAsset(path.join(__dirname, '..', 'dynamo-items'))
+        const fnPreviewList = new lambda.Function(this, 'dynamo-lambda-query-preview', {
+            functionName: 'tdms-db-query-preview',
+            role: roleForAdminCognitoAndDB,
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler: 'get.previewList',
+            timeout: cdk.Duration.minutes(1),
+            code: lambda.Code.fromAsset(path.join(__dirname, '..', 'dynamo-items'))
 
+        });
+
+        const createItemTypesFn = new lambda.Function(this, 'dynamo-lambda-create-item-types', {
+            functionName: 'tdms-db-create-item-types',
+            role: roleForAdminCognitoAndDB,
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler: 'itemTypes.createItemTypes',
+            timeout: cdk.Duration.minutes(1),
+            code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users'))
         });
         /*
         fnGetItemsForServer.currentVersion.addAlias('latest',{
@@ -675,7 +688,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const countryQueryResource = queryResource.addResource('{country}');
         const countryAndTypeResource = countryQueryResource.addResource('{type}');
         const accessGroupsResource = itemsRootResource.addResource('accessGroup');
-
+        const createItemTypeResource = itemsRootResource.addResource('type');
         //Resources for api SERVERS
         const itemForServers = serverRootApi.addResource('items');
         const countryItemServer = itemForServers.addResource('{country}');
@@ -739,6 +752,10 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         });
 
         previewResource.addMethod('GET', new apigateway.LambdaIntegration(fnPreviewList), {
+            authorizer: auth
+        });
+
+        createItemTypeResource.addMethod('POST', new apigateway.LambdaIntegration(createItemTypesFn), {
             authorizer: auth
         });
     }
