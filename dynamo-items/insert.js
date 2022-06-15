@@ -154,8 +154,12 @@ const baseHandler = async (event, context) => {
 
         const itemsInDb = await getTypeItems();
 
-        const nameItems = itemsInDb.map(v=>v.pk);
-        if (!nameItems.includes(typeItem)){
+        const nameItemsSchema = itemsInDb.reduce((acc,item)=>{
+            acc[item.pk]=item.schema;
+            return acc;
+        },{});
+        console.log("nameItemsSchema"+JSON.stringify(nameItemsSchema));
+        if (!nameItemsSchema.hasOwnProperty(typeItem)){
             return {
                 "statusCode":400,
                 "headers":{
@@ -167,8 +171,34 @@ const baseHandler = async (event, context) => {
                 })
             }
         }
-        console.log(JSON.stringify(itemsInDb));
-
+        const schema = nameItemsSchema[typeItem];
+        console.log("schema"+JSON.stringify(schema));
+        console.log("dataValue",JSON.stringify(dataValue));
+        let isValid=true;
+        Object.keys(schema).forEach(
+            (key)=>{
+                if (dataValue.hasOwnProperty(key))
+                {
+                    console.log("good");
+                }
+                else
+                {
+                    console.log("bad");
+                    isValid=false
+                }
+            }
+        );
+        if (!isValid)
+            return {
+                "statusCode":400,
+                "headers":{
+                    "Content-Type":"application/json"
+                },
+                "body":JSON.stringify({
+                    code:400,
+                    message:"Data must follows schema: "+ Object.keys(schema).join(",")
+                })
+            };
         if (enc && enc=="true")
         {
 
