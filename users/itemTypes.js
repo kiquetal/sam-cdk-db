@@ -22,7 +22,7 @@ const inputSchema = {
                 name: {type: 'string'},
                 schema: {type: 'object'}
             },
-            required: ['name,schema'] // Insert here all required event properties
+            required: ['name','schema'] // Insert here all required event properties
         }
     }
 }
@@ -46,12 +46,40 @@ const createItemTypes = async (event,context) => {
     }
     const { name, schema } = event.body;
 
+    try {
+        const db = new AWS.DynamoDB.DocumentClient();
+        const params = {
+            TableName: "RolesAccessCollection",
+            Item: {
+                pk: name,
+                sk: "item#type",
+                typeItem: "ItemType",
+                createdAt: dayjs().utc().format(),
+                creator: {
+                    email: context.email,
+                    sub: event.requestContext.authorizer.claims.sub
+                }
+            },
+            ConditionExpression: "attribute_not_exists(pk) and attribute_not_exists(sk)",
+        }
+        const res = await db.put(params).promise();
+        await lib.insertToAudit({ pk: event.requestContext.authorizer.claims.sub,
+            currentValue: event.body }, lib.AUDIT_ACTIONS.CREATE_ITEM_TYPE);
+        return {
+            statusCode: 201,
+            headers: {
+                ContentType: "application/json",
+            },
+            body: JSON.stringify({
+                "message": "ItemType created successfully"
+            })
+        };
+    }
+    catch (ex) {
+        console.log("exception", ex.message);
+        return lib.return500Response({"code": 500, "message": ex.message})
+    }
 
-
-    return lib.returnResponse(201, {
-        "name":name,
-        "schema":schema
-    });
 
 
 };
