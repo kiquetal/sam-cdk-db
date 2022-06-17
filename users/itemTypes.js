@@ -13,10 +13,47 @@ const httpErrorHandler = require("@middy/http-error-handler");
 const axios = require("axios");
 dayjs.extend(utc);
 
-const createItemTypes = async (event,context) => {
+const inputSchema = {
+    type: 'object',
+    properties: {
+        body: {
+            type: 'object',
+            properties: {
+                name: {type: 'string'},
+                schema: {type: 'object'}
+            },
+            required: ['name,schema'] // Insert here all required event properties
+        }
+    }
+}
 
+
+const createItemTypes = async (event,context) => {
     const { roles } = context;
-    console.log(JSON.stringify(roles));
+    console.log(JSON.stringify(roles))
+    if (!roles.includes("admin"))
+    {
+        return {
+            statusCode:403,
+            headers:{
+                'Content-Type':"application/json"
+            },
+            body:JSON.stringify({
+                "code":403,
+                "message":"Forbidden"
+            })
+        };
+    }
+    const { name, schema } = event.body;
+
+
+
+    return lib.returnResponse(201, {
+        "name":name,
+        "schema":schema
+    });
+
+
 };
 
-exports.createItemTypes = middy(createItemTypes).use(cors()).use(httpError()).use(lib.checkPermisson()).onError(lib.fnErrors);
+exports.createItemTypes = middy(createItemTypes).use(cors()).use(jsonBodyParser()).use(validator({inputSchema})).use(httpError()).use(lib.checkPermisson()).onError(lib.fnErrors);
