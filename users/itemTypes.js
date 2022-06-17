@@ -27,6 +27,32 @@ const inputSchema = {
     }
 }
 
+const getItemTypes = async (event,context) => {
+  try {
+      const db = new AWS.DynamoDB.DocumentClient();
+        const params = {
+            TableName: "RolesAccessCollection",
+            IndexName: "index_by_typeItem",
+            KeyConditionExpression: "typeItem = :type AND sk = :sk",
+            ExpressionAttributeValues: {
+                ":type": "ItemType",
+                ":sk": "item#type"
+            },
+            ProjectionExpression: "pk,#schema",
+            ExpressionAttributeNames: {
+                "#schema": "schema"
+            }
+        }
+        const items = await db.query(params).promise()
+        return lib.returnResponse(200, {
+                "itemTypes":items["Items"]
+        });
+  }
+    catch (ex) {
+        console.log("exception", ex.message);
+        return lib.return500Response({"code": 500, "message": ex.message})
+    }
+};
 
 const createItemTypes = async (event,context) => {
     const { roles } = context;
@@ -58,7 +84,8 @@ const createItemTypes = async (event,context) => {
                 creator: {
                     email: context.email,
                     sub: event.requestContext.authorizer.claims.sub
-                }
+                },
+                schema
             },
             ConditionExpression: "attribute_not_exists(pk) and attribute_not_exists(sk)",
         }
@@ -85,3 +112,4 @@ const createItemTypes = async (event,context) => {
 };
 
 exports.createItemTypes = middy(createItemTypes).use(cors()).use(jsonBodyParser()).use(validator({inputSchema})).use(httpError()).use(lib.checkPermisson()).onError(lib.fnErrors);
+exports.getItemTypes = middy(getItemTypes).use(cors()).use(httpError()).onError(lib.fnErrors);

@@ -612,7 +612,19 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
            provisionedConcurrentExecutions:3
         });
 */
-
+        const fnGetItemTypes = new lambda.Function(this, 'dynamo-lambda-get-item-types', {
+            functionName: 'tdms-db-get-item-types',
+            role: roleForAdminCognitoAndDB,
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler: 'itemTypes.getItemTypes',
+            timeout: cdk.Duration.minutes(1),
+            code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users'))
+        });
 
         const rule = new events.Rule(this, 'Rule', {
             description: "Rule to avoid coldstart lambda",
@@ -688,7 +700,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const countryQueryResource = queryResource.addResource('{country}');
         const countryAndTypeResource = countryQueryResource.addResource('{type}');
         const accessGroupsResource = itemsRootResource.addResource('accessGroup');
-        const createItemTypeResource = itemsRootResource.addResource('type');
+        const itemTypesResource = itemsRootResource.addResource('types');
         //Resources for api SERVERS
         const itemForServers = serverRootApi.addResource('items');
         const countryItemServer = itemForServers.addResource('{country}');
@@ -755,9 +767,14 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             authorizer: auth
         });
 
-        createItemTypeResource.addMethod('POST', new apigateway.LambdaIntegration(createItemTypesFn), {
+        itemTypesResource.addMethod('POST', new apigateway.LambdaIntegration(createItemTypesFn), {
             authorizer: auth
         });
+
+        itemTypesResource.addMethod("GET",new apigateway.LambdaIntegration(fnGetItemTypes),{
+            authorizer: auth
+        });
+
     }
 
 
