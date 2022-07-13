@@ -155,10 +155,12 @@ const baseHandler = async (event, context) => {
         const itemsInDb = await getTypeItems();
 
         const nameItemsSchema = itemsInDb.reduce((acc,item)=>{
-            acc[item.pk]=item.schema;
+            const pkS=item.pk.toUpperCase();
+            acc[pkS]=item.schema;
             return acc;
         },{});
         console.log("nameItemsSchema"+JSON.stringify(nameItemsSchema));
+        console.log("typeItem-Body",typeItem);
         if (!nameItemsSchema.hasOwnProperty(typeItem)){
             return {
                 "statusCode":400,

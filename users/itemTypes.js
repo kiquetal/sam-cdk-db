@@ -22,14 +22,14 @@ const inputSchema = {
                 name: {type: 'string'},
                 schema: {type: 'object'}
             },
-            required: ['name','schema'] // Insert here all required event properties
+            required: ['name', 'schema'] // Insert here all required event properties
         }
     }
 }
 
-const getItemTypes = async (event,context) => {
-  try {
-      const db = new AWS.DynamoDB.DocumentClient();
+const getItemTypes = async (event, context) => {
+    try {
+        const db = new AWS.DynamoDB.DocumentClient();
         const params = {
             TableName: "RolesAccessCollection",
             IndexName: "index_by_typeItem",
@@ -45,39 +45,37 @@ const getItemTypes = async (event,context) => {
         }
         const items = await db.query(params).promise()
         return lib.returnResponse(200, {
-                "itemTypes":items["Items"]
+            "itemTypes": items["Items"]
         });
-  }
-    catch (ex) {
+    } catch (ex) {
         console.log("exception", ex.message);
         return lib.return500Response({"code": 500, "message": ex.message})
     }
 };
 
-const createItemTypes = async (event,context) => {
-    const { roles } = context;
+const createItemTypes = async (event, context) => {
+    const {roles} = context;
     console.log(JSON.stringify(roles))
-    if (!roles.includes("admin"))
-    {
+    if (!roles.includes("admin")) {
         return {
-            statusCode:403,
-            headers:{
-                'Content-Type':"application/json"
+            statusCode: 403,
+            headers: {
+                'Content-Type': "application/json"
             },
-            body:JSON.stringify({
-                "code":403,
-                "message":"Forbidden"
+            body: JSON.stringify({
+                "code": 403,
+                "message": "Forbidden"
             })
         };
     }
-    const { name, schema } = event.body;
+    const {name, schema} = event.body;
 
     try {
         const db = new AWS.DynamoDB.DocumentClient();
         const params = {
             TableName: "RolesAccessCollection",
             Item: {
-                pk: name,
+                pk: name.toUpperCase(),
                 sk: "item#type",
                 typeItem: "ItemType",
                 createdAt: dayjs().utc().format(),
@@ -90,8 +88,10 @@ const createItemTypes = async (event,context) => {
             ConditionExpression: "attribute_not_exists(pk) and attribute_not_exists(sk)",
         }
         const res = await db.put(params).promise();
-        await lib.insertToAudit({ pk: event.requestContext.authorizer.claims.sub,
-            currentValue: event.body }, lib.AUDIT_ACTIONS.CREATE_ITEM_TYPE);
+        await lib.insertToAudit({
+            pk: event.requestContext.authorizer.claims.sub,
+            currentValue: event.body
+        }, lib.AUDIT_ACTIONS.CREATE_ITEM_TYPE);
         return {
             statusCode: 201,
             headers: {
@@ -101,15 +101,57 @@ const createItemTypes = async (event,context) => {
                 "message": "ItemType created successfully"
             })
         };
-    }
-    catch (ex) {
+    } catch (ex) {
         console.log("exception", ex.message);
         return lib.return500Response({"code": 500, "message": ex.message})
     }
 
+
+};
+const updateItemTypes = async (event, context) => {
+
+    try {
+        const db = new AWS.DynamoDB.DocumentClient();
+        const {schema} = event.body;
+        const {type} = event.pathParameters;
+
+        const params = {
+            TableName: "RolesAccessCollection",
+            Items: {
+                pk: type.toUpperCase(),
+                sk: "item#type",
+                typeItem: "ItemType",
+                createdAt: dayjs().utc().format(),
+                creator: {
+                    email: context.email,
+                },
+                schema
+            },
+            ConditionExpression: "attribute_exists(pk) and attribute_exists(sk)",
+        };
+        const res = await db.put(params).promise();
+        await lib.insertToAudit({
+            pk: event.requestContext.authorizer.claims.sub,
+            currentValue: event.body,
+        }, lib.AUDIT_ACTIONS.UPDATE_ITEM_TYPE);
+
+        return {
+            statusCode: 200,
+            headers: {
+                ContentType: "application/json",
+            },
+            body: JSON.stringify({
+                "message": "ItemType updated successfully"
+            })
+        };
+    } catch (ex) {
+        console.log("exception", ex.message);
+        return lib.return500Response({"code": 500, "message": ex.message})
+    }
 
 
 };
 
 exports.createItemTypes = middy(createItemTypes).use(cors()).use(jsonBodyParser()).use(validator({inputSchema})).use(httpError()).use(lib.checkPermisson()).onError(lib.fnErrors);
 exports.getItemTypes = middy(getItemTypes).use(cors()).use(httpError()).onError(lib.fnErrors);
+exports.updateItemTypes = middy(updateItemTypes).use(cors()).use(jsonBodyParser()).use(validator({inputSchema})).use(httpError()).use(lib.checkPermisson()).onError(lib.fnErrors);

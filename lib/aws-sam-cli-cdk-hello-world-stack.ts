@@ -701,6 +701,7 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const countryAndTypeResource = countryQueryResource.addResource('{type}');
         const accessGroupsResource = itemsRootResource.addResource('accessGroup');
         const itemTypesResource = itemsRootResource.addResource('types');
+        const itemTypeResourceForUpdate = itemTypesResource.addResource('{type}');
         //Resources for api SERVERS
         const itemForServers = serverRootApi.addResource('items');
         const countryItemServer = itemForServers.addResource('{country}');
