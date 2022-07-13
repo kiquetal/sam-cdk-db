@@ -626,6 +626,20 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users'))
         });
 
+        const fnUpdateItemTypes = new lambda.Function(this, 'dynamo-lambda-update-item-types', {
+            functionName: 'tdms-db-update-item-types',
+            role: roleForAdminCognitoAndDB,
+            vpc: vpc,
+            securityGroups: [lambdaSG],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
+            },
+            runtime: lambda.Runtime.NODEJS_14_X,
+            handler: 'itemTypes.updateItemTypes',
+            timeout: cdk.Duration.minutes(1),
+            code: lambda.Code.fromAsset(path.join(__dirname, '..', 'users'))
+        });
+
         const rule = new events.Rule(this, 'Rule', {
             description: "Rule to avoid coldstart lambda",
             schedule: events.Schedule.expression('rate(5 minutes)')
@@ -701,7 +715,6 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
         const countryAndTypeResource = countryQueryResource.addResource('{type}');
         const accessGroupsResource = itemsRootResource.addResource('accessGroup');
         const itemTypesResource = itemsRootResource.addResource('types');
-        const itemTypeResourceForUpdate = itemTypesResource.addResource('{type}');
         //Resources for api SERVERS
         const itemForServers = serverRootApi.addResource('items');
         const countryItemServer = itemForServers.addResource('{country}');
@@ -776,6 +789,9 @@ export class AwsSamCliCdkHelloWorldStack extends cdk.Stack {
             authorizer: auth
         });
 
+        itemTypesResource.addMethod('PUT', new apigateway.LambdaIntegration(fnUpdateItemTypes), {
+            authorizer: auth
+        });
     }
 
 

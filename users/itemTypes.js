@@ -111,19 +111,32 @@ const createItemTypes = async (event, context) => {
 const updateItemTypes = async (event, context) => {
 
     try {
+        const {roles} = context;
+        console.log(JSON.stringify(roles))
+        if (!roles.includes("admin")) {
+            return {
+                statusCode: 403,
+                headers: {
+                    'Content-Type': "application/json"
+                },
+                body: JSON.stringify({
+                    "code": 403,
+                    "message": "Forbidden"
+                })
+            };
+        }
         const db = new AWS.DynamoDB.DocumentClient();
-        const {schema} = event.body;
-        const {type} = event.pathParameters;
-
+        const {schema, name} = event.body;
         const params = {
             TableName: "RolesAccessCollection",
-            Items: {
-                pk: type.toUpperCase(),
+            Item: {
+                pk: name,
                 sk: "item#type",
                 typeItem: "ItemType",
                 createdAt: dayjs().utc().format(),
                 creator: {
                     email: context.email,
+                    sub: event.requestContext.authorizer.claims.sub
                 },
                 schema
             },
